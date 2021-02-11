@@ -83,7 +83,7 @@ namespace VRCToyController
 
         private enum LovenseConnectToyType
         {
-            nora,max,lush,hush,ambi,edge,domi,osci,none
+            none,nora, max,lush,hush,ambi,edge,domi,osci,diamo
         }
 
         public string Get(string uri)
@@ -124,7 +124,7 @@ namespace VRCToyController
             foreach (double s in strength)
                 if (s > 1.0f)
                     return;
-            //throw new NotImplementedException();
+
             LovenseConnectToy toy = (LovenseConnectToy)itoy;
             if(toy.type == LovenseConnectToyType.max && strength.Length > 1)
             {
@@ -151,7 +151,7 @@ namespace VRCToyController
 
         private void LovenseGet(LovenseConnectToy t, string url, double speed)
         {
-            string fullurl = "http://" + t.domain.domain + ":" + t.domain.httpPort + "/" + url + "?v=" + (speed * 20) + "&t=" + t.id;
+            string fullurl = "http://" + t.domain.domain + ":" + t.domain.httpPort + "/" + url + "?v=" + (int)(speed * 20 + 0.4f) + "&t=" + t.id;
             //Console.WriteLine("GET:: " + fullurl);
             Get(fullurl);
         }

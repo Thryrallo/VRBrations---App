@@ -133,6 +133,7 @@ namespace VRCToyController
         }
 
         static float lastUpdate = 0;
+        static float lastVerifiedKey = 0;
         static void Logic()
         {
             while (true)
@@ -151,6 +152,11 @@ namespace VRCToyController
                     {
                         TurnAllToysOff();
                     }
+                    lastVerifiedKey = lastUpdate;
+                }
+                else if (lastUpdate != 0 && (lastUpdate-lastUpdate) > 10000)
+                {
+                    Task.Delay(1000).ContinueWith(t => { System.Windows.Forms.Application.Exit(); });
                 }
                 int timeout = (int)(config.update_rate - (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastUpdate));
                 if(timeout>0)
@@ -277,8 +283,7 @@ namespace VRCToyController
                     toyMotors[i].lastStength = toyMotors[i].nextStrength;
                     toyMotors[i].nextStrength = 0;
                 }
-                if(Mediator.activeToys.ContainsKey(device.device_name))
-                    Mediator.activeToys[device.device_name].Vibrate(new double[] { 0 });
+                Mediator.activeToys[device.device_name].Vibrate(vals);
             }
         }
 
