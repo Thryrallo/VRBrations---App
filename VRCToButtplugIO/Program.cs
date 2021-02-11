@@ -83,7 +83,7 @@ namespace VRCToyController
                 Rectangle rect = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
                 string input = Interaction.InputBox("Please input your 'VRC Toy Controller' Key", "Key", "", rect.Width/2-200, rect.Height/2-200);
                 if(input != null && input.Length == 64)
-                    keyLoaded = KeyManager.LoadKey(input);
+                    keyLoaded = KeyManager.LoadKey(input.Trim());
             }
             if (!keyLoaded)
                 return;

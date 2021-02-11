@@ -153,7 +153,13 @@ namespace VRCToyController
         {
             string fullurl = "http://" + t.domain.domain + ":" + t.domain.httpPort + "/" + url + "?v=" + (int)(speed * 20 + 0.4f) + "&t=" + t.id;
             //Console.WriteLine("GET:: " + fullurl);
-            Get(fullurl);
+            try
+            {
+                Get(fullurl);
+            }catch(Exception e)
+            {
+                System.IO.File.AppendAllText("./error.txt", "System.Net.WebException: The remote name could not be resolved: " + fullurl + "\n");
+            }
         }
 
     }
