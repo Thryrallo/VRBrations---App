@@ -1,5 +1,4 @@
-﻿using Buttplug.Core.Messages;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,6 +19,8 @@ namespace VRCToyController
 
             this.Icon = new System.Drawing.Icon("./lib/icon.ico");
             scan.Click += new EventHandler(Scan);
+
+            scan.Text = "Stop Scanning";
         }
 
         private void Scan(object sender, EventArgs e)

@@ -1,7 +1,4 @@
-﻿using Buttplug.Client;
-using Buttplug.Core.Logging;
-using Buttplug.Core.Messages;
-using Buttplug.Test;
+﻿using Buttplug;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +19,11 @@ namespace VRCToyController
         public static new async Task<ButtplugIOAPI> GetClient()
         {
             ButtplugIOAPI buttplugIOInterface = new ButtplugIOAPI();
-            var connector = new ButtplugEmbeddedConnector("Example Server");
-            var client = new ButtplugClient("Example Client",
-                new ButtplugEmbeddedConnector("Example Server"));
+            var connector = new ButtplugEmbeddedConnectorOptions();
+            var client = new ButtplugClient("Example Client");
             buttplugIOInterface.client = client;
 
-            await client.ConnectAsync();
+            await client.ConnectAsync(connector);
             Console.WriteLine("Connected!");
 
             void HandleDeviceAdded(object aObj, DeviceAddedEventArgs aArgs)
@@ -46,10 +42,7 @@ namespace VRCToyController
             }
             client.DeviceRemoved += HandleDeviceRemoved;
 
-
             buttplugIOInterface.StartScanning();
-            Mediator.ui.scan.Text = "Stop scanning";
-
             return buttplugIOInterface;
         }
 
@@ -78,7 +71,8 @@ namespace VRCToyController
                 if (s > 1.0f)
                     return;
             ButtplugToy toy = (ButtplugToy)itoy;
-            if (strength.Length == toy.device.GetMessageAttributes<VibrateCmd>().FeatureCount)
+            if (toy.device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd) == false) return;
+            if (strength.Length == toy.device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd].FeatureCount)
             {
                 toy.device.SendVibrateCmd(strength);
             }
@@ -88,7 +82,7 @@ namespace VRCToyController
             }
             if (toy.lovenseType == LovenseToyType.max && strength.Length > 1)
             {
-                toy.device.SendLovenseCmd("Air:Level:" + (strength[1] * 3) + ";");
+                toy.device.SendRawWriteCmd(Endpoint.Command, Encoding.ASCII.GetBytes("Air:Level:" + (strength[1] * 3) + ";"), false);
             }
         }
 
@@ -98,7 +92,7 @@ namespace VRCToyController
             {
                 if (device.Name == deviceName)
                 {
-                    device.SendLovenseCmd("Vibrate:10;");
+                    device.SendVibrateCmd(10);
                 }
             }
         }
@@ -111,7 +105,7 @@ namespace VRCToyController
                 s += ($"{device.Name} supports these messages:");
                 foreach (var msgInfo in device.AllowedMessages)
                 {
-                    s += ($"- {msgInfo.Key.Name}");
+                    s += ($"- {msgInfo.Key.ToString()}");
                     if (msgInfo.Value.FeatureCount != null)
                     {
                         s += ($" - Features: {msgInfo.Value.FeatureCount}");
@@ -143,7 +137,10 @@ namespace VRCToyController
             this.device = device;
             this.lovenseType = GetLovenseType(device);
             this.name = device.Name;
-            this.motorCount = (int)(device.GetMessageAttributes<VibrateCmd>().FeatureCount) + (lovenseType == LovenseToyType.max ? 1 : 0);
+            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd))
+                this.motorCount = (int)(device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd].FeatureCount) + (lovenseType == LovenseToyType.max ? 1 : 0);
+            else
+                this.motorCount = 0;
             foreach (ToyAPI api in Mediator.toyAPIs)
             {
                 if (api is ButtplugIOAPI)
@@ -153,9 +150,9 @@ namespace VRCToyController
 
         public static LovenseToyType GetLovenseType(ButtplugClientDevice device)
         {
-            if (device.AllowedMessages.ContainsKey(typeof(LovenseCmd)))
+            if (device.Name.StartsWith("Lovense"))
             {
-                if (device.Name.Contains("Max"))
+                if (device.Name.Contains("Lovense Max"))
                     return LovenseToyType.max;
                 return LovenseToyType.any;
                 //string result = await device.SendLovenseCmd("DeviceType;");

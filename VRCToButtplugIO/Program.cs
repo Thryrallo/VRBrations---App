@@ -88,11 +88,11 @@ namespace VRCToyController
             if (!keyLoaded)
                 return;
 
-            Init();
-            CreateLogicThread();
-
             Mediator.toyAPIs.Add(await ButtplugIOAPI.GetClient());
             Mediator.toyAPIs.Add(await LovenseConnectAPI.GetClient());
+
+            Init();
+            CreateLogicThread();
 
             Application.Run(Mediator.ui);
         }
@@ -100,9 +100,6 @@ namespace VRCToyController
         static async void Init()
         {
             config = Config.config;
-
-            //buttplugIOInterface.Test("Lovense Edge v101");
-
             dpi = getScalingFactor();
             Console.WriteLine("DPI:" + dpi);
 
