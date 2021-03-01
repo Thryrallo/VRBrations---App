@@ -92,7 +92,7 @@ namespace VRCToyController
             }
         }
 
-        private static async Task VerifyKeyAsync()
+        public static async Task<bool> VerifyKeyAsync()
         {
             var values = new Dictionary<string, string>
             {
@@ -107,6 +107,8 @@ namespace VRCToyController
             //Console.WriteLine(responseString);
             ValidationResult result = JsonConvert.DeserializeObject<ValidationResult>(responseString);
             p_status = result.status;
+            Console.WriteLine(status);
+            return status == KeyStatus.VALID;
         }
 
         private static async Task SendFreeRequest()

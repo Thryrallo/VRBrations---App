@@ -17,7 +17,7 @@ namespace VRCToyController
             return new LovenseConnectAPI();
         }
 
-        private Dictionary<string, LovenseConnectDomain> domains;
+        private Dictionary<string, LovenseConnectDomain> domains = new Dictionary<string, LovenseConnectDomain>();
 
         private LovenseConnectAPI()
         {
@@ -27,32 +27,53 @@ namespace VRCToyController
         public void GetToys()
         {
             string data = Get("https://api.lovense.com/api/lan/getToys");
-            Console.WriteLine("-----------Lovense Connect---------");
-            domains = JsonConvert.DeserializeObject<Dictionary<string, LovenseConnectDomain>>(data);
-            foreach (KeyValuePair<string, LovenseConnectDomain> d in domains)
+            Dictionary<string, LovenseConnectDomain>  newDomains = JsonConvert.DeserializeObject<Dictionary<string, LovenseConnectDomain>>(data);
+            foreach (KeyValuePair<string, LovenseConnectDomain> d in newDomains)
             {
-                Console.WriteLine("Domain: " + d.Key);
-                foreach (LovenseConnectToy t in d.Value.toys.Values)
+                //if domains already exists check for new toys
+                if (domains.ContainsKey(d.Key))
                 {
-                    Console.WriteLine("Toy: " + t.name + "," + t.id);
-                    if (Enum.TryParse<LovenseConnectToyType>(t.name, out t.type) == false)
-                        t.type = LovenseConnectToyType.none;
-                    Console.WriteLine("Type: " + t.type);
-                    switch (t.type)
+                    foreach (LovenseConnectToy t in d.Value.toys.Values)
                     {
-                        case LovenseConnectToyType.max:
-                        case LovenseConnectToyType.edge:
-                            t.motorCount = 2;
-                            break;
-                        default:
-                            t.motorCount = 1;
-                            break;
+                        bool isNewToy = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy && (aT as LovenseConnectToy).id == t.id).Count() == 0;
+                        if (isNewToy)
+                        {
+                            AddToy(t, d.Value);
+                        }
                     }
-                    t.toyAPI = this;
-                    t.domain = d.Value;
-                    Mediator.AddToy(t);
+                }
+                //else add all toys
+                else
+                {
+                    Program.DebugToFile("[LovenseConnect] New Domain: "+d.Key);
+                    domains.Add(d.Key, d.Value);
+                    foreach (LovenseConnectToy t in d.Value.toys.Values)
+                    {
+                        AddToy(t, d.Value);
+                    }
                 }
             }
+        }
+
+        private void AddToy(LovenseConnectToy t, LovenseConnectDomain d)
+        {
+            
+            if (Enum.TryParse<LovenseConnectToyType>(t.name, out t.type) == false)
+                t.type = LovenseConnectToyType.none;
+            Program.DebugToFile("[LovenseConnect] Add Toy: " + t.name + "," + t.id+ ", type: "+t.type);
+            switch (t.type)
+            {
+                case LovenseConnectToyType.max:
+                case LovenseConnectToyType.edge:
+                    t.motorCount = 2;
+                    break;
+                default:
+                    t.motorCount = 1;
+                    break;
+            }
+            t.toyAPI = this;
+            t.domain = d;
+            Mediator.AddToy(t);
         }
 
         public void ClearToys()
@@ -162,5 +183,9 @@ namespace VRCToyController
             }
         }
 
+        public override void SlowUpdate()
+        {
+            GetToys();
+        }
     }
 }

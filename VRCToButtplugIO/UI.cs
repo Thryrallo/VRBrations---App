@@ -95,16 +95,16 @@ namespace VRCToyController
                         device.device_params = list.ToArray();
                     }
                     param.input_pos = new int[] { (int)deviceParamsUI.x.Value, (int)deviceParamsUI.y.Value };
-                    param.max = Math.Min(1.0f, Math.Max(0.0f, float.Parse(deviceParamsUI.max.Text.Replace('.', ',')) ));
+                    param.max = Math.Min(1.0f, Math.Max(0.0f, ParseFloat(deviceParamsUI.max.Text) ));
                     param.type = (CalulcationType)deviceParamsUI.typeSelector.SelectedIndex;
                     param.motor = deviceParamsUI.motor.SelectedIndex;
-                    param.volume_width = float.Parse(deviceParamsUI.volume_width.Text.Replace('.', ','));
-                    param.volume_depth = float.Parse(deviceParamsUI.volume_depth.Text.Replace('.', ','));
-                    param.thrusting_acceleration = Math.Min(1,float.Parse(deviceParamsUI.thrust_acceleration.Text.Replace('.', ',')));
-                    param.thrusting_speed_scale = float.Parse(deviceParamsUI.thrust_speed_scale.Text.Replace('.', ','));
-                    param.thrusting_depth_scale = float.Parse(deviceParamsUI.thrust_depth_scale.Text.Replace('.', ','));
-                    param.rubbing_acceleration = Math.Min(1, float.Parse(deviceParamsUI.rub_acceleration.Text.Replace('.', ',')));
-                    param.rubbing_scale = float.Parse(deviceParamsUI.rub_scale.Text.Replace('.', ','));
+                    param.volume_width = ParseFloat(deviceParamsUI.volume_width.Text);
+                    param.volume_depth = ParseFloat(deviceParamsUI.volume_depth.Text);
+                    param.thrusting_acceleration = Math.Min(1, ParseFloat(deviceParamsUI.thrust_acceleration.Text));
+                    param.thrusting_speed_scale = ParseFloat(deviceParamsUI.thrust_speed_scale.Text);
+                    param.thrusting_depth_scale = ParseFloat(deviceParamsUI.thrust_depth_scale.Text);
+                    param.rubbing_acceleration = Math.Min(1, ParseFloat(deviceParamsUI.rub_acceleration.Text));
+                    param.rubbing_scale = ParseFloat(deviceParamsUI.rub_scale.Text);
                 }
                 if(device.device_params.Length> deviceUI.paramsList.Controls.Count)
                 {
@@ -113,6 +113,11 @@ namespace VRCToyController
                     device.device_params = list.ToArray();
                 }
             }
+        }
+
+        private float ParseFloat(string s)
+        {
+            return float.Parse(s, System.Globalization.NumberStyles.Number);
         }
 
         private void b_Save_Click(object sender, EventArgs e)

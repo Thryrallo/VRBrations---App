@@ -77,25 +77,45 @@ namespace VRCToyController
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            bool keyLoaded = KeyManager.LoadKey();
-            if (!keyLoaded)
+
+            while (KeyManager.LoadKey() == false || await KeyManager.VerifyKeyAsync() == false)
             {
                 Rectangle rect = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
-                string input = Interaction.InputBox("Please input your 'VRC Toy Controller' Key", "Key", "", rect.Width/2-200, rect.Height/2-200);
+                string input = Interaction.InputBox("Please input your 'VRC Toy Controller' Key", "Key", "", rect.Width / 2 - 200, rect.Height / 2 - 200);
                 input = input.Trim();
-                if(input != null && input.Length == 64)
-                    keyLoaded = KeyManager.LoadKey(input);
+                if (input != null && input.Length == 64)
+                    KeyManager.LoadKey(input);
             }
-            if (!keyLoaded)
-                return;
+            DebugToFile("[Key] Key has been verified.");
 
-            Mediator.toyAPIs.Add(await ButtplugIOAPI.GetClient());
-            Mediator.toyAPIs.Add(await LovenseConnectAPI.GetClient());
-
+            DebugToFile("[API] Starting Inizilization.");
             Init();
+            DebugToFile("[API] Starting Logic Thread.");
             CreateLogicThread();
+            DebugToFile("[API] Starting Application.");
+
+            DebugToFile("[API] Starting ButtplugIO.");
+            InitButtplugIO();
+            DebugToFile("[API] Starting LovenseConnect.");
+            //Mediator.toyAPIs.Add(await LovenseConnectAPI.GetClient());
+            InitLovenseConnect();
+            DebugToFile("[API] All APIs have been started.");
 
             Application.Run(Mediator.ui);
+        }
+
+        static  void InitButtplugIO()
+        {
+            var thread = new Thread(async delegate() { Mediator.toyAPIs.Add(await ButtplugIOAPI.GetClient()); });
+            thread.IsBackground = true;
+            thread.Start();
+        }
+
+        static void InitLovenseConnect()
+        {
+            var thread = new Thread(async delegate () { Mediator.toyAPIs.Add(await LovenseConnectAPI.GetClient()); });
+            thread.IsBackground = true;
+            thread.Start();
         }
 
         static async void Init()
@@ -130,6 +150,9 @@ namespace VRCToyController
             thread.Start();
         }
 
+        static float lastSlowUpdate = 0;
+        const float slowUpdateRate = 10000;
+
         static float lastUpdate = 0;
         static float lastVerifiedKey = 0;
         static void Logic()
@@ -150,6 +173,16 @@ namespace VRCToyController
                     {
                         TurnAllToysOff();
                     }
+                    //do slow update on apis
+                    if(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastSlowUpdate > slowUpdateRate)
+                    {
+                        foreach (ToyAPI api in Mediator.toyAPIs)
+                        {
+                            api.SlowUpdate();
+                        }
+                        lastSlowUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    } 
+                    
                     lastVerifiedKey = lastUpdate;
                 }
                 else if (lastUpdate != 0 && (lastUpdate-lastUpdate) > 10000)
@@ -349,6 +382,15 @@ namespace VRCToyController
             bounds.Y += titleBarHeight;
             bounds.Height -= titleBarHeight;
             return bounds;
+        }
+
+        public static void DebugToFile(string s)
+        {
+            Console.WriteLine(s);
+            using (StreamWriter sw = File.AppendText("./debug"))
+            {
+                sw.WriteLine(s);
+            }
         }
     }
 }

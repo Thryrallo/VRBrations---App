@@ -83,7 +83,7 @@ namespace VRCToyController
                 return;
             TextBox box = (TextBox)sender;
             float f;
-            bool isNotFloat = (float.TryParse(box.Text.Replace(".",","), out f) == false || f < 0 || f > 1);
+            bool isNotFloat = float.TryParse(box.Text, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture, out f) == false || f < 0 || f > 1;
             //Console.WriteLine(f+","+isNotFloat + "," + box.Text);
             if (isNotFloat && box.Text != "")
             {

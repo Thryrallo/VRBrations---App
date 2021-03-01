@@ -30,23 +30,24 @@
         {
             this.scan = new System.Windows.Forms.Button();
             this.deviceList = new System.Windows.Forms.FlowLayoutPanel();
+            this.warning = new System.Windows.Forms.Label();
             this.b_Save = new System.Windows.Forms.Button();
             this.apply = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.footer = new System.Windows.Forms.LinkLabel();
-            this.warning = new System.Windows.Forms.Label();
             this.deviceList.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // scan
             // 
-            this.scan.Location = new System.Drawing.Point(12, 12);
+            this.scan.Location = new System.Drawing.Point(12, 268);
             this.scan.Name = "scan";
             this.scan.Size = new System.Drawing.Size(130, 42);
             this.scan.TabIndex = 0;
             this.scan.Text = "scan";
             this.scan.UseVisualStyleBackColor = true;
+            this.scan.Visible = false;
             // 
             // deviceList
             // 
@@ -61,9 +62,25 @@
             this.deviceList.TabIndex = 1;
             this.deviceList.WrapContents = false;
             // 
+            // warning
+            // 
+            this.warning.AutoSize = true;
+            this.warning.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
+            this.warning.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.warning.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.warning.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.warning.Location = new System.Drawing.Point(3, 5);
+            this.warning.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
+            this.warning.Name = "warning";
+            this.warning.Size = new System.Drawing.Size(53, 22);
+            this.warning.TabIndex = 1;
+            this.warning.Text = "label1";
+            this.warning.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.warning.Visible = false;
+            // 
             // b_Save
             // 
-            this.b_Save.Location = new System.Drawing.Point(12, 171);
+            this.b_Save.Location = new System.Drawing.Point(12, 78);
             this.b_Save.Name = "b_Save";
             this.b_Save.Size = new System.Drawing.Size(130, 56);
             this.b_Save.TabIndex = 4;
@@ -73,7 +90,7 @@
             // 
             // apply
             // 
-            this.apply.Location = new System.Drawing.Point(12, 109);
+            this.apply.Location = new System.Drawing.Point(12, 16);
             this.apply.Name = "apply";
             this.apply.Size = new System.Drawing.Size(130, 56);
             this.apply.TabIndex = 5;
@@ -108,22 +125,6 @@
             this.footer.Text = "by Thryrallo";
             this.footer.VisitedLinkColor = System.Drawing.Color.Fuchsia;
             this.footer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.footer_LinkClicked);
-            // 
-            // warning
-            // 
-            this.warning.AutoSize = true;
-            this.warning.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
-            this.warning.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.warning.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.warning.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.warning.Location = new System.Drawing.Point(3, 5);
-            this.warning.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
-            this.warning.Name = "warning";
-            this.warning.Size = new System.Drawing.Size(53, 22);
-            this.warning.TabIndex = 1;
-            this.warning.Text = "label1";
-            this.warning.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.warning.Visible = false;
             // 
             // MainUI
             // 

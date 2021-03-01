@@ -120,6 +120,10 @@ namespace VRCToyController
             await client.DisconnectAsync();
         }
 
+        public override void SlowUpdate()
+        {
+            
+        }
     }
 
     public enum LovenseToyType
