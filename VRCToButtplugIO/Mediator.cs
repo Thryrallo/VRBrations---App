@@ -46,9 +46,14 @@ namespace VRCToyController
                 DeviceUI deviceControl = new DeviceUI(toy);
                 deviceControl.Populate(Config.config);
                 Console.WriteLine("Connected to " + toy.name);
+                toy.ui = deviceControl;
                 Mediator.activeToys.Add(toy.name, toy);
 
                 Mediator.ui.deviceList.Controls.Add(deviceControl);
+
+                toy.UpdateBatterUI(0);
+
+                toy.toyAPI.UpdateBatteryIndicator(toy);
             });
         }
     }

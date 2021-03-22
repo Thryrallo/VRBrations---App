@@ -155,10 +155,10 @@ namespace VRCToyController
             thread.Start();
         }
 
-        static float lastSlowUpdate = 0;
+        static long lastSlowUpdate = 0;
         const float slowUpdateRate = 10000;
 
-        static float lastUpdate = 0;
+        static long lastUpdate = 0;
         static float lastVerifiedKey = 0;
         static void Logic()
         {
@@ -197,11 +197,15 @@ namespace VRCToyController
                         SetUIMessage(Mediator.ui.label_vrc_focus, "VRC not in focus\nCurrent window:\n" + activeWindow, Color.Red);
                     }
                     //do slow update on apis
-                    if(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastSlowUpdate > slowUpdateRate)
+                    if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastSlowUpdate > slowUpdateRate)
                     {
                         foreach (ToyAPI api in Mediator.toyAPIs)
                         {
                             api.SlowUpdate();
+                        }
+                        foreach (Toy toy in Mediator.activeToys.Values)
+                        {
+                            toy.toyAPI.UpdateBatteryIndicator(toy);
                         }
                         lastSlowUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     } 
@@ -222,14 +226,19 @@ namespace VRCToyController
         private static void SetUIMessage(Label l, string message, Color color)
         {
             if (l == null) return;
-            if (l.ForeColor != color || l.Text != message)
+            //try chach, because this throws sometimes an error when application is closing. should probabnly be fixed correctly at some point
+            try
             {
-                l.Invoke((Action)delegate ()
+                if (l.ForeColor != color || l.Text != message)
                 {
-                    l.Text = message;
-                    l.ForeColor = color;
-                });
+                    l.Invoke((Action)delegate ()
+                    {
+                        l.Text = message;
+                        l.ForeColor = color;
+                    });
+                }
             }
+            catch (Exception e) { };
         }
 
         private static void TurnAllToysOff()

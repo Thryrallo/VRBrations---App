@@ -125,6 +125,18 @@ namespace VRCToyController
         {
             
         }
+
+        public override void UpdateBatteryIndicator(Toy iToy)
+        {
+            Task.Run(() =>  UpdateBatteryIndicatorAsync(iToy));
+        }
+
+        private async Task UpdateBatteryIndicatorAsync(Toy iToy)
+        {
+            ButtplugToy toy = (ButtplugToy)iToy;
+            double level = await toy.device.SendBatteryLevelCmd();
+            toy.UpdateBatterUI((int)(level * 100));
+        }
     }
 
     public enum LovenseToyType

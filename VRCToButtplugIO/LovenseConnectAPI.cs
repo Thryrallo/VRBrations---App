@@ -187,5 +187,25 @@ namespace VRCToyController
         {
             GetToys();
         }
+
+        public override void UpdateBatteryIndicator(Toy iToy)
+        {
+            Task.Run(() => UpdateBatteryIndicatorAsync(iToy));
+        }
+
+        private struct LovenseBattery
+        {
+            public int data;
+        }
+
+        private async Task UpdateBatteryIndicatorAsync(Toy iToy)
+        {
+            LovenseConnectToy t = (LovenseConnectToy)iToy;
+            string fullurl = "http://" + t.domain.domain + ":" + t.domain.httpPort + "/Battery?t="+t.id;
+            string data = Get(fullurl);
+            LovenseBattery battery = JsonConvert.DeserializeObject<LovenseBattery>(data);
+            int level = battery.data;
+            t.UpdateBatterUI(level);
+        }
     }
 }

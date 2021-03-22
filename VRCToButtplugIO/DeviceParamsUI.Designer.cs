@@ -444,9 +444,8 @@
             this.label_pixel_found.AutoSize = true;
             this.label_pixel_found.Location = new System.Drawing.Point(323, 7);
             this.label_pixel_found.Name = "label_pixel_found";
-            this.label_pixel_found.Size = new System.Drawing.Size(90, 20);
+            this.label_pixel_found.Size = new System.Drawing.Size(0, 20);
             this.label_pixel_found.TabIndex = 5;
-            this.label_pixel_found.Text = "pixel_found";
             this.label_pixel_found.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // DeviceParamsUI

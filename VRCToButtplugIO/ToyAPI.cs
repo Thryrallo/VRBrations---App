@@ -11,6 +11,7 @@ namespace VRCToyController
         public static Task<ToyAPI> GetClient;
         public abstract void Vibrate(Toy toy, double[] strength);
 
+        public abstract void UpdateBatteryIndicator(Toy itoy);
         public abstract void SlowUpdate();
     }
 }
