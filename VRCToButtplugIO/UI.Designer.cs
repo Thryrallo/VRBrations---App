@@ -35,13 +35,14 @@
             this.apply = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.footer = new System.Windows.Forms.LinkLabel();
+            this.label_vrc_focus = new System.Windows.Forms.Label();
             this.deviceList.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // scan
             // 
-            this.scan.Location = new System.Drawing.Point(12, 268);
+            this.scan.Location = new System.Drawing.Point(12, 368);
             this.scan.Name = "scan";
             this.scan.Size = new System.Drawing.Size(130, 42);
             this.scan.TabIndex = 0;
@@ -101,6 +102,7 @@
             // panel1
             // 
             this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.panel1.Controls.Add(this.label_vrc_focus);
             this.panel1.Controls.Add(this.footer);
             this.panel1.Controls.Add(this.b_Save);
             this.panel1.Controls.Add(this.apply);
@@ -125,6 +127,15 @@
             this.footer.Text = "by Thryrallo";
             this.footer.VisitedLinkColor = System.Drawing.Color.Fuchsia;
             this.footer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.footer_LinkClicked);
+            // 
+            // label_vrc_focus
+            // 
+            this.label_vrc_focus.AutoSize = true;
+            this.label_vrc_focus.Location = new System.Drawing.Point(3, 137);
+            this.label_vrc_focus.Name = "label_vrc_focus";
+            this.label_vrc_focus.Size = new System.Drawing.Size(77, 20);
+            this.label_vrc_focus.TabIndex = 7;
+            this.label_vrc_focus.Text = "vrc_focus";
             // 
             // MainUI
             // 
@@ -153,6 +164,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.LinkLabel footer;
         public System.Windows.Forms.Label warning;
+        public System.Windows.Forms.Label label_vrc_focus;
     }
 }
 

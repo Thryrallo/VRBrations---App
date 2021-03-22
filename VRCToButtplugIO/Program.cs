@@ -85,6 +85,11 @@ namespace VRCToyController
                 input = input.Trim();
                 if (input != null && input.Length == 64)
                     KeyManager.LoadKey(input);
+                if(input == null || input.Length == 0)
+                {
+                    DebugToFile("[Key] no key was entered, or cancel was pressed.");
+                    return;
+                }
             }
             DebugToFile("[Key] Key has been verified.");
 
@@ -164,14 +169,32 @@ namespace VRCToyController
                     string activeWindow = GetActiveWindow();
                     if (activeWindow == config.window_name)
                     {
-                        Rectangle windowBounds = GetWindowBounds();
-                        Bitmap capture = Capture(windowBounds);
-                        CheckCaptureForInput(capture);
-                        capture.Dispose();
+                        try
+                        {
+                            Rectangle windowBounds = GetWindowBounds();
+                            if (windowBounds.Height > 0 && windowBounds.Width > 0)
+                            {
+                                Bitmap capture = Capture(windowBounds);
+                                CheckCaptureForInput(capture);
+                                capture.Dispose();
+
+                                SetUIMessage(Mediator.ui.label_vrc_focus, "VRC is in focus", Color.Green);
+                            }
+                            else
+                            {
+                                SetUIMessage(Mediator.ui.label_vrc_focus, "VRC bounds wrong", Color.Red);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            DebugToFile(e.ToString(),2);
+                            SetUIMessage(Mediator.ui.label_vrc_focus, "Error. Check log.", Color.Orange);
+                        }
                     }
                     else
                     {
                         TurnAllToysOff();
+                        SetUIMessage(Mediator.ui.label_vrc_focus, "VRC not in focus\nCurrent window:\n" + activeWindow, Color.Red);
                     }
                     //do slow update on apis
                     if(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastSlowUpdate > slowUpdateRate)
@@ -193,6 +216,19 @@ namespace VRCToyController
                 if(timeout>0)
                     Thread.Sleep(timeout);
                 lastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            }
+        }
+
+        private static void SetUIMessage(Label l, string message, Color color)
+        {
+            if (l == null) return;
+            if (l.ForeColor != color || l.Text != message)
+            {
+                l.Invoke((Action)delegate ()
+                {
+                    l.Text = message;
+                    l.ForeColor = color;
+                });
             }
         }
 
@@ -264,7 +300,14 @@ namespace VRCToyController
                     //Console.WriteLine("------" + param.type+"------");
                     //Console.WriteLine(col1 + "," + col2);
                     if (col1.B != 0 || col2.R != 0)
+                    {
+                        SetUIMessage(param.ui.label_pixel_found, "not found", Color.Red);
                         continue;
+                    }
+                    else
+                    {
+                        SetUIMessage(param.ui.label_pixel_found, "found", Color.Green);
+                    }
 
                     
                     float add = 0;
@@ -384,8 +427,10 @@ namespace VRCToyController
             return bounds;
         }
 
-        public static void DebugToFile(string s)
+        public static void DebugToFile(string s, int type = 0)
         {
+            if (type == 1) s += "[Warning]";
+            else if (type == 2) s += "[Error]";
             Console.WriteLine(s);
             using (StreamWriter sw = File.AppendText("./debug"))
             {

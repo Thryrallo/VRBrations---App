@@ -24,12 +24,13 @@ namespace VRCToyController
             buttplugIOInterface.client = client;
 
             await client.ConnectAsync(connector);
-            Console.WriteLine("Connected!");
+            Program.DebugToFile("[Bluetooth] Connected to Buttplug.IO Client");
 
             void HandleDeviceAdded(object aObj, DeviceAddedEventArgs aArgs)
             {
                 //add to ui
                 var device = aArgs.Device;
+                Program.DebugToFile("[Bluetooth] New device: "+device.Name);
                 ButtplugToy toy = new ButtplugToy(device);
                 Mediator.AddToy(toy);
             }

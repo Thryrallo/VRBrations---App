@@ -90,6 +90,7 @@ namespace VRCToyController
                     else
                     {
                         param = new DeviceParams();
+                        param.ui = deviceParamsUI;
                         List<DeviceParams> list = new List<DeviceParams>(device.device_params);
                         list.Add(param);
                         device.device_params = list.ToArray();
@@ -141,6 +142,11 @@ namespace VRCToyController
             {
                 this.Close();
             });
+        }
+
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

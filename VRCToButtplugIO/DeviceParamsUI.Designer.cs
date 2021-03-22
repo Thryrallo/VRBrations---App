@@ -61,6 +61,7 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.rem_button = new System.Windows.Forms.Button();
+            this.label_pixel_found = new System.Windows.Forms.Label();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.x)).BeginInit();
@@ -95,6 +96,7 @@
             this.flowLayoutPanel3.Controls.Add(this.y);
             this.flowLayoutPanel3.Controls.Add(this.label11);
             this.flowLayoutPanel3.Controls.Add(this.motor);
+            this.flowLayoutPanel3.Controls.Add(this.label_pixel_found);
             this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
             this.flowLayoutPanel3.Size = new System.Drawing.Size(429, 37);
@@ -196,7 +198,7 @@
             // 
             // tooltip_volume
             // 
-            this.tooltip_volume.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.tooltip_volume.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tooltip_volume.AutoSize = true;
             this.tooltip_volume.Location = new System.Drawing.Point(3, 87);
@@ -265,7 +267,7 @@
             // 
             // tooltip_thrust
             // 
-            this.tooltip_thrust.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.tooltip_thrust.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tooltip_thrust.AutoSize = true;
             this.tooltip_thrust.Location = new System.Drawing.Point(3, 183);
@@ -356,7 +358,7 @@
             // 
             // tooltipRub
             // 
-            this.tooltipRub.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.tooltipRub.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tooltipRub.AutoSize = true;
             this.tooltipRub.Location = new System.Drawing.Point(439, 104);
@@ -436,6 +438,17 @@
             this.rem_button.UseVisualStyleBackColor = true;
             this.rem_button.Click += new System.EventHandler(this.rem_button_Click);
             // 
+            // label_pixel_found
+            // 
+            this.label_pixel_found.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label_pixel_found.AutoSize = true;
+            this.label_pixel_found.Location = new System.Drawing.Point(323, 7);
+            this.label_pixel_found.Name = "label_pixel_found";
+            this.label_pixel_found.Size = new System.Drawing.Size(90, 20);
+            this.label_pixel_found.TabIndex = 5;
+            this.label_pixel_found.Text = "pixel_found";
+            this.label_pixel_found.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // DeviceParamsUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -499,5 +512,6 @@
         private System.Windows.Forms.Label label10;
         public System.Windows.Forms.ComboBox motor;
         private System.Windows.Forms.Button rem_button;
+        public System.Windows.Forms.Label label_pixel_found;
     }
 }

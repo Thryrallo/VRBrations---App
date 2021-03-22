@@ -35,6 +35,8 @@ namespace VRCToyController
         public float rubbing_scale = 1;
 
         public float max = 1;
+
+        public DeviceParamsUI ui;
     }
 
     public enum CalulcationType
