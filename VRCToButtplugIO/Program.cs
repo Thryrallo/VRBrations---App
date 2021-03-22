@@ -310,12 +310,12 @@ namespace VRCToyController
                     //Console.WriteLine(col1 + "," + col2);
                     if (col1.B != 0 || col2.R != 0)
                     {
-                        SetUIMessage(param.ui.label_pixel_found, "not found", Color.Red);
+                        SetUIMessage(param.GetDeviceParamsUI().label_pixel_found, "not found", Color.Red);
                         continue;
                     }
                     else
                     {
-                        SetUIMessage(param.ui.label_pixel_found, "found", Color.Green);
+                        SetUIMessage(param.GetDeviceParamsUI().label_pixel_found, "found", Color.Green);
                     }
 
                     

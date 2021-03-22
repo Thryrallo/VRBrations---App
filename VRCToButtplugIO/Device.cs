@@ -36,7 +36,9 @@ namespace VRCToyController
 
         public float max = 1;
 
-        public DeviceParamsUI ui;
+        private DeviceParamsUI ui;
+        public void SetDeviceParamsUI(DeviceParamsUI ui) { this.ui = ui; }
+        public DeviceParamsUI GetDeviceParamsUI() { return ui;  }
     }
 
     public enum CalulcationType

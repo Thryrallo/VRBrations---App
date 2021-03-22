@@ -40,12 +40,10 @@ namespace VRCToyController
 
         public static void AddToy(Toy toy)
         {
-            Console.WriteLine("added");
             Mediator.ui.Invoke((Action)delegate ()
             {
                 DeviceUI deviceControl = new DeviceUI(toy);
                 deviceControl.Populate(Config.config);
-                Console.WriteLine("Connected to " + toy.name);
                 toy.ui = deviceControl;
                 Mediator.activeToys.Add(toy.name, toy);
 
