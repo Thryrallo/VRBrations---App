@@ -18,8 +18,8 @@ namespace VRCToyController
 
             b_test.Click += delegate (object o, EventArgs a)
             {
-                if (Mediator.activeToys.ContainsKey(this.name.Text))
-                    Mediator.activeToys[this.name.Text].Test();
+                if (Mediator.activeToys.ContainsKey(this.Name))
+                    Mediator.activeToys[this.Name].Test();
             };
         }
 
@@ -29,11 +29,11 @@ namespace VRCToyController
             InitializeComponent();
 
             this.name.Text = toy.name;
-            this.Name = toy.name;
+            this.Name = toy.vrcToys_id;
             b_test.Click += delegate (object o, EventArgs a)
             {
-                if (Mediator.activeToys.ContainsKey(this.name.Text))
-                    Mediator.activeToys[this.name.Text].Test();
+                if (Mediator.activeToys.ContainsKey(this.Name))
+                    Mediator.activeToys[this.Name].Test();
             };
 
             motorsValues = new string[toy.motorCount];

@@ -24,14 +24,14 @@ namespace VRCToyController
             }
         }
 
-        public static void RemoveToy(string name)
+        public static void RemoveToy(string id)
         {
+            Mediator.activeToys.Remove(id);
             Mediator.ui.Invoke((Action)delegate ()
             {
-                Mediator.activeToys.Remove(name);
                 for (int i = Mediator.ui.deviceList.Controls.Count - 1; i >= 0; i--)
                 {
-                    if (Mediator.ui.deviceList.Controls[i].Name == name)
+                    if (Mediator.ui.deviceList.Controls[i].Name == id)
                         Mediator.ui.deviceList.Controls.RemoveAt(i);
 
                 }
@@ -45,11 +45,9 @@ namespace VRCToyController
                 DeviceUI deviceControl = new DeviceUI(toy);
                 deviceControl.Populate(Config.config);
                 toy.ui = deviceControl;
-                Mediator.activeToys.Add(toy.name, toy);
+                Mediator.activeToys.Add(toy.vrcToys_id, toy);
 
                 Mediator.ui.deviceList.Controls.Add(deviceControl);
-
-                toy.UpdateBatterUI(0);
 
                 toy.toyAPI.UpdateBatteryIndicator(toy);
             });

@@ -17,7 +17,14 @@
             {
                 components.Dispose();
             }
-            base.Dispose(disposing);
+            try
+            {
+                base.Dispose(disposing);
+            }
+            catch (System.Exception e)
+            {
+                
+            }
         }
 
         #region Windows Form Designer generated code
@@ -36,6 +43,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.label_vrc_focus = new System.Windows.Forms.Label();
             this.footer = new System.Windows.Forms.LinkLabel();
+            this.button_AddLovenseConnectURL = new System.Windows.Forms.Button();
             this.deviceList.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -102,6 +110,7 @@
             // panel1
             // 
             this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.panel1.Controls.Add(this.button_AddLovenseConnectURL);
             this.panel1.Controls.Add(this.label_vrc_focus);
             this.panel1.Controls.Add(this.footer);
             this.panel1.Controls.Add(this.b_Save);
@@ -136,6 +145,16 @@
             this.footer.VisitedLinkColor = System.Drawing.Color.Fuchsia;
             this.footer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.footer_LinkClicked);
             // 
+            // button_AddLovenseConnectURL
+            // 
+            this.button_AddLovenseConnectURL.Location = new System.Drawing.Point(0, 748);
+            this.button_AddLovenseConnectURL.Name = "button_AddLovenseConnectURL";
+            this.button_AddLovenseConnectURL.Size = new System.Drawing.Size(155, 46);
+            this.button_AddLovenseConnectURL.TabIndex = 8;
+            this.button_AddLovenseConnectURL.Text = "Add Lovense URL";
+            this.button_AddLovenseConnectURL.UseVisualStyleBackColor = true;
+            this.button_AddLovenseConnectURL.Click += new System.EventHandler(this.button_AddLovenseConnectURL_Click);
+            // 
             // MainUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -164,6 +183,7 @@
         private System.Windows.Forms.LinkLabel footer;
         public System.Windows.Forms.Label warning;
         public System.Windows.Forms.Label label_vrc_focus;
+        private System.Windows.Forms.Button button_AddLovenseConnectURL;
     }
 }
 

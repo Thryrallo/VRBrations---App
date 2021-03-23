@@ -12,6 +12,7 @@ namespace VRCToyController
         public DeviceUI ui;
         public ToyAPI toyAPI;
         public string name;
+        public string vrcToys_id;
         public int motorCount;
 
         public void Vibrate(double[] strength)

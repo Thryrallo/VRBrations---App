@@ -199,15 +199,9 @@ namespace VRCToyController
                     //do slow update on apis
                     if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastSlowUpdate > slowUpdateRate)
                     {
-                        foreach (ToyAPI api in Mediator.toyAPIs)
-                        {
-                            api.SlowUpdate();
-                        }
-                        foreach (Toy toy in Mediator.activeToys.Values)
-                        {
-                            toy.toyAPI.UpdateBatteryIndicator(toy);
-                        }
-                        lastSlowUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                        Thread slowUpdate = new Thread(SlowUpdate);
+                        slowUpdate.Name = "SlowUpdate";
+                        slowUpdate.Start();
                     } 
                     
                     lastVerifiedKey = lastUpdate;
@@ -221,6 +215,19 @@ namespace VRCToyController
                     Thread.Sleep(timeout);
                 lastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
+        }
+
+        private static void SlowUpdate()
+        {
+            foreach (ToyAPI api in Mediator.toyAPIs)
+            {
+                api.SlowUpdate();
+            }
+            foreach (Toy toy in Mediator.activeToys.Values)
+            {
+                toy.toyAPI.UpdateBatteryIndicator(toy);
+            }
+            lastSlowUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
         private static void SetUIMessage(Label l, string message, Color color)

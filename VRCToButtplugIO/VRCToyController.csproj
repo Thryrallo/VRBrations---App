@@ -70,8 +70,8 @@
     <ApplicationIcon>butticon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Buttplug, Version=1.0.14.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Buttplug.1.0.14\lib\netstandard2.0\Buttplug.dll</HintPath>
+    <Reference Include="Buttplug, Version=1.0.17.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Buttplug.1.0.17\lib\net47\Buttplug.dll</HintPath>
     </Reference>
     <Reference Include="Buttplug.Client.Connectors.WebsocketConnector, Version=0.5.9.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -83,8 +83,8 @@
       <HintPath>lib\deniszykov.WebSocketListener.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Google.Protobuf, Version=3.14.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Protobuf.3.14.0\lib\net45\Google.Protobuf.dll</HintPath>
+    <Reference Include="Google.Protobuf, Version=3.15.6.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Protobuf.3.15.6\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
     <Reference Include="JetBrains.Annotations, Version=2020.1.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -239,11 +239,11 @@ ROBOCOPY "$(TargetDir) " "$(TargetDir)lib\ " /XF *.exe *.config *.manifest /XD l
 ROBOCOPY "$(TargetDir)lib\ " "$(TargetDir) " Buttplug.Server.Managers.UWPBluetoothManager.dll /E /IS /MOVE
 if %25errorlevel%25 leq 4 exit 0 else exit %25errorlevel%25</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\ButtplugRustFFI.1.0.12\build\ButtplugRustFFI.targets" Condition="Exists('..\packages\ButtplugRustFFI.1.0.12\build\ButtplugRustFFI.targets')" />
+  <Import Project="..\packages\ButtplugRustFFI.1.0.15\build\ButtplugRustFFI.targets" Condition="Exists('..\packages\ButtplugRustFFI.1.0.15\build\ButtplugRustFFI.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\ButtplugRustFFI.1.0.12\build\ButtplugRustFFI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ButtplugRustFFI.1.0.12\build\ButtplugRustFFI.targets'))" />
+    <Error Condition="!Exists('..\packages\ButtplugRustFFI.1.0.15\build\ButtplugRustFFI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ButtplugRustFFI.1.0.15\build\ButtplugRustFFI.targets'))" />
   </Target>
 </Project>

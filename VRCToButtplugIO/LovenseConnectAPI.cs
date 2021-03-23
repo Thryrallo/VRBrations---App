@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace VRCToyController
@@ -19,6 +20,8 @@ namespace VRCToyController
 
         private Dictionary<string, LovenseConnectDomain> domains = new Dictionary<string, LovenseConnectDomain>();
 
+        private List<CustomLovenseConnectDomain> customDomains = new List<CustomLovenseConnectDomain>();
+
         private LovenseConnectAPI()
         {
             GetToys();
@@ -26,39 +29,64 @@ namespace VRCToyController
 
         public void GetToys()
         {
-            string data = Get("https://api.lovense.com/api/lan/getToys");
-            Dictionary<string, LovenseConnectDomain>  newDomains = JsonConvert.DeserializeObject<Dictionary<string, LovenseConnectDomain>>(data);
-            foreach (KeyValuePair<string, LovenseConnectDomain> d in newDomains)
+            Task.Factory.StartNew(() =>
             {
-                //if domains already exists check for new toys
-                if (domains.ContainsKey(d.Key))
+                string data = Get("https://api.lovense.com/api/lan/getToys");
+                Dictionary<string, LovenseConnectDomain> newDomains = JsonConvert.DeserializeObject<Dictionary<string, LovenseConnectDomain>>(data);
+
+                IEnumerable<LovenseConnectToy> previouslyExistingToys = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy).Select(t => t as LovenseConnectToy);
+                foreach (KeyValuePair<string, LovenseConnectDomain> d in newDomains)
                 {
-                    foreach (LovenseConnectToy t in d.Value.toys.Values)
-                    {
-                        bool isNewToy = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy && (aT as LovenseConnectToy).id == t.id && (aT as LovenseConnectToy).domain.domain == d.Key).Count() == 0;
-                        if (isNewToy)
-                        {
-                            AddToy(t, d.Value);
-                        }
-                    }
+                    HandleDomainToys(d.Key, d.Value, previouslyExistingToys);
                 }
-                //else add all toys
-                else
+                foreach (CustomLovenseConnectDomain cD_Url in customDomains)
                 {
-                    Program.DebugToFile("[LovenseConnect] New Domain: "+d.Key);
-                    domains.Add(d.Key, d.Value);
-                    foreach (LovenseConnectToy t in d.Value.toys.Values)
+                    data = Get(cD_Url.toysUrl);
+                    LovenseConnectDomain domain = JsonConvert.DeserializeObject<LovenseConnectDomain>(data);
+                    domain.toys = domain.data;
+                    domain.domain = cD_Url.domain;
+                    domain.httpPort = cD_Url.httpPort;
+                    domain.isHttps = true;
+
+                    HandleDomainToys(cD_Url.domain, domain, previouslyExistingToys);
+                }
+            });
+        }
+
+        private void HandleDomainToys(string domainId, LovenseConnectDomain domain, IEnumerable<LovenseConnectToy> previouslyExistingToys)
+        {
+            //if domains already exists check for new toys
+            if (domains.ContainsKey(domainId))
+            {
+                foreach (LovenseConnectToy t in domain.toys.Values)
+                {
+                    bool isNewToy = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy && (aT as LovenseConnectToy).id == t.id && (aT as LovenseConnectToy).domain.domain == domainId).Count() == 0;
+                    if (isNewToy)
                     {
-                        AddToy(t, d.Value);
+                        AddToy(t, domain);
                     }
                 }
             }
+            //else add all toys
+            else
+            {
+                Program.DebugToFile("[LovenseConnect] New Domain: " + domainId);
+                domains.Add(domainId, domain);
+                foreach (LovenseConnectToy t in domain.toys.Values)
+                {
+                    AddToy(t, domain);
+                }
+            }
+            //Remove old devices
+            //Where domains is same and domain does not contain toy
+            IEnumerable<LovenseConnectToy> oldToys = previouslyExistingToys.Where(t => t.domain.domain == domainId && domain.toys.ContainsKey(t.id) == false);
+            foreach (LovenseConnectToy t in oldToys) Mediator.RemoveToy(domainId + "_" + t.id);
         }
 
         private void AddToy(LovenseConnectToy t, LovenseConnectDomain d)
         {
             
-            if (Enum.TryParse<LovenseConnectToyType>(t.name, out t.type) == false)
+            if (Enum.TryParse<LovenseConnectToyType>(t.name.ToLower(), out t.type) == false)
                 t.type = LovenseConnectToyType.none;
             Program.DebugToFile("[LovenseConnect] Add Toy: " + t.name + "," + t.id+ ", type: "+t.type);
             switch (t.type)
@@ -73,6 +101,7 @@ namespace VRCToyController
             }
             t.toyAPI = this;
             t.domain = d;
+            t.vrcToys_id = d.domain + "_" + t.id;
             Mediator.AddToy(t);
         }
 
@@ -92,7 +121,23 @@ namespace VRCToyController
         {
             public string domain;
             public int httpPort;
+            public bool isHttps;
             public Dictionary<string,LovenseConnectToy> toys;
+            //in case of custom domain
+            public Dictionary<string,LovenseConnectToy> data;
+
+            private string p_url;
+            public string url
+            {
+                get
+                {
+                    if(p_url == null)
+                    {
+                        p_url = (isHttps ? "https://" : "http://") + domain + ":" + httpPort;
+                    }
+                    return p_url;
+                }
+            }
         }
         private class LovenseConnectToy : Toy
         {
@@ -172,7 +217,7 @@ namespace VRCToyController
 
         private void LovenseGet(LovenseConnectToy t, string url, double speed)
         {
-            string fullurl = "http://" + t.domain.domain + ":" + t.domain.httpPort + "/" + url + "?v=" + (int)(speed * 20 + 0.4f) + "&t=" + t.id;
+            string fullurl = t.domain.url + "/" + url + "?v=" + (int)(speed * 20 + 0.4f) + "&t=" + t.id;
             //Console.WriteLine("GET:: " + fullurl);
             try
             {
@@ -183,6 +228,24 @@ namespace VRCToyController
             }
         }
 
+        public bool AddCustomURL(string url)
+        {
+            string regex = @"https:\/\/\d+-\d+-\d+-\d+\.lovense.club:\d+\/GetToys";
+            if(Regex.IsMatch(url, regex))
+            {
+                CustomLovenseConnectDomain domain = new CustomLovenseConnectDomain();
+                domain.toysUrl = url;
+                string pattern = @"\d+-\d+-\d+-\d+.lovense\.club";
+                domain.domain = Regex.Match(url, pattern).Value;
+                pattern = @":\d+";
+                domain.httpPort = int.Parse(Regex.Match(url, pattern).Value.Trim(':'));
+                customDomains.Add(domain);
+                GetToys();
+                return true;
+            }
+            return false;
+        }
+
         public override void SlowUpdate()
         {
             GetToys();
@@ -190,7 +253,7 @@ namespace VRCToyController
 
         public override void UpdateBatteryIndicator(Toy iToy)
         {
-            Task.Run(() => UpdateBatteryIndicatorAsync(iToy));
+            UpdateBatteryIndicatorAsync(iToy);
         }
 
         private struct LovenseBattery
@@ -198,10 +261,17 @@ namespace VRCToyController
             public int data;
         }
 
-        private async Task UpdateBatteryIndicatorAsync(Toy iToy)
+        private struct CustomLovenseConnectDomain
+        {
+            public string domain;
+            public int httpPort;
+            public string toysUrl;
+        }
+
+        private void UpdateBatteryIndicatorAsync(Toy iToy)
         {
             LovenseConnectToy t = (LovenseConnectToy)iToy;
-            string fullurl = "http://" + t.domain.domain + ":" + t.domain.httpPort + "/Battery?t="+t.id;
+            string fullurl = t.domain.url + "/Battery?t="+t.id;
             string data = Get(fullurl);
             LovenseBattery battery = JsonConvert.DeserializeObject<LovenseBattery>(data);
             int level = battery.data;

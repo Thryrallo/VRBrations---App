@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -147,6 +148,22 @@ namespace VRCToyController
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void button_AddLovenseConnectURL_Click(object sender, EventArgs e)
+        {
+            LovenseConnectAPI api = (Mediator.toyAPIs.Where(a => a is LovenseConnectAPI).First() as LovenseConnectAPI);
+            Rectangle rect = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
+            string input = "";
+            while(api.AddCustomURL(input) == false)
+            {
+                input = Interaction.InputBox("Please input the Local IP from your Lovense Connect App on your phone.", "Lovense Connect Local IP", "https://192-168-0-1.lovense.club:34568/GetToys", rect.Width / 2 - 200, rect.Height / 2 - 200);
+                input = input.Trim();
+                if (input.Length == 0)
+                {
+                    break;
+                }
+            }
         }
     }
 }

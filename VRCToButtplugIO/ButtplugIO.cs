@@ -32,6 +32,7 @@ namespace VRCToyController
                 var device = aArgs.Device;
                 Program.DebugToFile("[Bluetooth] New device: "+device.Name);
                 ButtplugToy toy = new ButtplugToy(device);
+                toy.vrcToys_id = GetId(device);
                 Mediator.AddToy(toy);
             }
             client.DeviceAdded += HandleDeviceAdded;
@@ -39,12 +40,24 @@ namespace VRCToyController
             void HandleDeviceRemoved(object aObj, DeviceRemovedEventArgs aArgs)
             {
                 //remove from ui
-                Mediator.RemoveToy(aArgs.Device.Name);
+                Mediator.RemoveToy(GetId(aArgs.Device));
+                Program.DebugToFile("[Bluetooth] Removed device: "+ aArgs.Device.Name);
             }
             client.DeviceRemoved += HandleDeviceRemoved;
 
+            void HandleError(object aObj, ButtplugExceptionEventArgs aArgs)
+            {
+                Program.DebugToFile("[Bluetooth Error] " + aArgs.Exception.ToString());
+            }
+            client.ErrorReceived += HandleError;
+
             buttplugIOInterface.StartScanning();
             return buttplugIOInterface;
+        }
+
+        private static string GetId(ButtplugClientDevice device)
+        {
+            return "BP_"+ device.Name + "_" + device.Index;
         }
 
         public bool is_scanning = false;
@@ -128,12 +141,13 @@ namespace VRCToyController
 
         public override void UpdateBatteryIndicator(Toy iToy)
         {
-            Task.Run(() =>  UpdateBatteryIndicatorAsync(iToy));
+            _ = UpdateBatteryIndicatorAsync(iToy);
         }
 
         private async Task UpdateBatteryIndicatorAsync(Toy iToy)
         {
             ButtplugToy toy = (ButtplugToy)iToy;
+            //this causes problems if the toy is disconnected
             double level = await toy.device.SendBatteryLevelCmd();
             toy.UpdateBatterUI((int)(level * 100));
         }
