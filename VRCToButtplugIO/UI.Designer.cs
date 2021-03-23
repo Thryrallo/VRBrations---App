@@ -34,8 +34,8 @@
             this.b_Save = new System.Windows.Forms.Button();
             this.apply = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.footer = new System.Windows.Forms.LinkLabel();
             this.label_vrc_focus = new System.Windows.Forms.Label();
+            this.footer = new System.Windows.Forms.LinkLabel();
             this.deviceList.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -113,6 +113,14 @@
             this.panel1.Size = new System.Drawing.Size(155, 836);
             this.panel1.TabIndex = 6;
             // 
+            // label_vrc_focus
+            // 
+            this.label_vrc_focus.AutoSize = true;
+            this.label_vrc_focus.Location = new System.Drawing.Point(3, 137);
+            this.label_vrc_focus.Name = "label_vrc_focus";
+            this.label_vrc_focus.Size = new System.Drawing.Size(0, 20);
+            this.label_vrc_focus.TabIndex = 7;
+            // 
             // footer
             // 
             this.footer.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
@@ -127,15 +135,6 @@
             this.footer.Text = "by Thryrallo";
             this.footer.VisitedLinkColor = System.Drawing.Color.Fuchsia;
             this.footer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.footer_LinkClicked);
-            // 
-            // label_vrc_focus
-            // 
-            this.label_vrc_focus.AutoSize = true;
-            this.label_vrc_focus.Location = new System.Drawing.Point(3, 137);
-            this.label_vrc_focus.Name = "label_vrc_focus";
-            this.label_vrc_focus.Size = new System.Drawing.Size(77, 20);
-            this.label_vrc_focus.TabIndex = 7;
-            this.label_vrc_focus.Text = "vrc_focus";
             // 
             // MainUI
             // 

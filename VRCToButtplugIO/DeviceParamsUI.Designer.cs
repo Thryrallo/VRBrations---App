@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
@@ -35,18 +36,17 @@
             this.y = new System.Windows.Forms.NumericUpDown();
             this.label11 = new System.Windows.Forms.Label();
             this.motor = new System.Windows.Forms.ComboBox();
+            this.label_pixel_found = new System.Windows.Forms.Label();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.label10 = new System.Windows.Forms.Label();
             this.typeSelector = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.max = new System.Windows.Forms.TextBox();
-            this.tooltip_volume = new System.Windows.Forms.Label();
             this.groupVolume = new System.Windows.Forms.TableLayoutPanel();
             this.volume_depth = new System.Windows.Forms.TextBox();
             this.volume_width = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.tooltip_thrust = new System.Windows.Forms.Label();
             this.groupThrusting = new System.Windows.Forms.TableLayoutPanel();
             this.thrust_speed_scale = new System.Windows.Forms.TextBox();
             this.thrust_acceleration = new System.Windows.Forms.TextBox();
@@ -54,14 +54,13 @@
             this.label7 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.thrust_depth_scale = new System.Windows.Forms.TextBox();
-            this.tooltipRub = new System.Windows.Forms.Label();
             this.groupRubbing = new System.Windows.Forms.TableLayoutPanel();
             this.rub_scale = new System.Windows.Forms.TextBox();
             this.rub_acceleration = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.rem_button = new System.Windows.Forms.Button();
-            this.label_pixel_found = new System.Windows.Forms.Label();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.x)).BeginInit();
@@ -77,16 +76,13 @@
             this.flowLayoutPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.flowLayoutPanel1.Controls.Add(this.flowLayoutPanel3);
             this.flowLayoutPanel1.Controls.Add(this.flowLayoutPanel2);
-            this.flowLayoutPanel1.Controls.Add(this.tooltip_volume);
             this.flowLayoutPanel1.Controls.Add(this.groupVolume);
-            this.flowLayoutPanel1.Controls.Add(this.tooltip_thrust);
             this.flowLayoutPanel1.Controls.Add(this.groupThrusting);
-            this.flowLayoutPanel1.Controls.Add(this.tooltipRub);
             this.flowLayoutPanel1.Controls.Add(this.groupRubbing);
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(433, 244);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(433, 197);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // flowLayoutPanel3
@@ -146,6 +142,16 @@
             this.motor.TabIndex = 4;
             this.motor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsInt);
             // 
+            // label_pixel_found
+            // 
+            this.label_pixel_found.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label_pixel_found.AutoSize = true;
+            this.label_pixel_found.Location = new System.Drawing.Point(323, 7);
+            this.label_pixel_found.Name = "label_pixel_found";
+            this.label_pixel_found.Size = new System.Drawing.Size(0, 20);
+            this.label_pixel_found.TabIndex = 5;
+            this.label_pixel_found.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // flowLayoutPanel2
             // 
             this.flowLayoutPanel2.Controls.Add(this.label10);
@@ -179,7 +185,8 @@
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(253, 0);
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label4.Location = new System.Drawing.Point(253, 2);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(42, 29);
             this.label4.TabIndex = 4;
@@ -196,18 +203,6 @@
             this.max.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsNumber);
             this.max.KeyUp += new System.Windows.Forms.KeyEventHandler(this.BoxFloatBetween0And1);
             // 
-            // tooltip_volume
-            // 
-            this.tooltip_volume.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tooltip_volume.AutoSize = true;
-            this.tooltip_volume.Location = new System.Drawing.Point(3, 87);
-            this.tooltip_volume.Name = "tooltip_volume";
-            this.tooltip_volume.Size = new System.Drawing.Size(430, 20);
-            this.tooltip_volume.TabIndex = 4;
-            this.tooltip_volume.Text = "(strength = widthScale * width + depthScale * depth)";
-            this.tooltip_volume.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
             // groupVolume
             // 
             this.groupVolume.ColumnCount = 2;
@@ -217,13 +212,14 @@
             this.groupVolume.Controls.Add(this.volume_width, 1, 0);
             this.groupVolume.Controls.Add(this.label3, 0, 0);
             this.groupVolume.Controls.Add(this.label2, 0, 1);
-            this.groupVolume.Location = new System.Drawing.Point(3, 110);
+            this.groupVolume.Location = new System.Drawing.Point(3, 90);
             this.groupVolume.Name = "groupVolume";
             this.groupVolume.RowCount = 2;
             this.groupVolume.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.groupVolume.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.groupVolume.Size = new System.Drawing.Size(246, 70);
             this.groupVolume.TabIndex = 3;
+            this.toolTip1.SetToolTip(this.groupVolume, "(strength = widthScale * width + depthScale * depth)");
             // 
             // volume_depth
             // 
@@ -249,33 +245,23 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(29, 7);
+            this.label3.Location = new System.Drawing.Point(25, 7);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(91, 20);
+            this.label3.Size = new System.Drawing.Size(95, 20);
             this.label3.TabIndex = 3;
-            this.label3.Text = "width scale:";
+            this.label3.Text = "Width scale:";
+            this.toolTip1.SetToolTip(this.label3, "(strength = widthScale * width + depthScale * depth)");
             // 
             // label2
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(25, 42);
+            this.label2.Location = new System.Drawing.Point(22, 42);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(95, 20);
+            this.label2.Size = new System.Drawing.Size(98, 20);
             this.label2.TabIndex = 2;
-            this.label2.Text = "depth scale:";
-            // 
-            // tooltip_thrust
-            // 
-            this.tooltip_thrust.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tooltip_thrust.AutoSize = true;
-            this.tooltip_thrust.Location = new System.Drawing.Point(3, 183);
-            this.tooltip_thrust.Name = "tooltip_thrust";
-            this.tooltip_thrust.Size = new System.Drawing.Size(430, 40);
-            this.tooltip_thrust.TabIndex = 6;
-            this.tooltip_thrust.Text = "(strength = (depth*depthScale+thustSpeed*speedScale) *(acceleration*time))";
-            this.tooltip_thrust.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.label2.Text = "Depth scale:";
+            this.toolTip1.SetToolTip(this.label2, "(strength = widthScale * width + depthScale * depth)");
             // 
             // groupThrusting
             // 
@@ -284,10 +270,10 @@
             this.groupThrusting.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.groupThrusting.Controls.Add(this.thrust_speed_scale, 1, 1);
             this.groupThrusting.Controls.Add(this.thrust_acceleration, 1, 0);
-            this.groupThrusting.Controls.Add(this.label6, 0, 0);
-            this.groupThrusting.Controls.Add(this.label7, 0, 1);
             this.groupThrusting.Controls.Add(this.label5, 0, 2);
             this.groupThrusting.Controls.Add(this.thrust_depth_scale, 1, 2);
+            this.groupThrusting.Controls.Add(this.label7, 0, 0);
+            this.groupThrusting.Controls.Add(this.label6, 0, 1);
             this.groupThrusting.Location = new System.Drawing.Point(439, 3);
             this.groupThrusting.Name = "groupThrusting";
             this.groupThrusting.RowCount = 3;
@@ -296,6 +282,7 @@
             this.groupThrusting.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 34F));
             this.groupThrusting.Size = new System.Drawing.Size(246, 98);
             this.groupThrusting.TabIndex = 4;
+            this.toolTip1.SetToolTip(this.groupThrusting, "(strength = (depth*depthScale+thustSpeed*speedScale) *(acceleration*time))");
             // 
             // thrust_speed_scale
             // 
@@ -321,31 +308,34 @@
             // 
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(21, 6);
+            this.label6.Location = new System.Drawing.Point(19, 38);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(99, 20);
+            this.label6.Size = new System.Drawing.Size(101, 20);
             this.label6.TabIndex = 3;
-            this.label6.Text = "acceleration:";
+            this.label6.Text = "Acceleration:";
+            this.toolTip1.SetToolTip(this.label6, "(strength = (depth*depthScale+thustSpeed*speedScale) *(acceleration*time))");
             // 
             // label7
             // 
             this.label7.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(22, 38);
+            this.label7.Location = new System.Drawing.Point(19, 6);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(98, 20);
+            this.label7.Size = new System.Drawing.Size(101, 20);
             this.label7.TabIndex = 2;
-            this.label7.Text = "speed scale:";
+            this.label7.Text = "Speed scale:";
+            this.toolTip1.SetToolTip(this.label7, "(strength = (depth*depthScale+thustSpeed*speedScale) *(acceleration*time))");
             // 
             // label5
             // 
             this.label5.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(25, 71);
+            this.label5.Location = new System.Drawing.Point(22, 71);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(95, 20);
+            this.label5.Size = new System.Drawing.Size(98, 20);
             this.label5.TabIndex = 4;
-            this.label5.Text = "deoth scale:";
+            this.label5.Text = "Depth scale:";
+            this.toolTip1.SetToolTip(this.label5, "(strength = (depth*depthScale+thustSpeed*speedScale) *(acceleration*time))");
             // 
             // thrust_depth_scale
             // 
@@ -356,18 +346,6 @@
             this.thrust_depth_scale.TabIndex = 5;
             this.thrust_depth_scale.Text = "1.0";
             // 
-            // tooltipRub
-            // 
-            this.tooltipRub.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tooltipRub.AutoSize = true;
-            this.tooltipRub.Location = new System.Drawing.Point(439, 104);
-            this.tooltipRub.Name = "tooltipRub";
-            this.tooltipRub.Size = new System.Drawing.Size(356, 20);
-            this.tooltipRub.TabIndex = 7;
-            this.tooltipRub.Text = "(strength = (rubSpeed*scale)*(acceleration*time))";
-            this.tooltipRub.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
             // groupRubbing
             // 
             this.groupRubbing.ColumnCount = 2;
@@ -377,13 +355,14 @@
             this.groupRubbing.Controls.Add(this.rub_acceleration, 1, 0);
             this.groupRubbing.Controls.Add(this.label8, 0, 0);
             this.groupRubbing.Controls.Add(this.label9, 0, 1);
-            this.groupRubbing.Location = new System.Drawing.Point(439, 127);
+            this.groupRubbing.Location = new System.Drawing.Point(439, 107);
             this.groupRubbing.Name = "groupRubbing";
             this.groupRubbing.RowCount = 2;
             this.groupRubbing.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.groupRubbing.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.groupRubbing.Size = new System.Drawing.Size(246, 70);
             this.groupRubbing.TabIndex = 5;
+            this.toolTip1.SetToolTip(this.groupRubbing, "(strength = (rubSpeed*scale)*(acceleration*time))");
             // 
             // rub_scale
             // 
@@ -409,44 +388,36 @@
             // 
             this.label8.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(21, 7);
+            this.label8.Location = new System.Drawing.Point(19, 7);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(99, 20);
+            this.label8.Size = new System.Drawing.Size(101, 20);
             this.label8.TabIndex = 3;
-            this.label8.Text = "acceleration:";
+            this.label8.Text = "Acceleration:";
+            this.toolTip1.SetToolTip(this.label8, "(strength = (rubSpeed*scale)*(acceleration*time))");
             // 
             // label9
             // 
             this.label9.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(70, 42);
+            this.label9.Location = new System.Drawing.Point(67, 42);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(50, 20);
+            this.label9.Size = new System.Drawing.Size(53, 20);
             this.label9.TabIndex = 2;
-            this.label9.Text = "scale:";
+            this.label9.Text = "Scale:";
+            this.toolTip1.SetToolTip(this.label9, "(strength = (rubSpeed*scale)*(acceleration*time))");
             // 
             // rem_button
             // 
             this.rem_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.rem_button.AutoSize = true;
             this.rem_button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.rem_button.Location = new System.Drawing.Point(356, 214);
+            this.rem_button.Location = new System.Drawing.Point(356, 166);
             this.rem_button.Name = "rem_button";
             this.rem_button.Size = new System.Drawing.Size(78, 30);
             this.rem_button.TabIndex = 5;
             this.rem_button.Text = "Remove";
             this.rem_button.UseVisualStyleBackColor = true;
             this.rem_button.Click += new System.EventHandler(this.rem_button_Click);
-            // 
-            // label_pixel_found
-            // 
-            this.label_pixel_found.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.label_pixel_found.AutoSize = true;
-            this.label_pixel_found.Location = new System.Drawing.Point(323, 7);
-            this.label_pixel_found.Name = "label_pixel_found";
-            this.label_pixel_found.Size = new System.Drawing.Size(0, 20);
-            this.label_pixel_found.TabIndex = 5;
-            this.label_pixel_found.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // DeviceParamsUI
             // 
@@ -456,9 +427,8 @@
             this.Controls.Add(this.rem_button);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "DeviceParamsUI";
-            this.Size = new System.Drawing.Size(439, 254);
+            this.Size = new System.Drawing.Size(439, 206);
             this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel3.ResumeLayout(false);
             this.flowLayoutPanel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.x)).EndInit();
@@ -488,7 +458,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TableLayoutPanel groupVolume;
-        private System.Windows.Forms.Label tooltip_volume;
         private System.Windows.Forms.TableLayoutPanel groupThrusting;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
@@ -501,10 +470,8 @@
         public System.Windows.Forms.TextBox rub_scale;
         public System.Windows.Forms.TextBox volume_width;
         public System.Windows.Forms.TextBox volume_depth;
-        private System.Windows.Forms.Label tooltip_thrust;
         private System.Windows.Forms.Label label5;
         public System.Windows.Forms.TextBox thrust_depth_scale;
-        private System.Windows.Forms.Label tooltipRub;
         public System.Windows.Forms.TextBox max;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
         private System.Windows.Forms.Label label11;
@@ -512,5 +479,6 @@
         public System.Windows.Forms.ComboBox motor;
         private System.Windows.Forms.Button rem_button;
         public System.Windows.Forms.Label label_pixel_found;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

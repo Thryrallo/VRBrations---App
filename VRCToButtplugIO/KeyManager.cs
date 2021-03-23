@@ -88,11 +88,10 @@ namespace VRCToyController
             if(time-lastVerification > UPDATE_RATE && !closing)
             {
                 Task.Factory.StartNew(VerifyKeyAsync);
-                lastVerification = time;
             }
         }
 
-        public static async Task<bool> VerifyKeyAsync()
+        public static async Task<KeyStatus> VerifyKeyAsync()
         {
             var values = new Dictionary<string, string>
             {
@@ -107,8 +106,8 @@ namespace VRCToyController
             //Console.WriteLine(responseString);
             ValidationResult result = JsonConvert.DeserializeObject<ValidationResult>(responseString);
             p_status = result.status;
-            Console.WriteLine(status);
-            return status == KeyStatus.VALID;
+            lastVerification = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            return status;
         }
 
         private static async Task SendFreeRequest()

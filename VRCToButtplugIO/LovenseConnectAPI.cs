@@ -35,7 +35,7 @@ namespace VRCToyController
                 {
                     foreach (LovenseConnectToy t in d.Value.toys.Values)
                     {
-                        bool isNewToy = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy && (aT as LovenseConnectToy).id == t.id).Count() == 0;
+                        bool isNewToy = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy && (aT as LovenseConnectToy).id == t.id && (aT as LovenseConnectToy).domain.domain == d.Key).Count() == 0;
                         if (isNewToy)
                         {
                             AddToy(t, d.Value);

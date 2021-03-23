@@ -103,10 +103,6 @@ namespace VRCToyController
             groupVolume.Visible = selected == CalulcationType.VOLUME;
             groupThrusting.Visible = selected == CalulcationType.THRUSTING;
             groupRubbing.Visible = selected == CalulcationType.RUBBING;
-
-            tooltip_volume.Visible = selected == CalulcationType.VOLUME;
-            tooltip_thrust.Visible = selected == CalulcationType.THRUSTING;
-            tooltipRub.Visible = selected == CalulcationType.RUBBING;
         }
 
         private void rem_button_Click(object sender, EventArgs e)
