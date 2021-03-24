@@ -233,7 +233,8 @@ namespace VRCToyController
             }
             foreach (Toy toy in Mediator.activeToys.Values)
             {
-                toy.toyAPI.UpdateBatteryIndicator(toy);
+                //Disabled till buttplug.io get's fixed
+                //toy.toyAPI.UpdateBatteryIndicator(toy);
             }
             lastSlowUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
