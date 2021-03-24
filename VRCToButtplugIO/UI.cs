@@ -133,7 +133,7 @@ namespace VRCToyController
 
         private float ParseFloat(string s)
         {
-            return float.Parse(s, System.Globalization.NumberStyles.Number);
+            return float.Parse(s, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
         }
 
         private void b_Save_Click(object sender, EventArgs e)
@@ -181,6 +181,11 @@ namespace VRCToyController
         }
 
         private void MainUI_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainUI_Load_1(object sender, EventArgs e)
         {
 
         }

@@ -169,6 +169,7 @@
             this.Name = "MainUI";
             this.Text = "VRC Toy Controller";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainUI_FormClosing);
+            this.Load += new System.EventHandler(this.MainUI_Load_1);
             this.deviceList.ResumeLayout(false);
             this.deviceList.PerformLayout();
             this.panel1.ResumeLayout(false);
