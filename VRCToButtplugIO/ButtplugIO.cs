@@ -21,7 +21,8 @@ namespace VRCToyController
         {
             ButtplugIOAPI buttplugIOInterface = new ButtplugIOAPI();
             var connector = new ButtplugEmbeddedConnectorOptions();
-            var client = new ButtplugClient("Example Client");
+            connector.AllowRawMessages = true;
+            var client = new ButtplugClient("Client");
             buttplugIOInterface.client = client;
 
             await client.ConnectAsync(connector);
@@ -34,6 +35,7 @@ namespace VRCToyController
                 Program.DebugToFile("[Bluetooth] New device: "+device.Name);
                 ButtplugToy toy = new ButtplugToy(device);
                 toy.vrcToys_id = GetId(device);
+                Program.DebugToFile("[Bluetooth] Add device to ui: " + device.Name);
                 Mediator.AddToy(toy);
                 //Program.DebugToFile(buttplugIOInterface.connectedDevices());
             }
@@ -195,7 +197,8 @@ namespace VRCToyController
         {
             if (strength.Count() == 1 && this.lovenseType != LovenseToyType.none)
             {
-                this.device.SendRawWriteCmd(Endpoint.Command, Encoding.ASCII.GetBytes("Air:Level:" + (strength.First() * 3) + ";"), false);
+                Console.WriteLine("Air:Level:" + (strength.First() * 3) + ";");
+                this.device.SendRawWriteCmd(Endpoint.Tx, Encoding.ASCII.GetBytes("Air:Level:" + (strength.First() * 3) + ";"), false);
             }
         }
     }

@@ -51,6 +51,7 @@ namespace VRCToyController
             {
                 DeviceParamsUI paramControl = new DeviceParamsUI(motorsValues);
                 paramControl.motor.SelectedIndex = i;
+                paramControl.x.Value = i;
                 paramsList.Controls.Add(paramControl);
             }
         }

@@ -43,6 +43,7 @@ namespace VRCToyController
             Mediator.ui.Invoke((Action)delegate ()
             {
                 DeviceUI deviceControl = new DeviceUI(toy);
+                Program.DebugToFile("[UI] Populate Device Control");
                 deviceControl.Populate(Config.config);
                 toy.ui = deviceControl;
                 Mediator.activeToys.Add(toy.vrcToys_id, toy);
