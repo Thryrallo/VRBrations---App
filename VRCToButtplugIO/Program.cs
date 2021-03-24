@@ -129,9 +129,17 @@ namespace VRCToyController
             dpi = getScalingFactor();
             Console.WriteLine("DPI:" + dpi);
 
-            Rectangle screenRectangle = Mediator.ui.RectangleToScreen(Mediator.ui.ClientRectangle);
-            titleBarHeight = (int)((screenRectangle.Top - Mediator.ui.Top) * dpi);
-            Console.WriteLine("titleBarHeight: " + titleBarHeight);
+            string justHereToForceUIInit = Mediator.ui.Name;
+
+            //this is correct if the title bar is default, but not with material design
+            //Rectangle screenRectangle = Mediator.ui.RectangleToScreen(Mediator.ui.ClientRectangle);
+            //titleBarHeight = (int)((screenRectangle.Top - Mediator.ui.Top) * dpi);
+
+            //Console.WriteLine(screenRectangle.Top - Mediator.ui.Top);
+
+            //dont ask why +8, idk, but tests seemed to have shown it as correct
+            titleBarHeight = (int)((SystemInformation.CaptionHeight + 8) * dpi);
+            DebugToFile("TitleBar Height: " + titleBarHeight);
         }
 
         static Config config;

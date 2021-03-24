@@ -1,0 +1,15 @@
+ControlHeight Register: -660
+Old: 53
+Control Height: 45
+old * dpi: 79 (correct)
+control * dpi: 67.5
+control * 2 = 90
+
+ControlHeight Register: -330
+Old: 31
+Control Height: 23
+old * dpi: 46 (correct)
+control * dpi: 34.5
+control * 2: 46
+
+(control height + 8)* dpi seems a good calculation
