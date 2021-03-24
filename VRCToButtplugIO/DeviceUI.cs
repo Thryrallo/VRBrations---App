@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static VRCToyController.Toy;
 
 namespace VRCToyController
 {
@@ -32,14 +33,18 @@ namespace VRCToyController
             this.Name = toy.vrcToys_id;
             b_test.Click += delegate (object o, EventArgs a)
             {
-                if (Mediator.activeToys.ContainsKey(this.Name))
-                    Mediator.activeToys[this.Name].Test();
+                if (Mediator.activeToys.ContainsKey(toy.vrcToys_id))
+                    Mediator.activeToys[toy.vrcToys_id].Test();
             };
 
-            motorsValues = new string[toy.motorCount];
-            for (int i = 0; i < motorsValues.Length; i++)
+            motorsValues = new string[toy.totalFeatureCount];
+            int j = 0;
+            foreach(KeyValuePair<ToyFeatureType,int> featureC in toy.featureCount)
             {
-                motorsValues[i] = "" + i;
+                for(int f = 0; f < featureC.Value; f++)
+                {
+                    motorsValues[j++] = featureC.Key + (f > 0 ? " " + f : "");
+                }
             }
 
             for(int i = 0; i < motorsValues.Length; i++)
@@ -88,6 +93,11 @@ namespace VRCToyController
         {
             DeviceParamsUI paramControl = new DeviceParamsUI(motorsValues);
             paramsList.Controls.Add(paramControl);
+        }
+
+        private void b_test_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

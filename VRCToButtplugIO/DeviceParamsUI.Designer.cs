@@ -82,7 +82,7 @@
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(433, 197);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(452, 197);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // flowLayoutPanel3
@@ -95,7 +95,7 @@
             this.flowLayoutPanel3.Controls.Add(this.label_pixel_found);
             this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(429, 37);
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(448, 37);
             this.flowLayoutPanel3.TabIndex = 8;
             // 
             // label1
@@ -128,17 +128,17 @@
             this.label11.AutoSize = true;
             this.label11.Location = new System.Drawing.Point(186, 7);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(54, 20);
+            this.label11.Size = new System.Drawing.Size(69, 20);
             this.label11.TabIndex = 3;
-            this.label11.Text = "Motor:";
+            this.label11.Text = "Feature:";
             // 
             // motor
             // 
             this.motor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.motor.FormattingEnabled = true;
-            this.motor.Location = new System.Drawing.Point(246, 3);
+            this.motor.Location = new System.Drawing.Point(261, 3);
             this.motor.Name = "motor";
-            this.motor.Size = new System.Drawing.Size(71, 28);
+            this.motor.Size = new System.Drawing.Size(97, 28);
             this.motor.TabIndex = 4;
             this.motor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsInt);
             // 
@@ -146,7 +146,7 @@
             // 
             this.label_pixel_found.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label_pixel_found.AutoSize = true;
-            this.label_pixel_found.Location = new System.Drawing.Point(323, 7);
+            this.label_pixel_found.Location = new System.Drawing.Point(364, 7);
             this.label_pixel_found.Name = "label_pixel_found";
             this.label_pixel_found.Size = new System.Drawing.Size(0, 20);
             this.label_pixel_found.TabIndex = 5;
@@ -274,7 +274,7 @@
             this.groupThrusting.Controls.Add(this.thrust_depth_scale, 1, 2);
             this.groupThrusting.Controls.Add(this.label7, 0, 0);
             this.groupThrusting.Controls.Add(this.label6, 0, 1);
-            this.groupThrusting.Location = new System.Drawing.Point(439, 3);
+            this.groupThrusting.Location = new System.Drawing.Point(457, 3);
             this.groupThrusting.Name = "groupThrusting";
             this.groupThrusting.RowCount = 3;
             this.groupThrusting.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -355,7 +355,7 @@
             this.groupRubbing.Controls.Add(this.rub_acceleration, 1, 0);
             this.groupRubbing.Controls.Add(this.label8, 0, 0);
             this.groupRubbing.Controls.Add(this.label9, 0, 1);
-            this.groupRubbing.Location = new System.Drawing.Point(439, 107);
+            this.groupRubbing.Location = new System.Drawing.Point(457, 107);
             this.groupRubbing.Name = "groupRubbing";
             this.groupRubbing.RowCount = 2;
             this.groupRubbing.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -411,7 +411,7 @@
             this.rem_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.rem_button.AutoSize = true;
             this.rem_button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.rem_button.Location = new System.Drawing.Point(356, 166);
+            this.rem_button.Location = new System.Drawing.Point(377, 166);
             this.rem_button.Name = "rem_button";
             this.rem_button.Size = new System.Drawing.Size(78, 30);
             this.rem_button.TabIndex = 5;
@@ -427,7 +427,7 @@
             this.Controls.Add(this.rem_button);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "DeviceParamsUI";
-            this.Size = new System.Drawing.Size(439, 206);
+            this.Size = new System.Drawing.Size(460, 206);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel3.ResumeLayout(false);
             this.flowLayoutPanel3.PerformLayout();

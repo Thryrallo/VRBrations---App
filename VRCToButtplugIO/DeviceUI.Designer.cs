@@ -105,6 +105,7 @@
             this.b_test.TabIndex = 4;
             this.b_test.Text = "Test";
             this.b_test.UseVisualStyleBackColor = true;
+            this.b_test.Click += new System.EventHandler(this.b_test_Click);
             // 
             // button_add
             // 

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static VRCToyController.Toy;
 
 namespace VRCToyController
 {
@@ -34,6 +35,7 @@ namespace VRCToyController
                 ButtplugToy toy = new ButtplugToy(device);
                 toy.vrcToys_id = GetId(device);
                 Mediator.AddToy(toy);
+                //Program.DebugToFile(buttplugIOInterface.connectedDevices());
             }
             client.DeviceAdded += HandleDeviceAdded;
 
@@ -77,38 +79,6 @@ namespace VRCToyController
 
 
             Console.WriteLine(connectedDevices());
-        }
-
-        public override void Vibrate(Toy itoy, double[] strength)
-        {
-            foreach (double s in strength)
-                if (s > 1.0f)
-                    return;
-            ButtplugToy toy = (ButtplugToy)itoy;
-            if (toy.device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd) == false) return;
-            if (strength.Length == toy.device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd].FeatureCount)
-            {
-                toy.device.SendVibrateCmd(strength);
-            }
-            else if (strength.Length > 0)
-            {
-                toy.device.SendVibrateCmd(strength[0]);
-            }
-            if (toy.lovenseType == LovenseToyType.max && strength.Length > 1)
-            {
-                toy.device.SendRawWriteCmd(Endpoint.Command, Encoding.ASCII.GetBytes("Air:Level:" + (strength[1] * 3) + ";"), false);
-            }
-        }
-
-        public void TestLovense(string deviceName)
-        {
-            foreach (var device in client.Devices)
-            {
-                if (device.Name == deviceName)
-                {
-                    device.SendVibrateCmd(10);
-                }
-            }
         }
 
         public string connectedDevices()
@@ -155,7 +125,7 @@ namespace VRCToyController
 
     public enum LovenseToyType
     {
-        none,any,max
+        none,any,max,nora
     }
 
     public class ButtplugToy : Toy
@@ -163,15 +133,18 @@ namespace VRCToyController
         public ButtplugClientDevice device;
         public LovenseToyType lovenseType;
 
-        public ButtplugToy(ButtplugClientDevice device)
+        public ButtplugToy(ButtplugClientDevice device) : base()
         {
             this.device = device;
             this.lovenseType = GetLovenseType(device);
             this.name = device.Name;
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd))
-                this.motorCount = (int)(device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd].FeatureCount) + (lovenseType == LovenseToyType.max ? 1 : 0);
-            else
-                this.motorCount = 0;
+                this.featureCount[ToyFeatureType.Vibrate] = (int)device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd].FeatureCount;
+            if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.RotateCmd))
+                this.featureCount[ToyFeatureType.Rotate] = (int)device.AllowedMessages[ServerMessage.Types.MessageAttributeType.RotateCmd].FeatureCount;
+            if (lovenseType == LovenseToyType.max)
+                this.featureCount[ToyFeatureType.Air] = 1;
+            this.UpdateTotalFeatureCount();
             foreach (ToyAPI api in Mediator.toyAPIs)
             {
                 if (api is ButtplugIOAPI)
@@ -181,14 +154,49 @@ namespace VRCToyController
 
         public static LovenseToyType GetLovenseType(ButtplugClientDevice device)
         {
-            if (device.Name.StartsWith("Lovense"))
+            string name = device.Name.ToLower();
+            if (name.StartsWith("lovense"))
             {
-                if (device.Name.Contains("Lovense Max"))
+                if (name.Contains("lovense max"))
                     return LovenseToyType.max;
+                else if (name.Contains("lovense nora"))
+                    return LovenseToyType.nora;
                 return LovenseToyType.any;
                 //string result = await device.SendLovenseCmd("DeviceType;");
             }
             return LovenseToyType.none;
+        }
+
+        public override void Vibrate(IEnumerable<double> strength)
+        {
+            if(strength.Count() == this.featureCount[ToyFeatureType.Vibrate])
+            {
+                this.device.SendVibrateCmd(strength);
+            }
+            else if(strength.Count() > 0)
+            {
+                this.device.SendVibrateCmd(strength.First());
+            }
+        }
+
+        public override void Rotate(IEnumerable<double> strength)
+        {
+            if (strength.Count() == this.featureCount[ToyFeatureType.Rotate])
+            {
+                this.device.SendRotateCmd(strength.Select(v => (v,true)));
+            }
+            else if (strength.Count() > 0)
+            {
+                this.device.SendRotateCmd(strength.First(),true);
+            }
+        }
+
+        public override void Air(IEnumerable<double> strength)
+        {
+            if (strength.Count() == 1 && this.lovenseType != LovenseToyType.none)
+            {
+                this.device.SendRawWriteCmd(Endpoint.Command, Encoding.ASCII.GetBytes("Air:Level:" + (strength.First() * 3) + ";"), false);
+            }
         }
     }
 }

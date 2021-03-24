@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static VRCToyController.Toy;
 
 namespace VRCToyController
 {
@@ -89,16 +90,20 @@ namespace VRCToyController
             if (Enum.TryParse<LovenseConnectToyType>(t.name.ToLower(), out t.type) == false)
                 t.type = LovenseConnectToyType.none;
             Program.DebugToFile("[LovenseConnect] Add Toy: " + t.name + "," + t.id+ ", type: "+t.type);
+            t.featureCount[ToyFeatureType.Vibrate] = 1;
             switch (t.type)
             {
                 case LovenseConnectToyType.max:
-                case LovenseConnectToyType.edge:
-                    t.motorCount = 2;
+                    t.featureCount[ToyFeatureType.Air] = 1;
                     break;
-                default:
-                    t.motorCount = 1;
+                case LovenseConnectToyType.nora:
+                    t.featureCount[ToyFeatureType.Rotate] = 1;
+                    break;
+                case LovenseConnectToyType.edge:
+                    t.featureCount[ToyFeatureType.Vibrate] = 2;
                     break;
             }
+            t.UpdateTotalFeatureCount();
             t.toyAPI = this;
             t.domain = d;
             t.vrcToys_id = d.domain + "_" + t.id;
@@ -117,7 +122,7 @@ namespace VRCToyController
                 Mediator.RemoveToy(t.name);
         }
 
-        private class LovenseConnectDomain
+        protected class LovenseConnectDomain
         {
             public string domain;
             public int httpPort;
@@ -139,20 +144,13 @@ namespace VRCToyController
                 }
             }
         }
-        private class LovenseConnectToy : Toy
-        {
-            public string id;
-            public string nickName;
-            public LovenseConnectToyType type;
-            public LovenseConnectDomain domain;
-        }
 
-        private enum LovenseConnectToyType
+        protected enum LovenseConnectToyType
         {
             none,nora, max,lush,hush,ambi,edge,domi,osci,diamo
         }
 
-        public string Get(string uri)
+        public static string Get(string uri)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
@@ -178,44 +176,7 @@ namespace VRCToyController
             }
         }
 
-        private const string vibrateURL = "Vibrate";
-        private const string vibrate1URL = "Vibrate1";
-        private const string vibrate2URL = "Vibrate2";
-        private const string rotateURL = "Rotate";
-        private const string airURL = "AirAuto";
-        private const string airInURL = "AirIn";
-        private const string airOutURL = "AirOut";
-        public override void Vibrate(Toy itoy, double[] strength)
-        {
-            foreach (double s in strength)
-                if (s > 1.0f)
-                    return;
-
-            LovenseConnectToy toy = (LovenseConnectToy)itoy;
-            if(toy.type == LovenseConnectToyType.max && strength.Length > 1)
-            {
-                LovenseGet(toy, vibrate1URL ,strength[0]);
-                if (strength[1] > 0.5f)
-                    LovenseGet(toy, airInURL ,0);
-                else
-                    LovenseGet(toy, airOutURL ,0);
-            }
-            else if(toy.type == LovenseConnectToyType.edge && strength.Length > 1)
-            {
-                LovenseGet(toy, vibrate1URL ,strength[0]);
-                LovenseGet(toy, vibrate2URL ,strength[1]);
-            }else if(toy.type == LovenseConnectToyType.nora && strength.Length > 1)
-            {
-                LovenseGet(toy, vibrateURL ,strength[0]);
-                LovenseGet(toy, rotateURL ,strength[1]);
-            }
-            else
-            {
-                LovenseGet(toy, vibrateURL, strength[0]);
-            }
-        }
-
-        private void LovenseGet(LovenseConnectToy t, string url, double speed)
+        protected static void LovenseGet(LovenseConnectToy t, string url, double speed)
         {
             string fullurl = t.domain.url + "/" + url + "?v=" + (int)(speed * 20 + 0.4f) + "&t=" + t.id;
             //Console.WriteLine("GET:: " + fullurl);
@@ -276,6 +237,61 @@ namespace VRCToyController
             LovenseBattery battery = JsonConvert.DeserializeObject<LovenseBattery>(data);
             int level = battery.data;
             t.UpdateBatterUI(level);
+        }
+
+        protected class LovenseConnectToy : Toy
+        {
+            public string id;
+            public string nickName;
+            public LovenseConnectToyType type;
+            public LovenseConnectDomain domain;
+
+            public LovenseConnectToy() : base()
+            {
+
+            }
+
+            private const string vibrateURL = "Vibrate";
+            private const string vibrate1URL = "Vibrate1";
+            private const string vibrate2URL = "Vibrate2";
+            private const string rotateURL = "Rotate";
+            private const string airURL = "AirAuto";
+            private const string airInURL = "AirIn";
+            private const string airOutURL = "AirOut";
+
+            public override void Air(IEnumerable<double> strength)
+            {
+                if (strength.Count() > 1)
+                {
+                    LovenseGet(this, vibrate1URL, strength.First());
+                    LovenseGet(this, vibrate2URL, strength.Skip(1).First());
+
+                }
+                else if (strength.Count() > 0)
+                {
+                    LovenseGet(this, vibrateURL, strength.First());
+                }
+            }
+
+            public override void Rotate(IEnumerable<double> strength)
+            {
+                if (strength.Count() > 0)
+                {
+                    LovenseGet(this, rotateURL, strength.First());
+                }
+            }
+
+            public override void Vibrate(IEnumerable<double> strength)
+            {
+                if (strength.Count() > 0)
+                {
+                    double s = strength.First();
+                    if (s > 0.5f)
+                        LovenseGet(this, airInURL, 0);
+                    else
+                        LovenseGet(this, airOutURL, 0);
+                }
+            }
         }
     }
 }

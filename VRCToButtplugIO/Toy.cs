@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Buttplug;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -13,20 +14,59 @@ namespace VRCToyController
         public ToyAPI toyAPI;
         public string name;
         public string vrcToys_id;
-        public int motorCount;
+        public Dictionary<ToyFeatureType, int> featureCount;
+        public int totalFeatureCount;
 
-        public void Vibrate(double[] strength)
+        public Toy()
         {
-            toyAPI.Vibrate(this, strength);
+            featureCount = new Dictionary<ToyFeatureType, int>();
+            foreach(ToyFeatureType f in Enum.GetValues(typeof(ToyFeatureType))){
+                featureCount[f] = 0;
+            }
         }
+
+        public void UpdateTotalFeatureCount()
+        {
+            totalFeatureCount = this.featureCount.Sum(f => f.Value);
+        }
+
+        public enum ToyFeatureType
+        {
+            Vibrate,Rotate,Air
+        }
+
+        public void ExecuteFeatures(double[] strength)
+        {
+            foreach (double s in strength)
+                if (s > 1.0f)
+                    return;
+            if (strength.Length == this.totalFeatureCount)
+            {
+                //split into different featres
+                IEnumerable<double> vibrate = strength.Take(featureCount[ToyFeatureType.Vibrate]).ToArray();
+                IEnumerable<double> rotate = strength.Skip(featureCount[ToyFeatureType.Vibrate]).Take(featureCount[ToyFeatureType.Rotate]);
+                IEnumerable<double> air = strength.Skip(featureCount[ToyFeatureType.Vibrate] + featureCount[ToyFeatureType.Rotate]).Take(featureCount[ToyFeatureType.Air]);
+                Vibrate(vibrate);
+                Rotate(rotate);
+                Air(air);
+            }
+            else if (strength.Length > 0 && featureCount[ToyFeatureType.Vibrate] > 0)
+            {
+                Vibrate(strength.Take(1));
+            }
+        }
+
+        public abstract void Vibrate(IEnumerable<double> strength);
+        public abstract void Rotate(IEnumerable<double> strength);
+        public abstract void Air(IEnumerable<double> strength);
 
         public void Test()
         {
-            Vibrate(new double[] { 1, 0 });
+            ExecuteFeatures(new double[] { 1, 0 });
             System.Threading.Thread.Sleep(2000);
-            Vibrate(new double[] { 0, 1 });
+            ExecuteFeatures(new double[] { 0, 1 });
             System.Threading.Thread.Sleep(2000);
-            Vibrate(new double[] { 0, 0 });
+            ExecuteFeatures(new double[] { 0, 0 });
         }
 
         public void UpdateBatterUI(int level)

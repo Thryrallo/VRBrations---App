@@ -373,7 +373,7 @@ namespace VRCToyController
                     toyMotors[i].lastStength = toyMotors[i].nextStrength;
                     toyMotors[i].nextStrength = 0;
                 }
-                Mediator.activeToys[device.device_name].Vibrate(vals);
+                Mediator.activeToys[device.device_name].ExecuteFeatures(vals);
             }
         }
 
