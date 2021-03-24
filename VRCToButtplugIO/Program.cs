@@ -443,14 +443,29 @@ namespace VRCToyController
             return bounds;
         }
 
-        public static void DebugToFile(string s, int type = 0)
+        public static void DebugToFile2(string s, int type = 0)
         {
             if (type == 1) s += "[Warning]";
             else if (type == 2) s += "[Error]";
             Console.WriteLine(s);
-            using (StreamWriter sw = File.AppendText("./debug"))
+            /*using (StreamWriter sw = File.AppendText("./debug"))
             {
                 sw.WriteLine(s);
+            }*/
+        }
+
+        static ReaderWriterLock locker = new ReaderWriterLock();
+        public static void DebugToFile(string s, int type = 0)
+        {
+            try
+            {
+                locker.AcquireWriterLock(int.MaxValue); //You might wanna change timeout value 
+                Console.WriteLine(s);
+                System.IO.File.AppendAllLines("./debug", new[] { s });
+            }
+            finally
+            {
+                locker.ReleaseWriterLock();
             }
         }
     }

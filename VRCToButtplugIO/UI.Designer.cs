@@ -60,7 +60,6 @@
             // 
             // deviceList
             // 
-            this.deviceList.AutoScroll = true;
             this.deviceList.AutoSize = true;
             this.deviceList.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.deviceList.Controls.Add(this.warning);

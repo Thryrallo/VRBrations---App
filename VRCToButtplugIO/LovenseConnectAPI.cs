@@ -62,7 +62,7 @@ namespace VRCToyController
                 foreach (LovenseConnectToy t in domain.toys.Values)
                 {
                     bool isNewToy = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy && (aT as LovenseConnectToy).id == t.id && (aT as LovenseConnectToy).domain.domain == domainId).Count() == 0;
-                    if (isNewToy)
+                    if (isNewToy && t.status == 1)
                     {
                         AddToy(t, domain);
                     }
@@ -75,7 +75,8 @@ namespace VRCToyController
                 domains.Add(domainId, domain);
                 foreach (LovenseConnectToy t in domain.toys.Values)
                 {
-                    AddToy(t, domain);
+                    if(t.status == 1)
+                        AddToy(t, domain);
                 }
             }
             //Remove old devices
@@ -243,6 +244,7 @@ namespace VRCToyController
         {
             public string id;
             public string nickName;
+            public int status;
             public LovenseConnectToyType type;
             public LovenseConnectDomain domain;
 
@@ -259,7 +261,7 @@ namespace VRCToyController
             private const string airInURL = "AirIn";
             private const string airOutURL = "AirOut";
 
-            public override void Air(IEnumerable<double> strength)
+            public override void Vibrate(IEnumerable<double> strength)
             {
                 if (strength.Count() > 1)
                 {
@@ -281,7 +283,7 @@ namespace VRCToyController
                 }
             }
 
-            public override void Vibrate(IEnumerable<double> strength)
+            public override void Air(IEnumerable<double> strength)
             {
                 if (strength.Count() > 0)
                 {
