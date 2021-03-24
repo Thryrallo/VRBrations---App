@@ -10,9 +10,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using MaterialSkin;
+using MaterialSkin.Controls;
+
 namespace VRCToyController
 {
-    public partial class MainUI : Form
+    public partial class MainUI : MaterialForm
     {
         public MainUI()
         {
@@ -22,6 +25,17 @@ namespace VRCToyController
             scan.Click += new EventHandler(Scan);
 
             scan.Text = "Stop Scanning";
+
+            MaterialSkinManager materialSkinManager = MaterialSkinManager.Instance;
+            materialSkinManager.AddFormToManage(this);
+            materialSkinManager.Theme = MaterialSkinManager.Themes.LIGHT;
+
+            // Configure color schema
+            materialSkinManager.ColorScheme = new ColorScheme(
+                Primary.Pink300, Primary.Pink300,
+                Primary.Pink300, Accent.Pink100,
+                TextShade.WHITE
+            );
         }
 
         private void Scan(object sender, EventArgs e)
@@ -164,6 +178,11 @@ namespace VRCToyController
                     break;
                 }
             }
+        }
+
+        private void MainUI_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
