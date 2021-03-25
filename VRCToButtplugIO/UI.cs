@@ -36,6 +36,7 @@ namespace VRCToyController
                 Primary.Pink300, Accent.Pink100,
                 TextShade.WHITE
             );
+
         }
 
         private void Scan(object sender, EventArgs e)
@@ -66,11 +67,6 @@ namespace VRCToyController
             //Console.WriteLine("connected devieces: "+Mediator.buttplugIOInterface.connectedDevices());
         }
 
-        private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         private void b_Save_Click(object sender, EventArgs e)
         {
             Config.Singleton.Save();
@@ -94,11 +90,6 @@ namespace VRCToyController
             });
         }
 
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         private void button_AddLovenseConnectURL_Click(object sender, EventArgs e)
         {
             Task.Factory.StartNew(() =>
@@ -118,14 +109,5 @@ namespace VRCToyController
             });
         }
 
-        private void MainUI_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void MainUI_Load_1(object sender, EventArgs e)
-        {
-
-        }
     }
 }

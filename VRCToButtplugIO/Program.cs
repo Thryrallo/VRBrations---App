@@ -66,7 +66,7 @@ namespace VRCToyController
         }
 
         static float dpi = 1;
-        static int titleBarHeight = 0;
+        public static int titleBarHeight = 0;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

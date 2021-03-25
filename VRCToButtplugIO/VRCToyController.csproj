@@ -163,6 +163,9 @@
     </Compile>
     <Compile Include="KeyManager.cs" />
     <Compile Include="LovenseConnectAPI.cs" />
+    <Compile Include="NoMousePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Toy.cs" />
     <Compile Include="ToyAPI.cs" />
     <Compile Include="UI.cs">

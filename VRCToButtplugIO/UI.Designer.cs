@@ -42,11 +42,11 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.label_vrc_focus = new System.Windows.Forms.Label();
             this.footer = new System.Windows.Forms.LinkLabel();
-            this.panel2 = new System.Windows.Forms.Panel();
+            this.panel_bottom = new System.Windows.Forms.Panel();
             this.materialFlatButton1 = new MaterialSkin.Controls.MaterialFlatButton();
             this.deviceList.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.panel2.SuspendLayout();
+            this.panel_bottom.SuspendLayout();
             this.SuspendLayout();
             // 
             // scan
@@ -63,9 +63,11 @@
             // 
             this.deviceList.AutoSize = true;
             this.deviceList.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.deviceList.BackColor = System.Drawing.Color.White;
             this.deviceList.Controls.Add(this.warning);
             this.deviceList.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.deviceList.Location = new System.Drawing.Point(29, 139);
+            this.deviceList.Margin = new System.Windows.Forms.Padding(3, 3, 10, 100);
             this.deviceList.Name = "deviceList";
             this.deviceList.Size = new System.Drawing.Size(59, 27);
             this.deviceList.TabIndex = 1;
@@ -122,9 +124,10 @@
             // footer
             // 
             this.footer.AutoSize = true;
+            this.footer.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.footer.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
             this.footer.LinkColor = System.Drawing.Color.Fuchsia;
-            this.footer.Location = new System.Drawing.Point(26, 26);
+            this.footer.Location = new System.Drawing.Point(0, 810);
             this.footer.Name = "footer";
             this.footer.Size = new System.Drawing.Size(88, 20);
             this.footer.TabIndex = 6;
@@ -133,19 +136,19 @@
             this.footer.VisitedLinkColor = System.Drawing.Color.Fuchsia;
             this.footer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.footer_LinkClicked);
             // 
-            // panel2
+            // panel_bottom
             // 
-            this.panel2.BackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.panel2.Controls.Add(this.materialFlatButton1);
-            this.panel2.Controls.Add(this.footer);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel2.Location = new System.Drawing.Point(0, 767);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(898, 69);
-            this.panel2.TabIndex = 9;
+            this.panel_bottom.BackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.panel_bottom.Controls.Add(this.materialFlatButton1);
+            this.panel_bottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel_bottom.Location = new System.Drawing.Point(0, 741);
+            this.panel_bottom.Name = "panel_bottom";
+            this.panel_bottom.Size = new System.Drawing.Size(898, 69);
+            this.panel_bottom.TabIndex = 9;
             // 
             // materialFlatButton1
             // 
+            this.materialFlatButton1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.materialFlatButton1.AutoSize = true;
             this.materialFlatButton1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.materialFlatButton1.Depth = 0;
@@ -166,20 +169,20 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(898, 836);
-            this.Controls.Add(this.panel2);
+            this.ClientSize = new System.Drawing.Size(898, 830);
+            this.Controls.Add(this.panel_bottom);
+            this.Controls.Add(this.footer);
             this.Controls.Add(this.label_vrc_focus);
             this.Controls.Add(this.deviceList);
             this.Controls.Add(this.panel1);
             this.Name = "MainUI";
             this.Text = "VRC Toy Controller";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainUI_FormClosing);
-            this.Load += new System.EventHandler(this.MainUI_Load_1);
             this.deviceList.ResumeLayout(false);
             this.deviceList.PerformLayout();
             this.panel1.ResumeLayout(false);
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
+            this.panel_bottom.ResumeLayout(false);
+            this.panel_bottom.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -193,7 +196,7 @@
         private System.Windows.Forms.LinkLabel footer;
         public System.Windows.Forms.Label warning;
         public System.Windows.Forms.Label label_vrc_focus;
-        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel panel_bottom;
         private MaterialSkin.Controls.MaterialFlatButton materialFlatButton1;
     }
 }
