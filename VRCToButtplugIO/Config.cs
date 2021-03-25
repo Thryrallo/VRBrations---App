@@ -31,7 +31,7 @@ namespace VRCToyController
         }
 
         private static Config p_config;
-        public static Config config
+        public static Config Singleton
         {
             get
             {
@@ -39,6 +39,8 @@ namespace VRCToyController
                 {
                     Load();
                     p_config = config_in_file;
+                    if (p_config.devices == null)
+                        p_config.devices = new Device[0];
                 }
                 return p_config;
             }
@@ -53,12 +55,16 @@ namespace VRCToyController
             }
 
             string data = File.ReadAllText(PATH);
-            p_config_in_file = JsonConvert.DeserializeObject<Config>(data);
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.Culture = System.Globalization.CultureInfo.InvariantCulture;
+            p_config_in_file = JsonConvert.DeserializeObject<Config>(data,settings);
         }
 
         public void Save()
         {
-            File.WriteAllText(PATH, JsonConvert.SerializeObject(this), Encoding.UTF8);
+            JsonSerializerSettings settings = new JsonSerializerSettings();
+            settings.Culture = System.Globalization.CultureInfo.InvariantCulture;
+            File.WriteAllText(PATH, JsonConvert.SerializeObject(this,settings), Encoding.UTF8);
         }
     }
 }

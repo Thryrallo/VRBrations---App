@@ -50,10 +50,10 @@
             this.groupThrusting = new System.Windows.Forms.TableLayoutPanel();
             this.thrust_speed_scale = new System.Windows.Forms.TextBox();
             this.thrust_acceleration = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.thrust_depth_scale = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.groupRubbing = new System.Windows.Forms.TableLayoutPanel();
             this.rub_scale = new System.Windows.Forms.TextBox();
             this.rub_acceleration = new System.Windows.Forms.TextBox();
@@ -82,7 +82,7 @@
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(452, 197);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(452, 231);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // flowLayoutPanel3
@@ -114,6 +114,7 @@
             this.x.Name = "x";
             this.x.Size = new System.Drawing.Size(50, 26);
             this.x.TabIndex = 1;
+            this.x.ValueChanged += new System.EventHandler(this.Apply_InputPos);
             // 
             // y
             // 
@@ -121,6 +122,7 @@
             this.y.Name = "y";
             this.y.Size = new System.Drawing.Size(50, 26);
             this.y.TabIndex = 0;
+            this.y.ValueChanged += new System.EventHandler(this.Apply_InputPos);
             // 
             // label11
             // 
@@ -140,6 +142,7 @@
             this.motor.Name = "motor";
             this.motor.Size = new System.Drawing.Size(97, 28);
             this.motor.TabIndex = 4;
+            this.motor.SelectedIndexChanged += new System.EventHandler(this.Apply_Feature);
             this.motor.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsInt);
             // 
             // label_pixel_found
@@ -200,8 +203,8 @@
             this.max.Size = new System.Drawing.Size(100, 26);
             this.max.TabIndex = 5;
             this.max.Text = "1.0";
-            this.max.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsNumber);
-            this.max.KeyUp += new System.Windows.Forms.KeyEventHandler(this.BoxFloatBetween0And1);
+            this.max.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsFloatBetween0And1);
+            this.max.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Apply_Max);
             // 
             // groupVolume
             // 
@@ -230,6 +233,7 @@
             this.volume_depth.TabIndex = 1;
             this.volume_depth.Text = "0.5";
             this.volume_depth.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsNumber);
+            this.volume_depth.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Apply_Volume);
             // 
             // volume_width
             // 
@@ -240,6 +244,7 @@
             this.volume_width.TabIndex = 0;
             this.volume_width.Text = "0.5";
             this.volume_width.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsNumber);
+            this.volume_width.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Apply_Volume);
             // 
             // label3
             // 
@@ -293,6 +298,7 @@
             this.thrust_speed_scale.TabIndex = 1;
             this.thrust_speed_scale.Text = "1.0";
             this.thrust_speed_scale.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsNumber);
+            this.thrust_speed_scale.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Apply_Thrusting);
             // 
             // thrust_acceleration
             // 
@@ -303,28 +309,7 @@
             this.thrust_acceleration.TabIndex = 0;
             this.thrust_acceleration.Text = "1.0";
             this.thrust_acceleration.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsNumber);
-            // 
-            // label6
-            // 
-            this.label6.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(19, 38);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(101, 20);
-            this.label6.TabIndex = 3;
-            this.label6.Text = "Acceleration:";
-            this.toolTip1.SetToolTip(this.label6, "(strength = (depth*depthScale+thustSpeed*speedScale) *(acceleration*time))");
-            // 
-            // label7
-            // 
-            this.label7.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(19, 6);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(101, 20);
-            this.label7.TabIndex = 2;
-            this.label7.Text = "Speed scale:";
-            this.toolTip1.SetToolTip(this.label7, "(strength = (depth*depthScale+thustSpeed*speedScale) *(acceleration*time))");
+            this.thrust_acceleration.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Apply_Thrusting);
             // 
             // label5
             // 
@@ -345,6 +330,30 @@
             this.thrust_depth_scale.Size = new System.Drawing.Size(100, 26);
             this.thrust_depth_scale.TabIndex = 5;
             this.thrust_depth_scale.Text = "1.0";
+            this.thrust_depth_scale.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsNumber);
+            this.thrust_depth_scale.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Apply_Thrusting);
+            // 
+            // label7
+            // 
+            this.label7.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(19, 6);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(101, 20);
+            this.label7.TabIndex = 2;
+            this.label7.Text = "Speed scale:";
+            this.toolTip1.SetToolTip(this.label7, "(strength = (depth*depthScale+thustSpeed*speedScale) *(acceleration*time))");
+            // 
+            // label6
+            // 
+            this.label6.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(19, 38);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(101, 20);
+            this.label6.TabIndex = 3;
+            this.label6.Text = "Acceleration:";
+            this.toolTip1.SetToolTip(this.label6, "(strength = (depth*depthScale+thustSpeed*speedScale) *(acceleration*time))");
             // 
             // groupRubbing
             // 
@@ -373,6 +382,7 @@
             this.rub_scale.TabIndex = 1;
             this.rub_scale.Text = "1.0";
             this.rub_scale.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsNumber);
+            this.rub_scale.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Apply_Rubbing);
             // 
             // rub_acceleration
             // 
@@ -383,6 +393,7 @@
             this.rub_acceleration.TabIndex = 0;
             this.rub_acceleration.Text = "1.0";
             this.rub_acceleration.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.KeyPressIsNumber);
+            this.rub_acceleration.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Apply_Rubbing);
             // 
             // label8
             // 
@@ -411,7 +422,7 @@
             this.rem_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.rem_button.AutoSize = true;
             this.rem_button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.rem_button.Location = new System.Drawing.Point(377, 166);
+            this.rem_button.Location = new System.Drawing.Point(377, 199);
             this.rem_button.Name = "rem_button";
             this.rem_button.Size = new System.Drawing.Size(78, 30);
             this.rem_button.TabIndex = 5;
@@ -427,7 +438,7 @@
             this.Controls.Add(this.rem_button);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "DeviceParamsUI";
-            this.Size = new System.Drawing.Size(460, 206);
+            this.Size = new System.Drawing.Size(460, 239);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel3.ResumeLayout(false);
             this.flowLayoutPanel3.PerformLayout();

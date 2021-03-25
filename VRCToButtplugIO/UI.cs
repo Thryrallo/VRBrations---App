@@ -71,75 +71,9 @@ namespace VRCToyController
 
         }
 
-        private void apply_Click(object sender, EventArgs e)
-        {
-            Config config = Config.config;
-            if (config.devices == null)
-                config.devices = new Device[0];
-            foreach (Control deviceControl in deviceList.Controls)
-            {
-                if (deviceControl.GetType() != typeof(DeviceUI) )
-                    continue;
-                DeviceUI deviceUI = (DeviceUI)deviceControl;
-                Device device = null;
-                foreach (Device d in config.devices)
-                {
-                    if (d.device_name == deviceUI.Name)
-                        device = d;
-                }
-                if (device == null)
-                {
-                    device = new Device();
-                    List<Device> list = new List<Device>(config.devices);
-                    list.Add(device);
-                    config.devices = list.ToArray();
-                }
-                device.device_name = deviceUI.Name;
-                device.motors = deviceUI.motorsValues.Length;
-                for (int i = 0; i < deviceUI.paramsList.Controls.Count; i++)
-                {
-                    DeviceParamsUI deviceParamsUI = (DeviceParamsUI)deviceUI.paramsList.Controls[i];
-                    DeviceParams param = null;
-                    if (i < device.device_params.Length)
-                        param = device.device_params[i];
-                    else
-                    {
-                        param = new DeviceParams();
-                        param.SetDeviceParamsUI(deviceParamsUI);
-                        List<DeviceParams> list = new List<DeviceParams>(device.device_params);
-                        list.Add(param);
-                        device.device_params = list.ToArray();
-                    }
-                    param.input_pos = new int[] { (int)deviceParamsUI.x.Value, (int)deviceParamsUI.y.Value };
-                    param.max = Math.Min(1.0f, Math.Max(0.0f, ParseFloat(deviceParamsUI.max.Text) ));
-                    param.type = (CalulcationType)deviceParamsUI.typeSelector.SelectedIndex;
-                    param.motor = deviceParamsUI.motor.SelectedIndex;
-                    param.volume_width = ParseFloat(deviceParamsUI.volume_width.Text);
-                    param.volume_depth = ParseFloat(deviceParamsUI.volume_depth.Text);
-                    param.thrusting_acceleration = Math.Min(1, ParseFloat(deviceParamsUI.thrust_acceleration.Text));
-                    param.thrusting_speed_scale = ParseFloat(deviceParamsUI.thrust_speed_scale.Text);
-                    param.thrusting_depth_scale = ParseFloat(deviceParamsUI.thrust_depth_scale.Text);
-                    param.rubbing_acceleration = Math.Min(1, ParseFloat(deviceParamsUI.rub_acceleration.Text));
-                    param.rubbing_scale = ParseFloat(deviceParamsUI.rub_scale.Text);
-                }
-                if(device.device_params.Length> deviceUI.paramsList.Controls.Count)
-                {
-                    List<DeviceParams> list = new List<DeviceParams>(device.device_params);
-                    list = list.GetRange(0, deviceUI.paramsList.Controls.Count);
-                    device.device_params = list.ToArray();
-                }
-            }
-        }
-
-        private float ParseFloat(string s)
-        {
-            return float.Parse(s, System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
-        }
-
         private void b_Save_Click(object sender, EventArgs e)
         {
-            apply_Click(sender, e);
-            Config.config.Save();
+            Config.Singleton.Save();
         }
 
         private void footer_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -150,6 +84,7 @@ namespace VRCToyController
         private async void MainUI_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
+            Config.Singleton.Save();
             await KeyManager.FreeKeyAsync();
             await KeyManager.FreeKeyAsync();
             this.FormClosing -= MainUI_FormClosing;
@@ -166,18 +101,21 @@ namespace VRCToyController
 
         private void button_AddLovenseConnectURL_Click(object sender, EventArgs e)
         {
-            LovenseConnectAPI api = (Mediator.toyAPIs.Where(a => a is LovenseConnectAPI).First() as LovenseConnectAPI);
-            Rectangle rect = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
-            string input = "";
-            while(api.AddCustomURL(input) == false)
+            Task.Factory.StartNew(() =>
             {
-                input = Interaction.InputBox("Please input the Local IP from your Lovense Connect App on your phone.", "Lovense Connect Local IP", "https://192-168-0-1.lovense.club:34568/GetToys", rect.Width / 2 - 200, rect.Height / 2 - 200);
-                input = input.Trim();
-                if (input.Length == 0)
+                LovenseConnectAPI api = (Mediator.toyAPIs.Where(a => a is LovenseConnectAPI).First() as LovenseConnectAPI);
+                Rectangle rect = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
+                string input = "";
+                while (api.AddCustomURL(input) == false)
                 {
-                    break;
+                    input = Interaction.InputBox("Please input the Local IP from your Lovense Connect App on your phone.", "Lovense Connect Local IP", "https://192-168-0-1.lovense.club:34568/GetToys", rect.Width / 2 - 200, rect.Height / 2 - 200);
+                    input = input.Trim();
+                    if (input.Length == 0)
+                    {
+                        break;
+                    }
                 }
-            }
+            });
         }
 
         private void MainUI_Load(object sender, EventArgs e)

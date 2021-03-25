@@ -47,41 +47,33 @@ namespace VRCToyController
                 }
             }
 
-            for(int i = 0; i < motorsValues.Length; i++)
+            Device savedDevice = Config.Singleton.devices.FirstOrDefault(d => d.device_name == toy.vrcToys_id);
+            if (savedDevice == null)
             {
-                DeviceParamsUI paramControl = new DeviceParamsUI(motorsValues);
-                paramControl.motor.SelectedIndex = i;
-                paramControl.x.Value = i;
-                paramsList.Controls.Add(paramControl);
-            }
-        }
-
-        public void Populate(Config config)
-        {
-            if (config.devices == null)
-                return;
-            foreach(Device d in config.devices)
-            {
-                if(d.device_name == this.name.Text)
+                Program.DebugToFile("[UI] Creating fresh UI for " + toy.name);
+                for (int i = 0; i < motorsValues.Length; i++)
                 {
-                    Populate(d);
-                    return;
+                    DeviceParamsUI paramControl = new DeviceParamsUI(motorsValues, true, this);
+                    paramControl.motor.SelectedIndex = i;
+                    paramControl.x.Value = i;
                 }
             }
+            else
+            {
+                Program.DebugToFile("[UI] Creating UI for " + toy.name +" from save file");
+                Populate(savedDevice);
+            }
         }
 
-        public void Populate(Device device)
+        private void Populate(Device device)
         {
             for (int i = 0; i < device.device_params.Length; i++)
             {
-                if(i>=paramsList.Controls.Count)
-                    paramsList.Controls.Add(new DeviceParamsUI(motorsValues));
+                if (i >= paramsList.Controls.Count)
+                {
+                    new DeviceParamsUI(motorsValues, false, this);
+                }
                 ((DeviceParamsUI)paramsList.Controls[i]).Populate(device.device_params[i]);
-            }
-            if (device.device_params.Length < paramsList.Controls.Count)
-            {
-                for (int i = 0; i < paramsList.Controls.Count - device.device_params.Length; i++)
-                    paramsList.Controls.Add(new DeviceParamsUI(motorsValues));
             }
         }
 
@@ -92,11 +84,16 @@ namespace VRCToyController
 
         private void button_add_Click(object sender, EventArgs e)
         {
-            DeviceParamsUI paramControl = new DeviceParamsUI(motorsValues);
+            DeviceParamsUI paramControl = new DeviceParamsUI(motorsValues,true,this);
             paramsList.Controls.Add(paramControl);
         }
 
         private void b_test_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void DeviceUI_Load(object sender, EventArgs e)
         {
 
         }

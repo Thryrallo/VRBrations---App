@@ -71,12 +71,17 @@ namespace VRCToyController
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static async Task Main()
+        static async Task Main(string[] args)
         {
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            //load key from args
+            if(args.Length > 0 && args[0] != null && args[0].Length == 64)
+            {
+                KeyManager.LoadKey(args[0]);
+            }
 
             while (KeyManager.LoadKey() == false || await KeyManager.VerifyKeyAsync() == KeyStatus.INVALID)
             {
@@ -125,7 +130,7 @@ namespace VRCToyController
 
         static async void Init()
         {
-            config = Config.config;
+            config = Config.Singleton;
             dpi = getScalingFactor();
             Console.WriteLine("DPI:" + dpi);
 

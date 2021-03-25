@@ -142,6 +142,7 @@
             this.Name = "DeviceUI";
             this.Padding = new System.Windows.Forms.Padding(0, 20, 0, 0);
             this.Size = new System.Drawing.Size(548, 65);
+            this.Load += new System.EventHandler(this.DeviceUI_Load);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
