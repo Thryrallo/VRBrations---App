@@ -262,6 +262,7 @@ namespace VRCToyController
             catch (Exception e) { };
         }
 
+        #region ToysLogic
         private static void TurnAllToysOff()
         {
             if (config.devices == null)
@@ -390,7 +391,9 @@ namespace VRCToyController
                 Mediator.activeToys[device.device_name].ExecuteFeatures(vals);
             }
         }
+        #endregion
 
+        #region Capturing
         static Bitmap Capture(Rectangle bounds)
         {
             Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height);
@@ -424,20 +427,44 @@ namespace VRCToyController
             return "";
         }
 
+        static bool wasFullScreen;
+        static int vrcBlackBarsHorizontal = 0;
+        static int vrcBlackBarsVertical = 0;
         private static Rectangle GetWindowBounds()
         {
-            Rectangle myRect = new Rectangle();
+            Rectangle fullBounds = new Rectangle();
             IntPtr handle = GetForegroundWindow();
             RECT rct = GetWindowRectangle(handle);
             //MessageBox.Show(rct.ToString());
 
-            myRect.X = (int)(rct.Left );
-            myRect.Y = (int)(rct.Top );
-            myRect.Width = (int)((rct.Right - rct.Left + 1) );
-            myRect.Height = (int)((rct.Bottom - rct.Top + 1) );
-            if (IsBoundsFullScreen(myRect, null))
-                return myRect;
-            return CleanBounds(myRect);
+            fullBounds.X = (int)(rct.Left );
+            fullBounds.Y = (int)(rct.Top );
+            fullBounds.Width = (int)((rct.Right - rct.Left + 1) );
+            fullBounds.Height = (int)((rct.Bottom - rct.Top + 1) );
+
+            Rectangle cleanedBounds = fullBounds;
+            if (IsBoundsFullScreen(fullBounds, null))
+            {
+                if (wasFullScreen == false)
+                {
+                    DebugToFile("Swapped to fullscreen");
+                    //if whole screen black try again next time
+                    if (OnVRCEnteredFullscreen(fullBounds))
+                    {
+                        //Bitmap capture = Capture(BoundsRemoveVRCBlackBars(fullBounds));
+                        //capture.Save("./fullscreen.jpg", ImageFormat.Jpeg);
+                        //capture.Dispose();
+                        wasFullScreen = true;
+                    }
+                }
+                cleanedBounds = BoundsRemoveVRCBlackBars(fullBounds);
+            }
+            else
+            {
+                cleanedBounds = CleanBounds(fullBounds);
+                wasFullScreen = false;
+            }
+            return cleanedBounds;
         }
 
         public static RECT GetWindowRectangle(IntPtr hWnd)
@@ -456,6 +483,63 @@ namespace VRCToyController
             bounds.Height -= titleBarHeight;
             return bounds;
         }
+
+        private static bool OnVRCEnteredFullscreen(Rectangle fullBounds)
+        {
+            Bitmap capture = Capture(fullBounds);
+
+            vrcBlackBarsHorizontal = 0;
+            bool collumIsBlack = true;
+            while(vrcBlackBarsHorizontal < capture.Width && collumIsBlack)
+            {
+                for(int y = 0; y < capture.Height; y++)
+                {
+                    Color c = capture.GetPixel(vrcBlackBarsHorizontal, y);
+                    if (c.R > 0 || c.G > 0 || c.B > 0)
+                    {
+                        collumIsBlack = false;
+                    }
+                }
+                if (collumIsBlack) vrcBlackBarsHorizontal++;
+            }
+
+            vrcBlackBarsVertical = 0;
+            bool isRowBlack = true;
+            while (vrcBlackBarsVertical < capture.Height && isRowBlack)
+            {
+                for (int x = 0; x < capture.Width; x++)
+                {
+                    Color c = capture.GetPixel(x, vrcBlackBarsVertical);
+                    if (c.R > 0 || c.G > 0 || c.B > 0)
+                    {
+                        isRowBlack = false;
+                    }
+                }
+                if (isRowBlack) vrcBlackBarsVertical++;
+            }
+
+            int width = capture.Width;
+            int height = capture.Height;
+            capture.Dispose();
+            if (vrcBlackBarsHorizontal == width || vrcBlackBarsVertical == height)
+            {
+                vrcBlackBarsHorizontal = 0;
+                vrcBlackBarsVertical = 0;
+                return false;
+            }
+            return true;
+        }
+
+        private static Rectangle BoundsRemoveVRCBlackBars(Rectangle bounds)
+        {
+            bounds.X += vrcBlackBarsHorizontal;
+            bounds.Width -= vrcBlackBarsHorizontal * 2;
+            bounds.Y += vrcBlackBarsVertical;
+            bounds.Height -= vrcBlackBarsVertical * 2;
+            return bounds;
+        }
+
+        #endregion
 
         public static void DebugToFile2(string s, int type = 0)
         {
