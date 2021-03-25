@@ -13,15 +13,17 @@ namespace VRCToyController
 {
     public partial class DeviceUI : UserControl
     {
+
+        private bool is_testing;
         public DeviceUI()
         {
             InitializeComponent();
 
-            b_test.Click += delegate (object o, EventArgs a)
+            /*b_test.Click += delegate (object o, EventArgs a)
             {
                 if (Mediator.activeToys.ContainsKey(this.Name))
                     Mediator.activeToys[this.Name].Test();
-            };
+            };*/
         }
 
         public string[] motorsValues;
@@ -90,7 +92,27 @@ namespace VRCToyController
 
         private void b_test_Click(object sender, EventArgs e)
         {
-
+            if(is_testing == false)
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    Toy toy = Mediator.activeToys[this.Name];
+                    if (toy != null) {
+                        is_testing = true;
+                        foreach (Control c in paramsList.Controls)
+                        {
+                            DeviceParams deviceParam = (c as DeviceParamsUI).GetDeviceParam();
+                            double[] strengths = new double[toy.totalFeatureCount];
+                            for (int i = 0; i < strengths.Length; i++) strengths[i] = 0;
+                            strengths[deviceParam.motor] = deviceParam.max;
+                            //Console.WriteLine("Testing " + deviceParam.motor + " at " + deviceParam.max);
+                            toy.ExecuteFeatures(strengths);
+                            System.Threading.Thread.Sleep(2000);
+                        }
+                        is_testing = false;
+                    }
+                });
+            }
         }
 
         private void DeviceUI_Load(object sender, EventArgs e)

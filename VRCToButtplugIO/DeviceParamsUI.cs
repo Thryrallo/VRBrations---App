@@ -40,6 +40,11 @@ namespace VRCToyController
             this.LoadCorrelatingDeviceParams();
         }
 
+        public DeviceParams GetDeviceParam()
+        {
+            return param;
+        }
+
         private void Apply_All()
         {
             Apply_InputPos(null, EventArgs.Empty);
