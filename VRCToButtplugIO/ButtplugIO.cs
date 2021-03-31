@@ -197,8 +197,9 @@ namespace VRCToyController
         {
             if (strength.Count() == 1 && this.lovenseType != LovenseToyType.none)
             {
-                Console.WriteLine("Air:Level:" + (strength.First() * 3) + ";");
-                this.device.SendRawWriteCmd(Endpoint.Tx, Encoding.ASCII.GetBytes("Air:Level:" + (strength.First() * 3) + ";"), false);
+                int value = (int)(strength.First() * 3.5f);
+                //Console.WriteLine("Air:Level:" + value + ";");
+                this.device.SendRawWriteCmd(Endpoint.Tx, Encoding.ASCII.GetBytes("Air:Level:" + value + ";"), false);
             }
         }
     }

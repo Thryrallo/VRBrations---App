@@ -132,7 +132,6 @@ namespace VRCToyController
         {
             config = Config.Singleton;
             dpi = getScalingFactor();
-            Console.WriteLine("DPI:" + dpi);
 
             string justHereToForceUIInit = Mediator.ui.Name;
 
@@ -144,7 +143,7 @@ namespace VRCToyController
 
             //dont ask why +8, idk, but tests seemed to have shown it as correct
             titleBarHeight = (int)((SystemInformation.CaptionHeight + 8) * dpi);
-            DebugToFile("TitleBar Height: " + titleBarHeight);
+            DebugToFile("TitleBar Height: " + titleBarHeight+", DPI: "+dpi);
         }
 
         static Config config;
