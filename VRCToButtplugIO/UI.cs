@@ -108,6 +108,5 @@ namespace VRCToyController
                 }
             });
         }
-
     }
 }

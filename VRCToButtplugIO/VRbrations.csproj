@@ -7,7 +7,7 @@
     <ProjectGuid>{6951E834-AD11-4995-BCA4-32D3EF4BA152}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>VRCToyController</RootNamespace>
-    <AssemblyName>VRC Toy Controller</AssemblyName>
+    <AssemblyName>VRbrations</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
