@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using XSNotifications;
+using XSNotifications.Enum;
 
 namespace VRCToyController
 {
@@ -24,8 +26,17 @@ namespace VRCToyController
             }
         }
 
+        public static XSNotifier xSNotifier { get; private set; } = new XSNotifier();
+        public static string appName { get; private set; } = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+
+        public static void SendXSNotification(string title, string content)
+        {
+            xSNotifier.SendNotification(new XSNotification() { Title = title, Content = content, SourceApp = appName, Timeout = 7  });
+        }
+
         public static void RemoveToy(string id)
         {
+            SendXSNotification("Toy Disconnected", Mediator.activeToys[id].name);
             Mediator.activeToys.Remove(id);
             Mediator.ui.Invoke((Action)delegate ()
             {
@@ -40,6 +51,7 @@ namespace VRCToyController
 
         public static void AddToy(Toy toy)
         {
+            SendXSNotification("Toy Connected", toy.name);
             Mediator.ui.Invoke((Action)delegate ()
             {
                 DeviceUI deviceControl = new DeviceUI(toy);

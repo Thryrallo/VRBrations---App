@@ -172,6 +172,9 @@ namespace VRCToyController
 
         static long lastUpdate = 0;
         static float lastVerifiedKey = 0;
+
+        static long vrchatNotInFocusStart = 0;
+        static bool wasVRChatInFocus = true;
         static void Logic()
         {
             while (true)
@@ -179,7 +182,8 @@ namespace VRCToyController
                 if (KeyManager.VerifyKey())
                 {
                     string activeWindow = GetActiveWindow();
-                    if (activeWindow == config.window_name)
+                    bool isVRchatInFocus = activeWindow == config.window_name;
+                    if (isVRchatInFocus)
                     {
                         try
                         {
@@ -206,8 +210,13 @@ namespace VRCToyController
                     else
                     {
                         TurnAllToysOff();
+                        if (wasVRChatInFocus)
+                        {
+                            vrchatNotInFocusStart = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                        }
                         SetUIMessage(Mediator.ui.label_vrc_focus, "VRC not in focus\nCurrent window:\n" + activeWindow, Color.Red);
                     }
+                    wasVRChatInFocus = isVRchatInFocus;
                     //do slow update on apis
                     if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastSlowUpdate > slowUpdateRate)
                     {
@@ -229,6 +238,7 @@ namespace VRCToyController
             }
         }
 
+        static bool hasSentNotInFocusNotification = false;
         private static void SlowUpdate()
         {
             foreach (ToyAPI api in Mediator.toyAPIs)
@@ -240,10 +250,20 @@ namespace VRCToyController
                 //Disabled till buttplug.io get's fixed
                 //toy.toyAPI.UpdateBatteryIndicator(toy);
             }
+            //Not in focus notification
+            if(wasVRChatInFocus == false && hasSentNotInFocusNotification==false && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - vrchatNotInFocusStart > 20000)
+            {
+                Mediator.SendXSNotification("VRChat is not in focus.", "Make sure the vrchat window is the active window.");
+                hasSentNotInFocusNotification = true;
+            }
+            else if(wasVRChatInFocus)
+            {
+                hasSentNotInFocusNotification = false;
+            }
             lastSlowUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
-        private static void SetUIMessage(Label l, string message, Color color)
+        private static void SetUIMessage(Label l, string message, Color color, string xsTitle = null, string xsMessage = null)
         {
             if (l == null) return;
             //try chach, because this throws sometimes an error when application is closing. should probabnly be fixed correctly at some point
@@ -256,6 +276,10 @@ namespace VRCToyController
                         l.Text = message;
                         l.ForeColor = color;
                     });
+                    if(xsTitle != null)
+                    {
+                        Mediator.SendXSNotification(xsTitle,xsMessage);
+                    }
                 }
             }
             catch (Exception e) { };
@@ -331,7 +355,7 @@ namespace VRCToyController
                     //Console.WriteLine(col1 + "," + col2);
                     if (col1.B != 0 || col2.R != 0)
                     {
-                        SetUIMessage(param.GetDeviceParamsUI().label_pixel_found, "not found", Color.Red);
+                        SetUIMessage(param.GetDeviceParamsUI().label_pixel_found, "not found", Color.Red, "Missing Pixel", "Data Pixel for Behviour " + i + " of toy " + Mediator.activeToys[device.device_name].name +" could not be found.");
                         continue;
                     }
                     else
