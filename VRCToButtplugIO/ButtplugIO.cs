@@ -121,7 +121,7 @@ namespace VRCToyController
             ButtplugToy toy = (ButtplugToy)iToy;
             //this causes problems if the toy is disconnected
             double level = await toy.device.SendBatteryLevelCmd();
-            toy.UpdateBatterUI((int)(level * 100));
+            toy.SetBatterLevel((int)(level * 100));
         }
     }
 

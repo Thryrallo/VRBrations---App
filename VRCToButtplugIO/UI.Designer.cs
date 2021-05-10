@@ -43,7 +43,10 @@
             this.label_vrc_focus = new System.Windows.Forms.Label();
             this.footer = new System.Windows.Forms.LinkLabel();
             this.panel_bottom = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.configSelector = new System.Windows.Forms.ComboBox();
             this.materialFlatButton1 = new MaterialSkin.Controls.MaterialFlatButton();
+            this.looseFocus = new System.Windows.Forms.Label();
             this.deviceList.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel_bottom.SuspendLayout();
@@ -139,12 +142,35 @@
             // panel_bottom
             // 
             this.panel_bottom.BackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.panel_bottom.Controls.Add(this.label1);
+            this.panel_bottom.Controls.Add(this.configSelector);
             this.panel_bottom.Controls.Add(this.materialFlatButton1);
             this.panel_bottom.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panel_bottom.Location = new System.Drawing.Point(0, 741);
             this.panel_bottom.Name = "panel_bottom";
             this.panel_bottom.Size = new System.Drawing.Size(898, 69);
             this.panel_bottom.TabIndex = 9;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(25, 14);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(111, 25);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Config File:";
+            // 
+            // configSelector
+            // 
+            this.configSelector.FormattingEnabled = true;
+            this.configSelector.Location = new System.Drawing.Point(142, 11);
+            this.configSelector.Name = "configSelector";
+            this.configSelector.Size = new System.Drawing.Size(170, 28);
+            this.configSelector.TabIndex = 10;
+            this.configSelector.SelectedIndexChanged += new System.EventHandler(this.configSelector_SelectedIndexChanged);
+            this.configSelector.TextChanged += new System.EventHandler(this.configSelector_TextChanged);
+            this.configSelector.KeyDown += new System.Windows.Forms.KeyEventHandler(this.configSelector_KeyDown);
             // 
             // materialFlatButton1
             // 
@@ -164,12 +190,20 @@
             this.materialFlatButton1.UseVisualStyleBackColor = true;
             this.materialFlatButton1.Click += new System.EventHandler(this.button_AddLovenseConnectURL_Click);
             // 
+            // looseFocus
+            // 
+            this.looseFocus.Location = new System.Drawing.Point(490, 22);
+            this.looseFocus.Name = "looseFocus";
+            this.looseFocus.Size = new System.Drawing.Size(0, 0);
+            this.looseFocus.TabIndex = 10;
+            // 
             // MainUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(898, 830);
+            this.Controls.Add(this.looseFocus);
             this.Controls.Add(this.panel_bottom);
             this.Controls.Add(this.footer);
             this.Controls.Add(this.label_vrc_focus);
@@ -198,6 +232,9 @@
         public System.Windows.Forms.Label label_vrc_focus;
         private System.Windows.Forms.Panel panel_bottom;
         private MaterialSkin.Controls.MaterialFlatButton materialFlatButton1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox configSelector;
+        private System.Windows.Forms.Label looseFocus;
     }
 }
 

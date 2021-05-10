@@ -247,8 +247,7 @@ namespace VRCToyController
             }
             foreach (Toy toy in Mediator.activeToys.Values)
             {
-                //Disabled till buttplug.io get's fixed
-                //toy.toyAPI.UpdateBatteryIndicator(toy);
+                toy.UpdateBatteryIndicator();
             }
             //Not in focus notification
             if(wasVRChatInFocus == false && hasSentNotInFocusNotification==false && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - vrchatNotInFocusStart > 20000)
@@ -263,7 +262,8 @@ namespace VRCToyController
             lastSlowUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
-        private static void SetUIMessage(Label l, string message, Color color, string xsTitle = null, string xsMessage = null)
+        private static Dictionary<Label, long> lastXSMessageTime = new Dictionary<Label, long>();
+        private static void SetUIMessage(Label l, string message, Color color, string xsTitle = null, string xsMessage = null, float xsCooldownTime = 0, bool xsCooldownBeforeFirstPopup = false)
         {
             if (l == null) return;
             //try chach, because this throws sometimes an error when application is closing. should probabnly be fixed correctly at some point
@@ -278,7 +278,20 @@ namespace VRCToyController
                     });
                     if(xsTitle != null)
                     {
-                        Mediator.SendXSNotification(xsTitle,xsMessage);
+                        long time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                        if(lastXSMessageTime.ContainsKey(l))
+                        {
+                            if(time - lastXSMessageTime[l] > xsCooldownTime)
+                            {
+                                Mediator.SendXSNotification(xsTitle, xsMessage);
+                                lastXSMessageTime[l] = time;
+                            }
+                        }
+                        else
+                        {
+                            if(xsCooldownBeforeFirstPopup == false) Mediator.SendXSNotification(xsTitle, xsMessage);
+                            lastXSMessageTime[l] = time;
+                        }
                     }
                 }
             }
@@ -311,6 +324,7 @@ namespace VRCToyController
             public float lastRubAcceleration = 0;
             public float lastThrustAcceleration = 0;
         }
+
         private static Dictionary<Device, MotorData[]> toyMotorsDictionary = new Dictionary<Device, MotorData[]>();
         private static Dictionary<DeviceParams, BehaviourData> behaviourDataDictionary = new Dictionary<DeviceParams, BehaviourData>();
         static void CheckCaptureForInput(Bitmap capture)
@@ -355,7 +369,7 @@ namespace VRCToyController
                     //Console.WriteLine(col1 + "," + col2);
                     if (col1.B != 0 || col2.R != 0)
                     {
-                        SetUIMessage(param.GetDeviceParamsUI().label_pixel_found, "not found", Color.Red, "Missing Pixel", "Data Pixel for Behviour " + i + " of toy " + Mediator.activeToys[device.device_name].name +" could not be found.");
+                        SetUIMessage(param.GetDeviceParamsUI().label_pixel_found, "not found", Color.Red, "Missing Pixel", "Data Pixel for Behviour " + i + " of toy " + Mediator.activeToys[device.device_name].name +" could not be found.", 60000, true);
                         continue;
                     }
                     else

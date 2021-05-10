@@ -17,6 +17,8 @@ namespace VRCToyController
 {
     public partial class MainUI : MaterialForm
     {
+        const string NEW_CONFIG_NAME = "<< New Config >>";
+
         public MainUI()
         {
             InitializeComponent();
@@ -37,6 +39,9 @@ namespace VRCToyController
                 TextShade.WHITE
             );
 
+            configSelector.Items.AddRange(Config.GetConfigNames());
+            configSelector.Items.Add(NEW_CONFIG_NAME);
+            configSelector.SelectedIndex = 0;
         }
 
         private void Scan(object sender, EventArgs e)
@@ -107,6 +112,55 @@ namespace VRCToyController
                     }
                 }
             });
+        }
+
+        private int selectedConfigIndex = 0;
+        private void configSelector_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(configSelector.SelectedIndex < configSelector.Items.Count - 1)
+            {
+                Config.Singleton.Save();
+                Config.LoadNewConfig(configSelector.SelectedItem as string);
+            }
+            if(configSelector.SelectedIndex >= 0)
+            {
+                selectedConfigIndex = configSelector.SelectedIndex;
+            }
+        }
+
+        private void configSelector_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (selectedConfigIndex == configSelector.Items.Count - 1)
+                {
+                    Program.DebugToFile("New Config: "+ configSelector.Text);
+                    Config.Singleton.Save();
+                    Config.AddConfigName(configSelector.Text);
+                    Config.LoadNewConfig(configSelector.Text);
+                    configSelector.Items[selectedConfigIndex] = configSelector.Text;
+                    configSelector.SelectedIndex = selectedConfigIndex;
+                    configSelector.Items.Add(NEW_CONFIG_NAME);
+                }
+                else
+                {
+                    Program.DebugToFile("Config Name Changed: "+ configSelector.Text);
+                    //config renamed => save config
+                    Config.Singleton.DeleteFile();
+                    Config.LoadNewConfig(configSelector.Text);
+                    configSelector.Items[selectedConfigIndex] = configSelector.Text;
+                    configSelector.SelectedIndex = selectedConfigIndex;
+                }
+                this.ActiveControl = looseFocus;
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private void configSelector_TextChanged(object sender, EventArgs e)
+        {
+            
+            
         }
     }
 }

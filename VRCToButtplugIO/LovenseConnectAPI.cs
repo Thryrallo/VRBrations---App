@@ -236,8 +236,7 @@ namespace VRCToyController
             string fullurl = t.domain.url + "/Battery?t="+t.id;
             string data = Get(fullurl);
             LovenseBattery battery = JsonConvert.DeserializeObject<LovenseBattery>(data);
-            int level = battery.data;
-            t.UpdateBatterUI(level);
+            t.SetBatterLevel(battery.data);
         }
 
         protected class LovenseConnectToy : Toy

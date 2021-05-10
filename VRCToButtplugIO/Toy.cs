@@ -17,6 +17,9 @@ namespace VRCToyController
         public Dictionary<ToyFeatureType, int> featureCount;
         public int totalFeatureCount;
 
+        private int batteryLevel = 100;
+        private bool hasSentBatteryWarning = false;
+
         public Toy()
         {
             featureCount = new Dictionary<ToyFeatureType, int>();
@@ -37,9 +40,7 @@ namespace VRCToyController
 
         public void ExecuteFeatures(double[] strength)
         {
-            foreach (double s in strength)
-                if (s > 1.0f)
-                    return;
+            for (int i = 0; i < strength.Length; i++) strength[i] = Math.Min(strength[i], 1);
             if (strength.Length == this.totalFeatureCount)
             {
                 //split into different featres
@@ -69,15 +70,31 @@ namespace VRCToyController
             ExecuteFeatures(new double[] { 0, 0 });
         }
 
-        public void UpdateBatterUI(int level)
+        public void UpdateBatteryIndicator()
+        {
+            toyAPI.UpdateBatteryIndicator(this);
+        }
+
+        public void SetBatterLevel(int level)
+        {
+            this.batteryLevel = level;
+            UpdateBatteryUI();
+            if(this.batteryLevel < 20 && !hasSentBatteryWarning)
+            {
+                Mediator.SendXSNotification("Toy Battery Low", "The Battery of " + this.name + " is low.");
+                hasSentBatteryWarning = true;
+            }
+        }
+
+        private void UpdateBatteryUI()
         {
             ui.battery_bar.Invoke((Action)delegate ()
             {
                 var size = ui.battery_bar.Size;
-                size.Width = (int)((level / 100.0f) * ui.battery_bar.Parent.Size.Width);
+                size.Width = (int)((this.batteryLevel / 100.0f) * ui.battery_bar.Parent.Size.Width);
                 ui.battery_bar.Size = size;
-                if (level > 50) ui.battery_bar.BackColor = Color.LimeGreen;
-                else if (level > 20) ui.battery_bar.BackColor = Color.Orange;
+                if (this.batteryLevel > 50) ui.battery_bar.BackColor = Color.LimeGreen;
+                else if (this.batteryLevel > 20) ui.battery_bar.BackColor = Color.Orange;
                 else ui.battery_bar.BackColor = Color.Red;
             });
         }
