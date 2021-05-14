@@ -162,11 +162,11 @@
     <Compile Include="ButtplugIO.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Device.cs" />
-    <Compile Include="DeviceParamsUI.cs">
+    <Compile Include="BehaviourUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DeviceParamsUI.Designer.cs">
-      <DependentUpon>DeviceParamsUI.cs</DependentUpon>
+    <Compile Include="BehaviourUI.Designer.cs">
+      <DependentUpon>BehaviourUI.cs</DependentUpon>
     </Compile>
     <Compile Include="DeviceUI.cs">
       <SubType>UserControl</SubType>
@@ -190,8 +190,8 @@
     <Compile Include="Mediator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="DeviceParamsUI.resx">
-      <DependentUpon>DeviceParamsUI.cs</DependentUpon>
+    <EmbeddedResource Include="BehaviourUI.resx">
+      <DependentUpon>BehaviourUI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceUI.resx">
       <DependentUpon>DeviceUI.cs</DependentUpon>

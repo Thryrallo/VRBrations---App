@@ -167,6 +167,41 @@ namespace VRCToyController
             thread.Start();
         }
 
+        public static double LinarToGamma(double linear)
+        {
+            return Math.Pow(linear, 1 / 2.2);
+        }
+
+        public static double GammaToLinar(double gamma)
+        {
+            
+            return Math.Pow(gamma, 2.2);
+        }
+
+        public static Color GetColor(double r, double g, double b)
+        {
+            return Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
+        }
+
+        public static Color GetGammaColor(double r, double g, double b)
+        {
+            return Color.FromArgb((int)(LinarToGamma(r) * 255), (int)(LinarToGamma(g) * 255), (int)(LinarToGamma(b) * 255));
+        }
+
+        public static bool IsSameColor(Color a, Color b)
+        {
+            return IsSameColor(a.R , b.R) && IsSameColor(a.G , b.G) && IsSameColor(a.B , b.B);
+        }
+
+        public static bool IsSameColor(int f1, int f2)
+        {
+            double f = f1 / 255.0f;
+            double maxDelta = (LinarToGamma(f + 0.018f) - LinarToGamma(f)) * 255;
+            return Math.Abs(f1 - f2) < maxDelta;
+        }
+
+        static readonly Color GLOBAL_INDICATOR_COLOR = GetGammaColor(0.69,0.01,0.69);
+
         static long lastSlowUpdate = 0;
         const float slowUpdateRate = 10000;
 
@@ -182,8 +217,8 @@ namespace VRCToyController
                 if (KeyManager.VerifyKey())
                 {
                     string activeWindow = GetActiveWindow();
-                    bool isVRchatInFocus = activeWindow == config.window_name;
-                    if (isVRchatInFocus)
+                    bool isAppInFocus = Config.WINDOW_NAMES.Contains(activeWindow);
+                    if (isAppInFocus)
                     {
                         try
                         {
@@ -216,7 +251,7 @@ namespace VRCToyController
                         }
                         SetUIMessage(Mediator.ui.label_vrc_focus, "VRC not in focus\nCurrent window:\n" + activeWindow, Color.Red);
                     }
-                    wasVRChatInFocus = isVRchatInFocus;
+                    wasVRChatInFocus = isAppInFocus;
                     //do slow update on apis
                     if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastSlowUpdate > slowUpdateRate)
                     {
@@ -301,131 +336,103 @@ namespace VRCToyController
         #region ToysLogic
         private static void TurnAllToysOff()
         {
-            if (config.devices == null)
-                return;
-            foreach (Device device in config.devices)
+            foreach(Toy t in Mediator.activeToys.Values)
             {
-                if (!Mediator.activeToys.ContainsKey(device.device_name))
-                    continue;
-                Mediator.activeToys[device.device_name].Vibrate(new double[] { 0 });
+                t.TurnOff();
             }
         }
 
-        class MotorData
+        static bool UpdateBehaviourPixelData(Bitmap capture, BehaviourData behaviourData)
         {
-            public float lastStength = 0;
-            public float nextStrength = 0;
-        }
-        class BehaviourData
-        {
-            public float[] lastAvgPos = new float[] { 0, 0 };
-            public float lastDepth = 0;
-            public float lastWidth = 0;
-            public float lastRubAcceleration = 0;
-            public float lastThrustAcceleration = 0;
+            int[] pos = behaviourData.input_pos;
+            float x1 = pos[0] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.25f;
+            float y1 = pos[1] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.5f;
+            float x2 = pos[0] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.75f;
+            float y2 = pos[1] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.5f;
+            Color col1 = capture.GetPixel((int)(x1 * capture.Width), (int)(y1 * capture.Height));
+            Color col2 = capture.GetPixel((int)(x2 * capture.Width), (int)(y2 * capture.Height));
+            //Console.WriteLine(i + ": " + col1 + " at "+ (int)(x1 * capture.Width) +","+ (int)(y1 * capture.Height));
+
+            behaviourData.GetRuntimeData().depth = col1.R * 0.0039f;
+            behaviourData.GetRuntimeData().width = col1.G * 0.0039f;
+            behaviourData.GetRuntimeData().avgX = col2.G * 0.0039f;
+            behaviourData.GetRuntimeData().avgY = col2.B * 0.0039f;
+
+            return col1.B == 0 && col2.R == 0;
         }
 
-        private static Dictionary<Device, MotorData[]> toyMotorsDictionary = new Dictionary<Device, MotorData[]>();
-        private static Dictionary<DeviceParams, BehaviourData> behaviourDataDictionary = new Dictionary<DeviceParams, BehaviourData>();
+        static bool audioLinkFound;
+        static float[] audioLinkData = new float[] { 0, 0, 0, 0 };
+
+        static bool LoadGlobalData(Bitmap capture)
+        {
+            float insidePixelOffset = Config.PIXEL_SCALE * 0.5f;
+            Color indicatorColor = capture.GetPixel((int)((1 - insidePixelOffset) * capture.Width), (int)(insidePixelOffset * capture.Height));
+            if(IsSameColor(indicatorColor,GLOBAL_INDICATOR_COLOR))
+            {
+                Color audioLinkColor0 = capture.GetPixel((int)((1 - insidePixelOffset - Config.PIXEL_SCALE * 1) * capture.Width), (int)(insidePixelOffset * capture.Height));
+                Color audioLinkColor1 = capture.GetPixel((int)((1 - insidePixelOffset - Config.PIXEL_SCALE * 2) * capture.Width), (int)(insidePixelOffset * capture.Height));
+                audioLinkData[0] = (float)GammaToLinar(audioLinkColor0.R / 255.0);
+                audioLinkData[1] = (float)GammaToLinar(audioLinkColor0.G / 255.0);
+                audioLinkData[2] = (float)GammaToLinar(audioLinkColor1.R / 255.0);
+                audioLinkData[3] = (float)GammaToLinar(audioLinkColor1.G / 255.0);
+                audioLinkFound = audioLinkColor0.B > 0;
+                return true;
+            }
+            else
+            {
+                audioLinkData[0] = 0;
+                audioLinkData[1] = 0;
+                audioLinkData[2] = 0;
+                audioLinkData[3] = 0;
+                audioLinkFound = false;
+                return false;
+            }
+        }
+
         static void CheckCaptureForInput(Bitmap capture)
         {
-            if (capture == null || config.devices == null)
+            if (capture == null)
                 return;
-            foreach(Device device in config.devices)
+
+            LoadGlobalData(capture);
+
+            foreach (Toy t in Mediator.activeToys.Values)
             {
-                if (!Mediator.activeToys.ContainsKey(device.device_name))
-                    continue;
-               if (!toyMotorsDictionary.ContainsKey(device))
-                {
-                    MotorData[] ar = new MotorData[device.motors];
-                    toyMotorsDictionary.Add(device, ar);
-                    for (int i = 0; i < device.motors; i++) ar[i] = new MotorData();
-                }
-                MotorData[] toyMotors = toyMotorsDictionary[device];
-                for (int i=0;i< device.device_params.Length; i++)
-                {
-                    DeviceParams param = device.device_params[i];
+                for (int i = 0; i < t.featureStrengths.Length; i++) t.featureStrengths[i] = 0;
 
-                    if (!behaviourDataDictionary.ContainsKey(param))
+                foreach (BehaviourData behaviour in t.GetBehaviours())
+                {
+                    bool behaviourFound;
+                    if (behaviour.type == CalulcationType.AudioLink) behaviourFound = audioLinkFound;
+                    else behaviourFound = UpdateBehaviourPixelData(capture, behaviour);
+
+                    //Get The pixel data and set label accordingly
+                    if (behaviourFound)
                     {
-                        behaviourDataDictionary.Add(param, new BehaviourData());
+                        if (behaviour.GetRuntimeData().wasFound == false)
+                        {
+                            SetUIMessage(t.GetDeviceUI().GetBehaviourUI(behaviour).label_pixel_found, "found", Color.Green);
+                            behaviour.GetRuntimeData().wasFound = true;
+                        }
                     }
-                    BehaviourData behaviourData = behaviourDataDictionary[param];
-
-                    int[] pos = param.input_pos;
-                    float x1 = pos[0] * config.window_scale + config.window_scale * 0.25f;
-                    float y1 = pos[1] * config.window_scale + config.window_scale * 0.5f;
-                    float x2 = pos[0] * config.window_scale + config.window_scale * 0.75f;
-                    float y2 = pos[1] * config.window_scale + config.window_scale * 0.5f;
-                    Color col1 = capture.GetPixel((int)(x1*capture.Width), (int)(y1*capture.Height));
-                    Color col2 = capture.GetPixel((int)(x2*capture.Width), (int)(y2*capture.Height));
-                    //Console.WriteLine(i + ": " + col1 + " at "+ (int)(x1 * capture.Width) +","+ (int)(y1 * capture.Height));
-
-                    float depth = col1.R * 0.0039f;
-                    float width = col1.G * 0.0039f;
-                    float[] avgPos = new float[] { col2.G * 0.0039f, col2.B * 0.0039f };
-
-                    //Console.WriteLine("------" + param.type+"------");
-                    //Console.WriteLine(col1 + "," + col2);
-                    if (col1.B != 0 || col2.R != 0)
+                    else
                     {
-                        SetUIMessage(param.GetDeviceParamsUI().label_pixel_found, "not found", Color.Red, "Missing Pixel", "Data Pixel for Behviour " + i + " of toy " + Mediator.activeToys[device.device_name].name +" could not be found.", 60000, true);
+                        if (behaviour.GetRuntimeData().wasFound)
+                        {
+                            SetUIMessage(t.GetDeviceUI().GetBehaviourUI(behaviour).label_pixel_found, "not found", Color.Red, "Missing Pixel", "Data Pixel for Behviour " + behaviour.type + " of toy " + t.name + " could not be found.", 60000, true);
+                            behaviour.GetRuntimeData().wasFound = false;
+                        }
                         continue;
                     }
-                    else
-                    {
-                        SetUIMessage(param.GetDeviceParamsUI().label_pixel_found, "found", Color.Green);
-                    }
 
-                    
-                    float add = 0;
-                    if(param.type == CalulcationType.VOLUME)
-                    {
-                         add = param.volume_width * width + param.volume_depth * depth;
-                    }else if(param.type == CalulcationType.THRUSTING)
-                    {
-                        float deltaDepth = Math.Abs(depth - behaviourData.lastDepth);
-                        float thrustAcceleration = Math.Min(1, behaviourData.lastThrustAcceleration + param.thrusting_acceleration);
-                        if (deltaDepth == 0)
-                            thrustAcceleration = Math.Max(0, thrustAcceleration-param.thrusting_acceleration);
-
-                        //Console.WriteLine("Thrusting: "+depth+","+deltaDepth);
-                        add = (depth * param.thrusting_depth_scale + deltaDepth * param.thrusting_speed_scale) * thrustAcceleration;
-
-                        behaviourData.lastThrustAcceleration = thrustAcceleration;
-                    }
-                    else if(param.type == CalulcationType.RUBBING)
-                    {
-                        float distance = (float)(Math.Pow(behaviourData.lastAvgPos[0] - avgPos[0], 2) + Math.Pow(behaviourData.lastAvgPos[1] - avgPos[1], 2))*80;
-                        float rubAcceleration = Math.Min(1, behaviourData.lastRubAcceleration + param.rubbing_acceleration);
-
-                        if (distance == 0)
-                            rubAcceleration = Math.Max(0,rubAcceleration-param.rubbing_acceleration*2);
-
-                        add = param.rubbing_scale * Math.Min(1,distance) * rubAcceleration;
-                        //Console.WriteLine("(" + avgPos[0] + "," + avgPos[1] + ") - (" + behaviourData.lastAvgPos[0] + "," + behaviourData.lastAvgPos[1] + ") = " + distance + " * " + param.rubbing_scale + " * " + rubAcceleration + " = "+(param.rubbing_scale * Math.Min(1, distance) * rubAcceleration));
-
-
-                        behaviourData.lastRubAcceleration = rubAcceleration;
-                    }
-                    toyMotors[param.motor].nextStrength += Math.Min(param.max,add);
-
-                    behaviourData.lastDepth = depth;
-                    behaviourData.lastWidth = width;
-                    behaviourData.lastAvgPos = avgPos;
+                    t.featureStrengths[behaviour.feature] += behaviour.CalculateStrength(audioLinkData);
                 }
 
-                double[] vals = new double[device.motors];
-                for (int i = 0; i < toyMotors.Length; i++)
+                for(int i = 0; i < t.totalFeatureCount; i++)
                 {
-                    if (toyMotors[i].nextStrength < config.threshold)
-                        vals[i] = 0;
-                    else
-                        vals[i] = Math.Min(1.0f, toyMotors[i].nextStrength);
-                    toyMotors[i].lastStength = toyMotors[i].nextStrength;
-                    toyMotors[i].nextStrength = 0;
+                    t.ExecuteFeatures(t.featureStrengths);
                 }
-                Mediator.activeToys[device.device_name].ExecuteFeatures(vals);
             }
         }
         #endregion

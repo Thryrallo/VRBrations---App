@@ -10,39 +10,35 @@ using System.Windows.Forms;
 
 namespace VRCToyController
 {
-    public partial class DeviceParamsUI : UserControl
+    public partial class BehaviourUI : UserControl
     {
-        private DeviceUI deviceUI;
-        private DeviceParams param;
+        private Toy toy;
 
         private bool blockApply = false;
 
-        public DeviceParamsUI(string[] motorValues, bool loadedFromConfig, DeviceUI deviceUI)
+        private BehaviourData behaviourData;
+
+        public BehaviourUI(Toy toy, BehaviourData behaviourData, string[] featureNames)
         {
             InitializeComponent();
 
-            this.deviceUI = deviceUI;
+            this.toy = toy;
+            this.behaviourData = behaviourData;
 
             foreach (object o in Enum.GetValues(typeof(CalulcationType)))
                 this.typeSelector.Items.Add(o);
-            
-            motor.Items.AddRange(motorValues);
 
-            if (loadedFromConfig)
-            {
-                typeSelector.SelectedIndex = 0;
-                EnagleSelectedGroup();
-                motor.SelectedIndex = 0;
-                Apply_All();
-            }
+            foreach (object o in Enum.GetValues(typeof(AudioLinkChannel)))
+                this.audioLinkChannel.Items.Add(o);
 
-            deviceUI.paramsList.Controls.Add(this);
-            this.LoadCorrelatingDeviceParams();
+            motor.Items.AddRange(featureNames);
+
+            Populate(behaviourData);
         }
 
-        public DeviceParams GetDeviceParam()
+        public BehaviourData GetBehaviourData()
         {
-            return param;
+            return behaviourData;
         }
 
         private void Apply_All()
@@ -54,96 +50,61 @@ namespace VRCToyController
             Apply_Volume(null, new KeyEventArgs(Keys.None));
             Apply_Thrusting(null, new KeyEventArgs(Keys.None));
             Apply_Rubbing(null, new KeyEventArgs(Keys.None));
+            Apply_AudioLink(null, new KeyEventArgs(Keys.None));
         }
 
         private void Apply_InputPos(object sender, EventArgs e)
         {
             if (blockApply) return;
-            LoadCorrelatingDeviceParams();
-            param.input_pos = new int[] { (int)this.x.Value, (int)this.y.Value };
+            behaviourData.SetInputPos(new int[] { (int)this.x.Value, (int)this.y.Value });
         }
 
         private void Apply_Max(object sender, KeyEventArgs e)
         {
             if (blockApply) return;
-            LoadCorrelatingDeviceParams();
-            param.max = Math.Min(1.0f, Math.Max(0.0f, ParseFloat(this.max.Text)));
+            behaviourData.SetMax(ParseFloat(this.max.Text));
         }
 
         private void Apply_Type(object sender, EventArgs e)
         {
             if (blockApply) return;
-            LoadCorrelatingDeviceParams();
-            param.type = (CalulcationType)this.typeSelector.SelectedIndex;
+            behaviourData.SetCalculationType((CalulcationType)this.typeSelector.SelectedIndex);
         }
 
         private void Apply_Feature(object sender, EventArgs e)
         {
             if (blockApply) return;
-            LoadCorrelatingDeviceParams();
-            param.motor = this.motor.SelectedIndex;
+            behaviourData.SetFeature(this.motor.SelectedIndex);
         }
 
         private void Apply_Volume(object sender, KeyEventArgs e)
         {
             if (blockApply) return;
-            LoadCorrelatingDeviceParams();
-            param.volume_width = ParseFloat(this.volume_width);
-            param.volume_depth = ParseFloat(this.volume_depth);
+            behaviourData.SetVolume(ParseFloat(this.volume_width), ParseFloat(this.volume_depth));
         }
 
         private void Apply_Thrusting(object sender, KeyEventArgs e)
         {
             if (blockApply) return;
-            LoadCorrelatingDeviceParams();
-            param.thrusting_acceleration = Math.Min(1, ParseFloat(this.thrust_acceleration));
-            param.thrusting_speed_scale = ParseFloat(this.thrust_speed_scale);
-            param.thrusting_depth_scale = ParseFloat(this.thrust_depth_scale);
+            behaviourData.SetThrusting(Math.Min(1, ParseFloat(this.thrust_acceleration)), ParseFloat(this.thrust_speed_scale), ParseFloat(this.thrust_depth_scale));
         }
 
         private void Apply_Rubbing(object sender, KeyEventArgs e)
         {
             if (blockApply) return;
-            LoadCorrelatingDeviceParams();
-            param.rubbing_acceleration = Math.Min(1, ParseFloat(this.rub_acceleration));
-            param.rubbing_scale = ParseFloat(this.rub_scale);
+            behaviourData.SetRubbing(Math.Min(1, ParseFloat(this.rub_acceleration)), ParseFloat(this.rub_scale));
         }
 
-        private void LoadCorrelatingDeviceParams()
+        private void Apply_AudioLink(object sender, EventArgs e)
         {
-            if (param != null) return;
-
-            Device device = GetCorrelatingDevice();
-
-            int index = deviceUI.paramsList.Controls.IndexOf(this);
-            if (index < device.device_params.Length && index > -1)
-            {
-                param = device.device_params[index];
-                param.SetDeviceParamsUI(this);
-            }
-            else
-            {
-                param = new DeviceParams();
-                param.SetDeviceParamsUI(this);
-                List<DeviceParams> list = new List<DeviceParams>(device.device_params);
-                list.Add(param);
-                device.device_params = list.ToArray();
-            }
+            if (blockApply) return;
+            behaviourData.SetAudioLink((AudioLinkChannel)audioLinkChannel.SelectedIndex, ParseFloat(this.audioLinkStrength));
         }
 
-        private Device GetCorrelatingDevice()
+        private void Apply_AudioLink(object sender, KeyEventArgs e)
         {
-            Device device = Config.Singleton.devices.FirstOrDefault(d => d.device_name == deviceUI.Name);
-            if (device == null)
-            {
-                device = new Device();
-                device.device_name = deviceUI.Name;
-                device.motors = deviceUI.motorsValues.Length;
-                List<Device> list = new List<Device>(Config.Singleton.devices);
-                list.Add(device);
-                Config.Singleton.devices = list.ToArray();
-            }
-            return device;
+            if (blockApply) return;
+            behaviourData.SetAudioLink((AudioLinkChannel)audioLinkChannel.SelectedIndex, ParseFloat(this.audioLinkStrength));
         }
 
         private float ParseFloat(TextBox box)
@@ -165,14 +126,14 @@ namespace VRCToyController
             return 1.0f;
         }
 
-        public void Populate(DeviceParams param)
+        private void Populate(BehaviourData param)
         {
             blockApply = true;
 
             this.x.Value = param.input_pos[0];
             this.y.Value = param.input_pos[1];
 
-            this.motor.SelectedIndex = param.motor;
+            this.motor.SelectedIndex = param.feature;
 
             this.max.Text = CleanConfigNumber(param.max);
 
@@ -185,6 +146,9 @@ namespace VRCToyController
 
             this.rub_acceleration.Text = CleanConfigNumber(param.rubbing_acceleration);
             this.rub_scale.Text = CleanConfigNumber(param.rubbing_scale);
+
+            this.audioLinkStrength.Text = CleanConfigNumber(param.audioLink_scale);
+            this.audioLinkChannel.SelectedIndex = (int)param.audioLink_channel;
 
             typeSelector.SelectedIndex =  (int)param.type;
 
@@ -253,18 +217,12 @@ namespace VRCToyController
             groupVolume.Visible = selected == CalulcationType.VOLUME;
             groupThrusting.Visible = selected == CalulcationType.THRUSTING;
             groupRubbing.Visible = selected == CalulcationType.RUBBING;
+            audioLinkSettings.Visible = selected == CalulcationType.AudioLink;
         }
 
         private void rem_button_Click(object sender, EventArgs e)
         {
-            //remove from config
-            Device device = Config.Singleton.devices.FirstOrDefault(d => d.device_name == deviceUI.Name);
-            List<DeviceParams> dparams = new List<DeviceParams>(device.device_params);
-            dparams.Remove(param);
-            device.device_params = dparams.ToArray();
-            Config.Singleton.Save();
-            //remove from ui
-            deviceUI.paramsList.Controls.Remove(this);
+            toy.RemoveBehaviour(this);
         }
     }
 }

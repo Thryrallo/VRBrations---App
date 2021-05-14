@@ -82,33 +82,14 @@ namespace VRCToyController
             //Remove old devices
             //Where domains is same and domain does not contain toy
             IEnumerable<LovenseConnectToy> oldToys = previouslyExistingToys.Where(t => t.domain.domain == domainId && domain.toys.ContainsKey(t.id) == false);
-            foreach (LovenseConnectToy t in oldToys) Mediator.RemoveToy(domainId + "_" + t.id);
+            foreach (LovenseConnectToy t in oldToys) Mediator.ToyDisconnected(domainId + "_" + t.id);
         }
 
         private void AddToy(LovenseConnectToy t, LovenseConnectDomain d)
         {
-            
-            if (Enum.TryParse<LovenseConnectToyType>(t.name.ToLower(), out t.type) == false)
-                t.type = LovenseConnectToyType.none;
-            Program.DebugToFile("[LovenseConnect] Add Toy: " + t.name + "," + t.id+ ", type: "+t.type);
-            t.featureCount[ToyFeatureType.Vibrate] = 1;
-            switch (t.type)
-            {
-                case LovenseConnectToyType.max:
-                    t.featureCount[ToyFeatureType.Air] = 1;
-                    break;
-                case LovenseConnectToyType.nora:
-                    t.featureCount[ToyFeatureType.Rotate] = 1;
-                    break;
-                case LovenseConnectToyType.edge:
-                    t.featureCount[ToyFeatureType.Vibrate] = 2;
-                    break;
-            }
-            t.UpdateTotalFeatureCount();
-            t.toyAPI = this;
-            t.domain = d;
-            t.vrcToys_id = d.domain + "_" + t.id;
-            Mediator.AddToy(t);
+            t.Constructor(d, this);
+            Program.DebugToFile("[LovenseConnect] Add Toy: " + t.name + "," + t.id + ", type: " + t.type);
+            Mediator.ToyConnected(t);
         }
 
         public void ClearToys()
@@ -120,7 +101,7 @@ namespace VRCToyController
                     toRemove.Add(t);
             }
             foreach (Toy t in toRemove)
-                Mediator.RemoveToy(t.name);
+                Mediator.ToyDisconnected(t.name);
         }
 
         protected class LovenseConnectDomain
@@ -249,7 +230,31 @@ namespace VRCToyController
 
             public LovenseConnectToy() : base()
             {
+                
+            }
 
+            public void Constructor(LovenseConnectDomain d, LovenseConnectAPI api)
+            {
+                if (Enum.TryParse<LovenseConnectToyType>(name.ToLower(), out type) == false)
+                    type = LovenseConnectToyType.none;
+                featureCount[ToyFeatureType.Vibrate] = 1;
+                switch (type)
+                {
+                    case LovenseConnectToyType.max:
+                        featureCount[ToyFeatureType.Air] = 1;
+                        break;
+                    case LovenseConnectToyType.nora:
+                        featureCount[ToyFeatureType.Rotate] = 1;
+                        break;
+                    case LovenseConnectToyType.edge:
+                        featureCount[ToyFeatureType.Vibrate] = 2;
+                        break;
+                }
+                UpdateTotalFeatureCount();
+                toyAPI = api;
+                domain = d;
+                id = d.domain + "_" + id;
+                AtEndOfConstructor();
             }
 
             private const string vibrateURL = "Vibrate";

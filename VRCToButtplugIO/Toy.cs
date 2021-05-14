@@ -10,15 +10,19 @@ namespace VRCToyController
 {
     public abstract class Toy
     {
-        public DeviceUI ui;
         public ToyAPI toyAPI;
         public string name;
-        public string vrcToys_id;
+        public string id;
         public Dictionary<ToyFeatureType, int> featureCount;
         public int totalFeatureCount;
 
         private int batteryLevel = 100;
         private bool hasSentBatteryWarning = false;
+
+        private DeviceData deviceData;
+        private DeviceUI deviceUI;
+
+        public double[] featureStrengths;
 
         public Toy()
         {
@@ -26,6 +30,45 @@ namespace VRCToyController
             foreach(ToyFeatureType f in Enum.GetValues(typeof(ToyFeatureType))){
                 featureCount[f] = 0;
             }
+        }
+
+        public void AtEndOfConstructor()
+        {
+            featureStrengths = new double[totalFeatureCount];
+            deviceData = Config.Singleton.GetDeviceData(this);
+        }
+
+        public void CreateUI()
+        {
+            deviceUI = new DeviceUI(this);
+            Mediator.ui.deviceList.Controls.Add(deviceUI);
+            toyAPI.UpdateBatteryIndicator(this);
+        }
+
+        public DeviceUI GetDeviceUI()
+        {
+            return deviceUI;
+        }
+
+        public DeviceData GetDeviceData()
+        {
+            return deviceData;
+        }
+
+        public void AddBehaviour()
+        {
+            deviceUI.AddBehaviourUI(deviceData.AddBehaviour(this));
+        }
+
+        public void RemoveBehaviour(BehaviourUI behaviourUI)
+        {
+            deviceUI.RemoveBehaviourUI(behaviourUI);
+            deviceData.RemoveBehaviour(behaviourUI.GetBehaviourData());
+        }
+
+        public List<BehaviourData> GetBehaviours()
+        {
+            return deviceData.behaviours;
         }
 
         public void UpdateTotalFeatureCount()
@@ -55,6 +98,13 @@ namespace VRCToyController
             {
                 Vibrate(strength.Take(1));
             }
+        }
+
+        public void TurnOff()
+        {
+            Vibrate(new double[] { 0 });
+            Rotate(new double[] { 0 });
+            Air(new double[] { 0 });
         }
 
         public abstract void Vibrate(IEnumerable<double> strength);
@@ -88,14 +138,14 @@ namespace VRCToyController
 
         private void UpdateBatteryUI()
         {
-            ui.battery_bar.Invoke((Action)delegate ()
+            deviceUI.battery_bar.Invoke((Action)delegate ()
             {
-                var size = ui.battery_bar.Size;
-                size.Width = (int)((this.batteryLevel / 100.0f) * ui.battery_bar.Parent.Size.Width);
-                ui.battery_bar.Size = size;
-                if (this.batteryLevel > 50) ui.battery_bar.BackColor = Color.LimeGreen;
-                else if (this.batteryLevel > 20) ui.battery_bar.BackColor = Color.Orange;
-                else ui.battery_bar.BackColor = Color.Red;
+                var size = deviceUI.battery_bar.Size;
+                size.Width = (int)((this.batteryLevel / 100.0f) * deviceUI.battery_bar.Parent.Size.Width);
+                deviceUI.battery_bar.Size = size;
+                if (this.batteryLevel > 50) deviceUI.battery_bar.BackColor = Color.LimeGreen;
+                else if (this.batteryLevel > 20) deviceUI.battery_bar.BackColor = Color.Orange;
+                else deviceUI.battery_bar.BackColor = Color.Red;
             });
         }
     }

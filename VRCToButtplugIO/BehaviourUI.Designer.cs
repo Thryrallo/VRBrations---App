@@ -1,6 +1,6 @@
 ﻿namespace VRCToyController
 {
-    partial class DeviceParamsUI
+    partial class BehaviourUI
     {
         /// <summary> 
         /// Required designer variable.
@@ -59,8 +59,13 @@
             this.rub_acceleration = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
+            this.audioLinkSettings = new System.Windows.Forms.TableLayoutPanel();
+            this.audioLinkStrength = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.rem_button = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.audioLinkChannel = new System.Windows.Forms.ComboBox();
+            this.label13 = new System.Windows.Forms.Label();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.x)).BeginInit();
@@ -69,6 +74,7 @@
             this.groupVolume.SuspendLayout();
             this.groupThrusting.SuspendLayout();
             this.groupRubbing.SuspendLayout();
+            this.audioLinkSettings.SuspendLayout();
             this.SuspendLayout();
             // 
             // flowLayoutPanel1
@@ -79,6 +85,7 @@
             this.flowLayoutPanel1.Controls.Add(this.groupVolume);
             this.flowLayoutPanel1.Controls.Add(this.groupThrusting);
             this.flowLayoutPanel1.Controls.Add(this.groupRubbing);
+            this.flowLayoutPanel1.Controls.Add(this.audioLinkSettings);
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -417,6 +424,45 @@
             this.label9.Text = "Scale:";
             this.toolTip1.SetToolTip(this.label9, "(strength = (rubSpeed*scale)*(acceleration*time))");
             // 
+            // audioLinkSettings
+            // 
+            this.audioLinkSettings.ColumnCount = 2;
+            this.audioLinkSettings.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.audioLinkSettings.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.audioLinkSettings.Controls.Add(this.label13, 0, 0);
+            this.audioLinkSettings.Controls.Add(this.audioLinkStrength, 1, 1);
+            this.audioLinkSettings.Controls.Add(this.label12, 0, 1);
+            this.audioLinkSettings.Controls.Add(this.audioLinkChannel, 1, 0);
+            this.audioLinkSettings.Location = new System.Drawing.Point(709, 3);
+            this.audioLinkSettings.Name = "audioLinkSettings";
+            this.audioLinkSettings.RowCount = 2;
+            this.audioLinkSettings.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.audioLinkSettings.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 36F));
+            this.audioLinkSettings.Size = new System.Drawing.Size(246, 75);
+            this.audioLinkSettings.TabIndex = 9;
+            this.toolTip1.SetToolTip(this.audioLinkSettings, "(strength = (rubSpeed*scale)*(acceleration*time))");
+            // 
+            // audioLinkStrength
+            // 
+            this.audioLinkStrength.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.audioLinkStrength.Location = new System.Drawing.Point(126, 44);
+            this.audioLinkStrength.Name = "audioLinkStrength";
+            this.audioLinkStrength.Size = new System.Drawing.Size(100, 26);
+            this.audioLinkStrength.TabIndex = 0;
+            this.audioLinkStrength.Text = "1.0";
+            this.audioLinkStrength.TextChanged += new System.EventHandler(this.Apply_AudioLink);
+            // 
+            // label12
+            // 
+            this.label12.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(45, 47);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(75, 20);
+            this.label12.TabIndex = 3;
+            this.label12.Text = "Strength:";
+            this.toolTip1.SetToolTip(this.label12, "(strength = (rubSpeed*scale)*(acceleration*time))");
+            // 
             // rem_button
             // 
             this.rem_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -430,14 +476,34 @@
             this.rem_button.UseVisualStyleBackColor = true;
             this.rem_button.Click += new System.EventHandler(this.rem_button_Click);
             // 
-            // DeviceParamsUI
+            // audioLinkChannel
+            // 
+            this.audioLinkChannel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.audioLinkChannel.FormattingEnabled = true;
+            this.audioLinkChannel.Location = new System.Drawing.Point(126, 3);
+            this.audioLinkChannel.Name = "audioLinkChannel";
+            this.audioLinkChannel.Size = new System.Drawing.Size(117, 28);
+            this.audioLinkChannel.TabIndex = 10;
+            this.audioLinkChannel.SelectedIndexChanged += new System.EventHandler(this.Apply_AudioLink);
+            // 
+            // label13
+            // 
+            this.label13.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(48, 9);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(72, 20);
+            this.label13.TabIndex = 11;
+            this.label13.Text = "Channel:";
+            // 
+            // BehaviourUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.Controls.Add(this.rem_button);
             this.Controls.Add(this.flowLayoutPanel1);
-            this.Name = "DeviceParamsUI";
+            this.Name = "BehaviourUI";
             this.Size = new System.Drawing.Size(460, 239);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel3.ResumeLayout(false);
@@ -452,6 +518,8 @@
             this.groupThrusting.PerformLayout();
             this.groupRubbing.ResumeLayout(false);
             this.groupRubbing.PerformLayout();
+            this.audioLinkSettings.ResumeLayout(false);
+            this.audioLinkSettings.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -491,5 +559,10 @@
         private System.Windows.Forms.Button rem_button;
         public System.Windows.Forms.Label label_pixel_found;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.TableLayoutPanel audioLinkSettings;
+        public System.Windows.Forms.TextBox audioLinkStrength;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label13;
+        public System.Windows.Forms.ComboBox audioLinkChannel;
     }
 }

@@ -34,9 +34,8 @@ namespace VRCToyController
                 var device = aArgs.Device;
                 Program.DebugToFile("[Bluetooth] New device: "+device.Name);
                 ButtplugToy toy = new ButtplugToy(device);
-                toy.vrcToys_id = GetId(device);
                 Program.DebugToFile("[Bluetooth] Add device to ui: " + device.Name);
-                Mediator.AddToy(toy);
+                Mediator.ToyConnected(toy);
                 //Program.DebugToFile(buttplugIOInterface.connectedDevices());
             }
             client.DeviceAdded += HandleDeviceAdded;
@@ -44,7 +43,7 @@ namespace VRCToyController
             void HandleDeviceRemoved(object aObj, DeviceRemovedEventArgs aArgs)
             {
                 //remove from ui
-                Mediator.RemoveToy(GetId(aArgs.Device));
+                Mediator.ToyDisconnected(GetId(aArgs.Device));
                 Program.DebugToFile("[Bluetooth] Removed device: "+ aArgs.Device.Name);
             }
             client.DeviceRemoved += HandleDeviceRemoved;
@@ -59,7 +58,7 @@ namespace VRCToyController
             return buttplugIOInterface;
         }
 
-        private static string GetId(ButtplugClientDevice device)
+        public static string GetId(ButtplugClientDevice device)
         {
             return "BP_"+ device.Name + "_" + device.Index;
         }
@@ -139,6 +138,7 @@ namespace VRCToyController
         {
             this.device = device;
             this.lovenseType = GetLovenseType(device);
+            this.id = ButtplugIOAPI.GetId(device);
             this.name = device.Name;
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd))
                 this.featureCount[ToyFeatureType.Vibrate] = (int)device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd].FeatureCount;
@@ -147,11 +147,8 @@ namespace VRCToyController
             if (lovenseType == LovenseToyType.max)
                 this.featureCount[ToyFeatureType.Air] = 1;
             this.UpdateTotalFeatureCount();
-            foreach (ToyAPI api in Mediator.toyAPIs)
-            {
-                if (api is ButtplugIOAPI)
-                    toyAPI = api;
-            }
+            toyAPI = Mediator.toyAPIs.Where(api => api is ButtplugIOAPI).First();
+            AtEndOfConstructor();
         }
 
         public static LovenseToyType GetLovenseType(ButtplugClientDevice device)

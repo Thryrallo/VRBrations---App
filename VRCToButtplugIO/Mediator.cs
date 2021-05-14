@@ -34,34 +34,37 @@ namespace VRCToyController
             xSNotifier.SendNotification(new XSNotification() { Title = title, Content = content, SourceApp = appName, Timeout = 7  });
         }
 
-        public static void RemoveToy(string id)
+        public static void RemoveToy(Toy toy)
         {
-            SendXSNotification("Toy Disconnected", Mediator.activeToys[id].name);
-            Mediator.activeToys.Remove(id);
+            Program.DebugToFile("[Mediator] Remove Toy " + toy.id);
+            Mediator.activeToys.Remove(toy.id);
             Mediator.ui.Invoke((Action)delegate ()
             {
-                for (int i = Mediator.ui.deviceList.Controls.Count - 1; i >= 0; i--)
-                {
-                    if (Mediator.ui.deviceList.Controls[i].Name == id)
-                        Mediator.ui.deviceList.Controls.RemoveAt(i);
-
-                }
+                Mediator.ui.deviceList.Controls.Remove(toy.GetDeviceUI());
             });
         }
 
         public static void AddToy(Toy toy)
         {
-            SendXSNotification("Toy Connected", toy.name);
+            Program.DebugToFile("[Mediator] Add Toy " + toy.id);
+            Mediator.activeToys.Add(toy.id, toy);
             Mediator.ui.Invoke((Action)delegate ()
             {
-                DeviceUI deviceControl = new DeviceUI(toy);
-                toy.ui = deviceControl;
-                Mediator.activeToys.Add(toy.vrcToys_id, toy);
-
-                Mediator.ui.deviceList.Controls.Add(deviceControl);
-
-                toy.toyAPI.UpdateBatteryIndicator(toy);
+                toy.CreateUI();
             });
+        }
+
+        public static void ToyDisconnected(string id)
+        {
+            Toy toy = Mediator.activeToys[id];
+            SendXSNotification("Toy Disconnected", toy.name);
+            RemoveToy(toy);
+        }
+
+        public static void ToyConnected(Toy toy)
+        {
+            SendXSNotification("Toy Connected", toy.name);
+            AddToy(toy);
         }
     }
 }
