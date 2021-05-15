@@ -120,6 +120,20 @@ namespace VRCToyController
             ExecuteFeatures(new double[] { 0, 0 });
         }
 
+        public void TestBehaviours()
+        {
+            foreach (BehaviourData behaviour in GetDeviceData().behaviours)
+            {
+                double[] strengths = new double[totalFeatureCount];
+                for (int i = 0; i < strengths.Length; i++) strengths[i] = 0;
+                strengths[behaviour.feature] = behaviour.max;
+                //Console.WriteLine("Testing " + behaviour.feature + " at " + behaviour.max);
+                ExecuteFeatures(strengths);
+                System.Threading.Thread.Sleep(2000);
+            }
+            TurnOff();
+        }
+
         public void UpdateBatteryIndicator()
         {
             toyAPI.UpdateBatteryIndicator(this);

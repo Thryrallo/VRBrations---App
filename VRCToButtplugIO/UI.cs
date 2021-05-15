@@ -126,6 +126,7 @@ namespace VRCToyController
             {
                 selectedConfigIndex = configSelector.SelectedIndex;
             }
+            this.ActiveControl = looseFocus;
         }
 
         private void configSelector_KeyDown(object sender, KeyEventArgs e)

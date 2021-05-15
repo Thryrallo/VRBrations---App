@@ -30,12 +30,6 @@ namespace VRCToyController
             this.name.Text = toy.name;
             this.toy = toy;
 
-            //Test button function
-            b_test.Click += delegate (object o, EventArgs a)
-            {
-                toy.Test();
-            };
-
             //Add feature names
             featureNames = new string[toy.totalFeatureCount];
             int j = 0;
@@ -89,16 +83,7 @@ namespace VRCToyController
             {
                 Task.Factory.StartNew(() => {
                     is_testing = true;
-
-                    foreach(BehaviourData behaviour in toy.GetDeviceData().behaviours)
-                    {
-                        double[] strengths = new double[toy.totalFeatureCount];
-                        for (int i = 0; i < strengths.Length; i++) strengths[i] = 0;
-                        strengths[behaviour.feature] = behaviour.max;
-                        //Console.WriteLine("Testing " + deviceParam.motor + " at " + deviceParam.max);
-                        toy.ExecuteFeatures(strengths);
-                        System.Threading.Thread.Sleep(2000);
-                    }
+                    toy.TestBehaviours();
                     is_testing = false;
                 });
             }

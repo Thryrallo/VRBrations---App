@@ -34,37 +34,49 @@ namespace VRCToyController
             xSNotifier.SendNotification(new XSNotification() { Title = title, Content = content, SourceApp = appName, Timeout = 7  });
         }
 
-        public static void RemoveToy(Toy toy)
+        public static bool RemoveToy(Toy toy)
         {
-            Program.DebugToFile("[Mediator] Remove Toy " + toy.id);
-            Mediator.activeToys.Remove(toy.id);
-            Mediator.ui.Invoke((Action)delegate ()
+            if (activeToys.ContainsKey(toy.id))
             {
-                Mediator.ui.deviceList.Controls.Remove(toy.GetDeviceUI());
-            });
+                activeToys.Remove(toy.id);
+                Program.DebugToFile($"[Mediator] Remove Toy {toy.id}");
+                ui.Invoke((Action)delegate () { ui.deviceList.Controls.Remove(toy.GetDeviceUI()); });
+                return true;
+            }
+            else
+            {
+                Program.DebugToFile($"[Mediator] Tried to remove Toy {toy.id} that is not dictionery.");
+                return false;
+            }
         }
 
-        public static void AddToy(Toy toy)
+        public static bool AddToy(Toy toy)
         {
-            Program.DebugToFile("[Mediator] Add Toy " + toy.id);
-            Mediator.activeToys.Add(toy.id, toy);
-            Mediator.ui.Invoke((Action)delegate ()
+            if (activeToys.ContainsKey(toy.id))
             {
-                toy.CreateUI();
-            });
+                Program.DebugToFile($"[Mediator] Tried to add Toy {toy.id} but key already exisits.");
+                return false;
+            }
+            else
+            {
+                activeToys.Add(toy.id, toy);
+                Program.DebugToFile($"[Mediator] Add Toy {toy.id}");
+                ui.Invoke((Action)delegate (){ toy.CreateUI(); });
+                return true;
+            }
         }
 
         public static void ToyDisconnected(string id)
         {
+            if (activeToys.ContainsKey(id) == false) return;
             Toy toy = Mediator.activeToys[id];
-            SendXSNotification("Toy Disconnected", toy.name);
-            RemoveToy(toy);
+            if(RemoveToy(toy)) SendXSNotification("Toy Disconnected", toy.name);
         }
 
         public static void ToyConnected(Toy toy)
         {
-            SendXSNotification("Toy Connected", toy.name);
-            AddToy(toy);
+            if (toy == null) return;
+            if(AddToy(toy)) SendXSNotification("Toy Connected", toy.name);
         }
     }
 }

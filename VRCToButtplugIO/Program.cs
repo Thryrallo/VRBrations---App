@@ -160,8 +160,8 @@ namespace VRCToyController
             return ScreenScalingFactor; // 1.25 = 125%
         }
 
-        static void CreateLogicThread()
-        {
+                                                    static void CreateLogicThread()             
+                                                    {
             var thread = new Thread(Logic);
             thread.IsBackground = true;
             thread.Start();
@@ -202,7 +202,8 @@ namespace VRCToyController
 
         static readonly Color GLOBAL_INDICATOR_COLOR = GetGammaColor(0.69,0.01,0.69);
 
-        static long lastSlowUpdate = 0;
+        static long lastSlowUpdateStart = 0;
+        static long lastSlowUpdateEnd = 0;
         const float slowUpdateRate = 10000;
 
         static long lastUpdate = 0;
@@ -214,6 +215,7 @@ namespace VRCToyController
         {
             while (true)
             {
+                long now;
                 if (KeyManager.VerifyKey())
                 {
                     string activeWindow = GetActiveWindow();
@@ -229,7 +231,7 @@ namespace VRCToyController
                                 CheckCaptureForInput(capture);
                                 capture.Dispose();
 
-                                SetUIMessage(Mediator.ui.label_vrc_focus, "VRC is in focus", Color.Green);
+                                SetUIMessage(Mediator.ui.label_vrc_focus, $"VRC is in focus ( {windowType} )", Color.Green);
                             }
                             else
                             {
@@ -244,27 +246,31 @@ namespace VRCToyController
                     }
                     else
                     {
-                        TurnAllToysOff();
                         if (wasVRChatInFocus)
                         {
+                            TurnAllToysOff();
                             vrchatNotInFocusStart = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                         }
-                        SetUIMessage(Mediator.ui.label_vrc_focus, "VRC not in focus\nCurrent window:\n" + activeWindow, Color.Red);
+                        SetUIMessage(Mediator.ui.label_vrc_focus, $"VRC not in focus\nCurrent window:\n{activeWindow}", Color.Red);
                     }
                     wasVRChatInFocus = isAppInFocus;
                     //do slow update on apis
-                    if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastSlowUpdate > slowUpdateRate)
+                    now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    if (now - lastSlowUpdateStart > slowUpdateRate && now - lastSlowUpdateEnd > slowUpdateRate)
                     {
                         Thread slowUpdate = new Thread(SlowUpdate);
                         slowUpdate.Name = "SlowUpdate";
                         slowUpdate.Start();
+                        lastSlowUpdateStart = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     } 
                     
                     lastVerifiedKey = lastUpdate;
                 }
-                else if (lastUpdate != 0 && (lastUpdate-lastUpdate) > 10000)
+                else if (lastUpdate != 0 && (lastVerifiedKey - lastUpdate) > 30000)
                 {
+                    DebugToFile("[KEY] Key has not been verified recently. Closing Application.");
                     Task.Delay(1000).ContinueWith(t => { System.Windows.Forms.Application.Exit(); });
+                    now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 }
                 int timeout = (int)(config.update_rate - (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastUpdate));
                 if(timeout>0)
@@ -287,14 +293,14 @@ namespace VRCToyController
             //Not in focus notification
             if(wasVRChatInFocus == false && hasSentNotInFocusNotification==false && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - vrchatNotInFocusStart > 20000)
             {
-                Mediator.SendXSNotification("VRChat is not in focus.", "Make sure the vrchat window is the active window.");
+                //Mediator.SendXSNotification("VRChat is not in focus.", "Make sure the vrchat window is the active window.");
                 hasSentNotInFocusNotification = true;
             }
             else if(wasVRChatInFocus)
             {
                 hasSentNotInFocusNotification = false;
             }
-            lastSlowUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            lastSlowUpdateEnd = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         }
 
         private static Dictionary<Label, long> lastXSMessageTime = new Dictionary<Label, long>();
@@ -410,7 +416,7 @@ namespace VRCToyController
                     //Get The pixel data and set label accordingly
                     if (behaviourFound)
                     {
-                        if (behaviour.GetRuntimeData().wasFound == false)
+                        if (behaviour.GetRuntimeData().wasFound == false && t.GetDeviceUI() != null)
                         {
                             SetUIMessage(t.GetDeviceUI().GetBehaviourUI(behaviour).label_pixel_found, "found", Color.Green);
                             behaviour.GetRuntimeData().wasFound = true;
@@ -418,9 +424,9 @@ namespace VRCToyController
                     }
                     else
                     {
-                        if (behaviour.GetRuntimeData().wasFound)
+                        if (behaviour.GetRuntimeData().wasFound && t.GetDeviceUI() != null)
                         {
-                            SetUIMessage(t.GetDeviceUI().GetBehaviourUI(behaviour).label_pixel_found, "not found", Color.Red, "Missing Pixel", "Data Pixel for Behviour " + behaviour.type + " of toy " + t.name + " could not be found.", 60000, true);
+                            SetUIMessage(t.GetDeviceUI().GetBehaviourUI(behaviour).label_pixel_found, "not found", Color.Red);
                             behaviour.GetRuntimeData().wasFound = false;
                         }
                         continue;
@@ -471,45 +477,80 @@ namespace VRCToyController
             return "";
         }
 
-        static bool wasFullScreen;
+        static WindowType windowType;
+        static Rectangle lastBounds;
         static int vrcBlackBarsHorizontal = 0;
         static int vrcBlackBarsVertical = 0;
         private static Rectangle GetWindowBounds()
+        {
+            Rectangle forgroundWindowBounds = GetForegroundWindowBounds();
+            if(forgroundWindowBounds != lastBounds)
+            {
+                //Recalculate windowtype and
+                if(IsBoundsFullScreen(forgroundWindowBounds,null) == false)
+                {
+                    if (windowType != WindowType.windowed) DebugToFile("[Game Window] Swapped to windowed");
+                    windowType = WindowType.windowed;
+                    lastBounds = forgroundWindowBounds;
+                }
+                else
+                {
+                    Thread.Sleep(500);
+                    Bitmap capture = Capture(forgroundWindowBounds);
+                    Color topLeft = capture.GetPixel(1, 1);
+                    Color topRight = capture.GetPixel(capture.Width - 2, 1);
+
+                    if (topLeft == topRight && topLeft == Color.FromArgb(255, 255, 255))
+                    {
+                        if (windowType != WindowType.maximized) DebugToFile("[Game Window] Swapped to maximized");
+                        windowType = WindowType.maximized;
+                        lastBounds = forgroundWindowBounds;
+                    }
+                    else
+                    {
+                        if (windowType != WindowType.fullscreen) DebugToFile("[Game Window] Swapped to fullscreen");
+                        //Is Fullscreen
+                        //if whole screen black try again next time
+                        if (OnVRCEnteredFullscreen(capture, forgroundWindowBounds))
+                        {
+                            //Bitmap capture = Capture(BoundsRemoveVRCBlackBars(fullBounds));
+                            //capture.Save("./fullscreen.jpg", ImageFormat.Jpeg);
+                            //capture.Dispose();
+                            windowType = WindowType.fullscreen;
+                            lastBounds = forgroundWindowBounds;
+                        }
+                    }
+                    capture.Dispose();
+                }
+            }
+
+            switch (windowType)
+            {
+                case WindowType.maximized:
+                case WindowType.windowed:
+                    return CleanBounds(forgroundWindowBounds);
+                case WindowType.fullscreen:
+                    return BoundsRemoveVRCBlackBars(forgroundWindowBounds);
+            }
+            return forgroundWindowBounds;
+        }
+
+        private static Rectangle GetForegroundWindowBounds()
         {
             Rectangle fullBounds = new Rectangle();
             IntPtr handle = GetForegroundWindow();
             RECT rct = GetWindowRectangle(handle);
             //MessageBox.Show(rct.ToString());
 
-            fullBounds.X = (int)(rct.Left );
-            fullBounds.Y = (int)(rct.Top );
-            fullBounds.Width = (int)((rct.Right - rct.Left + 1) );
-            fullBounds.Height = (int)((rct.Bottom - rct.Top + 1) );
+            fullBounds.X = (int)(rct.Left);
+            fullBounds.Y = (int)(rct.Top);
+            fullBounds.Width = (int)((rct.Right - rct.Left + 1));
+            fullBounds.Height = (int)((rct.Bottom - rct.Top + 1));
 
-            Rectangle cleanedBounds = fullBounds;
-            if (IsBoundsFullScreen(fullBounds, null))
-            {
-                if (wasFullScreen == false)
-                {
-                    DebugToFile("Swapped to fullscreen");
-                    //if whole screen black try again next time
-                    if (OnVRCEnteredFullscreen(fullBounds))
-                    {
-                        //Bitmap capture = Capture(BoundsRemoveVRCBlackBars(fullBounds));
-                        //capture.Save("./fullscreen.jpg", ImageFormat.Jpeg);
-                        //capture.Dispose();
-                        wasFullScreen = true;
-                    }
-                }
-                cleanedBounds = BoundsRemoveVRCBlackBars(fullBounds);
-            }
-            else
-            {
-                cleanedBounds = CleanBounds(fullBounds);
-                wasFullScreen = false;
-            }
-            return cleanedBounds;
+            return fullBounds;
         }
+
+        enum WindowType { windowed, maximized, fullscreen};
 
         public static RECT GetWindowRectangle(IntPtr hWnd)
         {
@@ -528,9 +569,9 @@ namespace VRCToyController
             return bounds;
         }
 
-        private static bool OnVRCEnteredFullscreen(Rectangle fullBounds)
+        private static bool OnVRCEnteredFullscreen(Bitmap capture, Rectangle fullBounds)
         {
-            Bitmap capture = Capture(fullBounds);
+            
 
             vrcBlackBarsHorizontal = 0;
             bool collumIsBlack = true;
@@ -564,7 +605,6 @@ namespace VRCToyController
 
             int width = capture.Width;
             int height = capture.Height;
-            capture.Dispose();
             if (vrcBlackBarsHorizontal == width || vrcBlackBarsVertical == height)
             {
                 vrcBlackBarsHorizontal = 0;

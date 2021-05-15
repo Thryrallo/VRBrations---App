@@ -25,7 +25,6 @@ namespace VRCToyController
 
         private LovenseConnectAPI()
         {
-            GetToys();
         }
 
         public void GetToys()
@@ -56,12 +55,14 @@ namespace VRCToyController
 
         private void HandleDomainToys(string domainId, LovenseConnectDomain domain, IEnumerable<LovenseConnectToy> previouslyExistingToys)
         {
+            //move id to lovenseId
+            foreach (LovenseConnectToy t in domain.toys.Values) t.lovenseId = t.id;
             //if domains already exists check for new toys
             if (domains.ContainsKey(domainId))
             {
                 foreach (LovenseConnectToy t in domain.toys.Values)
                 {
-                    bool isNewToy = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy && (aT as LovenseConnectToy).id == t.id && (aT as LovenseConnectToy).domain.domain == domainId).Count() == 0;
+                    bool isNewToy = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy && (aT as LovenseConnectToy).lovenseId == t.lovenseId && (aT as LovenseConnectToy).domain.domain == domainId).Count() == 0;
                     if (isNewToy && t.status == 1)
                     {
                         AddToy(t, domain);
@@ -71,24 +72,25 @@ namespace VRCToyController
             //else add all toys
             else
             {
-                Program.DebugToFile("[LovenseConnect] New Domain: " + domainId);
                 domains.Add(domainId, domain);
+                Program.DebugToFile("[LovenseConnect] New Domain: " + domainId);
                 foreach (LovenseConnectToy t in domain.toys.Values)
                 {
+
                     if(t.status == 1)
                         AddToy(t, domain);
                 }
             }
             //Remove old devices
             //Where domains is same and domain does not contain toy
-            IEnumerable<LovenseConnectToy> oldToys = previouslyExistingToys.Where(t => t.domain.domain == domainId && domain.toys.ContainsKey(t.id) == false);
-            foreach (LovenseConnectToy t in oldToys) Mediator.ToyDisconnected(domainId + "_" + t.id);
+            IEnumerable<LovenseConnectToy> oldToys = previouslyExistingToys.Where(t => t.domain.domain == domainId && domain.toys.ContainsKey(t.lovenseId) == false);
+            foreach (LovenseConnectToy t in oldToys) Mediator.ToyDisconnected(t.id);
         }
 
         private void AddToy(LovenseConnectToy t, LovenseConnectDomain d)
         {
+            Program.DebugToFile("[LovenseConnect] Add Toy: " + t.name + "," + t.lovenseId + ", type: " + t.type);
             t.Constructor(d, this);
-            Program.DebugToFile("[LovenseConnect] Add Toy: " + t.name + "," + t.id + ", type: " + t.type);
             Mediator.ToyConnected(t);
         }
 
@@ -160,7 +162,7 @@ namespace VRCToyController
 
         protected static void LovenseGet(LovenseConnectToy t, string url, double speed)
         {
-            string fullurl = t.domain.url + "/" + url + "?v=" + (int)(speed * 20 + 0.4f) + "&t=" + t.id;
+            string fullurl = t.domain.url + "/" + url + "?v=" + (int)(speed * 20 + 0.4f) + "&t=" + t.lovenseId;
             //Console.WriteLine("GET:: " + fullurl);
             try
             {
@@ -201,7 +203,8 @@ namespace VRCToyController
 
         private struct LovenseBattery
         {
-            public int data;
+            public string data;
+            public int code;
         }
 
         private struct CustomLovenseConnectDomain
@@ -214,15 +217,18 @@ namespace VRCToyController
         private void UpdateBatteryIndicatorAsync(Toy iToy)
         {
             LovenseConnectToy t = (LovenseConnectToy)iToy;
-            string fullurl = t.domain.url + "/Battery?t="+t.id;
+            string fullurl = t.domain.url + "/Battery?t="+t.lovenseId;
             string data = Get(fullurl);
             LovenseBattery battery = JsonConvert.DeserializeObject<LovenseBattery>(data);
-            t.SetBatterLevel(battery.data);
+            if(battery.code == 200)
+            {
+                t.SetBatterLevel(int.Parse(battery.data));
+            }
         }
 
         protected class LovenseConnectToy : Toy
         {
-            public string id;
+            public string lovenseId;
             public string nickName;
             public int status;
             public LovenseConnectToyType type;
