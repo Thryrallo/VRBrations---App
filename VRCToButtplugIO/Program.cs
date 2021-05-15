@@ -346,9 +346,9 @@ namespace VRCToyController
         {
             int[] pos = behaviourData.input_pos;
             float x1 = pos[0] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.25f;
-            float y1 = pos[1] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.5f;
+            float y1 = pos[1] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.25f;
             float x2 = pos[0] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.75f;
-            float y2 = pos[1] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.5f;
+            float y2 = pos[1] * Config.PIXEL_SCALE + Config.PIXEL_SCALE * 0.25f;
             Color col1 = capture.GetPixel((int)(x1 * capture.Width), (int)(y1 * capture.Height));
             Color col2 = capture.GetPixel((int)(x2 * capture.Width), (int)(y2 * capture.Height));
             //Console.WriteLine(i + ": " + col1 + " at "+ (int)(x1 * capture.Width) +","+ (int)(y1 * capture.Height));
@@ -425,8 +425,8 @@ namespace VRCToyController
                         }
                         continue;
                     }
-
                     t.featureStrengths[behaviour.feature] += behaviour.CalculateStrength(audioLinkData);
+                    behaviour.GetBehaviourUI(t).UpdateStrengthIndicatorValue();
                 }
 
                 for(int i = 0; i < t.totalFeatureCount; i++)

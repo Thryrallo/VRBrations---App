@@ -66,6 +66,9 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.audioLinkChannel = new System.Windows.Forms.ComboBox();
             this.label13 = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.battery_bar = new System.Windows.Forms.Label();
+            this.strengthIndicator = new System.Windows.Forms.Label();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.x)).BeginInit();
@@ -75,6 +78,7 @@
             this.groupThrusting.SuspendLayout();
             this.groupRubbing.SuspendLayout();
             this.audioLinkSettings.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // flowLayoutPanel1
@@ -468,7 +472,7 @@
             this.rem_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.rem_button.AutoSize = true;
             this.rem_button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.rem_button.Location = new System.Drawing.Point(377, 199);
+            this.rem_button.Location = new System.Drawing.Point(374, 199);
             this.rem_button.Name = "rem_button";
             this.rem_button.Size = new System.Drawing.Size(78, 30);
             this.rem_button.TabIndex = 5;
@@ -496,6 +500,35 @@
             this.label13.TabIndex = 11;
             this.label13.Text = "Channel:";
             // 
+            // panel1
+            // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.panel1.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.strengthIndicator);
+            this.panel1.Controls.Add(this.battery_bar);
+            this.panel1.Location = new System.Drawing.Point(3, 225);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(452, 20);
+            this.panel1.TabIndex = 5;
+            // 
+            // battery_bar
+            // 
+            this.battery_bar.BackColor = System.Drawing.Color.Red;
+            this.battery_bar.Location = new System.Drawing.Point(1, 1);
+            this.battery_bar.Margin = new System.Windows.Forms.Padding(0);
+            this.battery_bar.Name = "battery_bar";
+            this.battery_bar.Size = new System.Drawing.Size(0, 31);
+            this.battery_bar.TabIndex = 0;
+            // 
+            // strengthIndicator
+            // 
+            this.strengthIndicator.BackColor = System.Drawing.Color.Cyan;
+            this.strengthIndicator.Location = new System.Drawing.Point(0, 0);
+            this.strengthIndicator.Name = "strengthIndicator";
+            this.strengthIndicator.Size = new System.Drawing.Size(0, 20);
+            this.strengthIndicator.TabIndex = 1;
+            // 
             // BehaviourUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -503,8 +536,9 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.Controls.Add(this.rem_button);
             this.Controls.Add(this.flowLayoutPanel1);
+            this.Controls.Add(this.panel1);
             this.Name = "BehaviourUI";
-            this.Size = new System.Drawing.Size(460, 239);
+            this.Size = new System.Drawing.Size(460, 255);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel3.ResumeLayout(false);
             this.flowLayoutPanel3.PerformLayout();
@@ -520,6 +554,7 @@
             this.groupRubbing.PerformLayout();
             this.audioLinkSettings.ResumeLayout(false);
             this.audioLinkSettings.PerformLayout();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -564,5 +599,8 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label13;
         public System.Windows.Forms.ComboBox audioLinkChannel;
+        private System.Windows.Forms.Panel panel1;
+        public System.Windows.Forms.Label battery_bar;
+        public System.Windows.Forms.Label strengthIndicator;
     }
 }

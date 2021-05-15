@@ -220,6 +220,17 @@ namespace VRCToyController
             audioLinkSettings.Visible = selected == CalulcationType.AudioLink;
         }
 
+        public void UpdateStrengthIndicatorValue()
+        {
+            strengthIndicator.Invoke((Action)delegate
+            {
+               Size size = strengthIndicator.Parent.Size;
+               size.Width = (int)(size.Width * behaviourData.GetCurrentStrength());
+               strengthIndicator.Size = size;
+           });
+            
+        }
+
         private void rem_button_Click(object sender, EventArgs e)
         {
             toy.RemoveBehaviour(this);

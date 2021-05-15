@@ -210,7 +210,7 @@
             this.Controls.Add(this.deviceList);
             this.Controls.Add(this.panel1);
             this.Name = "MainUI";
-            this.Text = "VRbrations";
+            this.Text = "VRbrations 3.0";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainUI_FormClosing);
             this.deviceList.ResumeLayout(false);
             this.deviceList.PerformLayout();

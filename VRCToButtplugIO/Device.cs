@@ -67,6 +67,13 @@ namespace VRCToyController
 
         public float max = 1;
 
+        private BehaviourUI ui;
+        public BehaviourUI GetBehaviourUI(Toy toy)
+        {
+            if(ui == null) ui = toy.GetDeviceUI().GetBehaviourUI(this);
+            return ui;
+        }
+
         public void SetFeature(int max)
         {
             this.feature = Math.Max(0, max);
@@ -129,24 +136,30 @@ namespace VRCToyController
             return runtimeData;
         }
 
+        private float currentStrength;
         public float CalculateStrength(float[] audioLinkData)
         {
             if (type == CalulcationType.VOLUME)
             {
-                return runtimeData.CalculateVolume(volume_width, volume_depth);
+                currentStrength = runtimeData.CalculateVolume(volume_width, volume_depth);
             }
             else if (type == CalulcationType.THRUSTING)
             {
-                return runtimeData.CalculateThrusting(thrusting_acceleration, thrusting_speed_scale, thrusting_depth_scale);
+                currentStrength = runtimeData.CalculateThrusting(thrusting_acceleration, thrusting_speed_scale, thrusting_depth_scale);
             }
             else if (type == CalulcationType.RUBBING)
             {
-                return runtimeData.CalculateRubbing(thrusting_acceleration, thrusting_speed_scale);
+                currentStrength = runtimeData.CalculateRubbing(thrusting_acceleration, thrusting_speed_scale);
             }else if( type == CalulcationType.AudioLink)
             {
-                return runtimeData.CalculateAudioLink(audioLink_scale, audioLink_channel, audioLinkData);
+                currentStrength = runtimeData.CalculateAudioLink(audioLink_scale, audioLink_channel, audioLinkData);
             }
-            return 0;
+            return currentStrength;
+        }
+
+        public float GetCurrentStrength()
+        {
+            return currentStrength;
         }
     }
 
