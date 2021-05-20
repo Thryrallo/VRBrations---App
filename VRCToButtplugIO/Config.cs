@@ -17,7 +17,10 @@ namespace VRCToyController
 
         //Constant Values
         public static readonly string[] WINDOW_NAMES = new string[] { "VRChat" };
-        public const float PIXEL_SCALE = 0.02f;
+        public const int SLOW_UPDATE_RATE = 10000;
+        public const int SENSOR_WIDTH = 4;
+        public const int SENSOR_HEIGHT = 4;
+        public static readonly Pixel GLOBAL_INDICATOR_PIXEL = new Pixel(0.69f, 0.01f, 0.69f);
 
         //Serialized Values
         public float update_rate = 100;

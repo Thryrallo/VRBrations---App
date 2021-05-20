@@ -159,6 +159,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BoundsCalculator.cs" />
     <Compile Include="ButtplugIO.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Device.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="DeviceUI.Designer.cs">
       <DependentUpon>DeviceUI.cs</DependentUpon>
     </Compile>
+    <Compile Include="GameWindowReader.cs" />
     <Compile Include="KeyManager.cs" />
     <Compile Include="LovenseConnectAPI.cs" />
     <Compile Include="NoMousePanel.cs">

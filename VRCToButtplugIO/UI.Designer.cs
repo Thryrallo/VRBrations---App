@@ -47,6 +47,7 @@
             this.configSelector = new System.Windows.Forms.ComboBox();
             this.materialFlatButton1 = new MaterialSkin.Controls.MaterialFlatButton();
             this.looseFocus = new System.Windows.Forms.Label();
+            this.messageLabel2 = new System.Windows.Forms.Label();
             this.deviceList.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel_bottom.SuspendLayout();
@@ -69,7 +70,7 @@
             this.deviceList.BackColor = System.Drawing.Color.White;
             this.deviceList.Controls.Add(this.warning);
             this.deviceList.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.deviceList.Location = new System.Drawing.Point(29, 139);
+            this.deviceList.Location = new System.Drawing.Point(29, 150);
             this.deviceList.Margin = new System.Windows.Forms.Padding(3, 3, 10, 100);
             this.deviceList.Name = "deviceList";
             this.deviceList.Size = new System.Drawing.Size(59, 27);
@@ -197,12 +198,21 @@
             this.looseFocus.Size = new System.Drawing.Size(0, 0);
             this.looseFocus.TabIndex = 10;
             // 
+            // messageLabel2
+            // 
+            this.messageLabel2.BackColor = System.Drawing.Color.White;
+            this.messageLabel2.Location = new System.Drawing.Point(26, 127);
+            this.messageLabel2.Name = "messageLabel2";
+            this.messageLabel2.Size = new System.Drawing.Size(592, 20);
+            this.messageLabel2.TabIndex = 11;
+            // 
             // MainUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(898, 830);
+            this.Controls.Add(this.messageLabel2);
             this.Controls.Add(this.looseFocus);
             this.Controls.Add(this.panel_bottom);
             this.Controls.Add(this.footer);
@@ -210,7 +220,7 @@
             this.Controls.Add(this.deviceList);
             this.Controls.Add(this.panel1);
             this.Name = "MainUI";
-            this.Text = "VRbrations 3.0";
+            this.Text = "VRbrations 3.0 Beta";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainUI_FormClosing);
             this.deviceList.ResumeLayout(false);
             this.deviceList.PerformLayout();
@@ -235,6 +245,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox configSelector;
         private System.Windows.Forms.Label looseFocus;
+        public System.Windows.Forms.Label messageLabel2;
     }
 }
 

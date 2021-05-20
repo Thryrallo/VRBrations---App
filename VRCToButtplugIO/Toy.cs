@@ -152,6 +152,7 @@ namespace VRCToyController
 
         private void UpdateBatteryUI()
         {
+            if (deviceUI.IsHandleCreated == false) return; //Prevents an error being thrown when closing application
             deviceUI.battery_bar.Invoke((Action)delegate ()
             {
                 var size = deviceUI.battery_bar.Size;
