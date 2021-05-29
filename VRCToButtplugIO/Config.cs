@@ -19,8 +19,26 @@ namespace VRCToyController
         public static readonly string[] WINDOW_NAMES = new string[] { "VRChat" };
         public const int SLOW_UPDATE_RATE = 10000;
         public const int SENSOR_WIDTH = 4;
-        public const int SENSOR_HEIGHT = 4;
-        public static readonly Pixel GLOBAL_INDICATOR_PIXEL = new Pixel(0.69f, 0.01f, 0.69f);
+        public const int SENSOR_HEIGHT = 8;
+        public const int CHECK_VALUE_SHORT = 175;
+
+        //Scale for resolution stuff
+        public const int RESOLUTION_SCREEN_WIDTH = 4;
+        public const int RESOLUTION_SCREEN_HEIGHT = 1;
+
+        //Coords for exist check
+        public static readonly PixelCoords COORDS_REFERENCE_COLORS = new PixelCoords(0, 0);
+        public static readonly SensorCoords COORDS_CHECK_VALUE = new SensorCoords(3, 0);
+
+        //Coords for audiolink
+        public static readonly SensorCoords COORDS_AUDIOLINK = new SensorCoords(0, 2);
+        public static readonly SensorCoords COORDS_AUDIOLINK_EXISITS = new SensorCoords(0, 3);
+
+        //Coords for sensor data
+        public static readonly SensorCoords COORDS_SENSOR_DATA_DEPTH = new SensorCoords(0, 2);
+        public static readonly SensorCoords COORDS_SENSOR_DATA_WIDTH = new SensorCoords(1, 2);
+        public static readonly SensorCoords COORDS_SENSOR_DATA_X = new SensorCoords(2, 2);
+        public static readonly SensorCoords COORDS_SENSOR_DATA_Y = new SensorCoords(3, 2);
 
         //Serialized Values
         public float update_rate = 100;
@@ -173,5 +191,31 @@ namespace VRCToyController
         }
 
         #endregion
+    }
+
+    public struct PixelCoords
+    {
+        public int x;
+        public int y;
+        public PixelCoords(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    public struct SensorCoords
+    {
+        public int x;
+        public int y;
+        public int sensorX;
+        public int sensorY;
+        public SensorCoords(int x, int y)
+        {
+            this.sensorX = x;
+            this.sensorY = y;
+            this.x = x * 3;
+            this.y = y * 3;
+        }
     }
 }

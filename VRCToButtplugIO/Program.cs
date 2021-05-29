@@ -93,7 +93,7 @@ namespace VRCToyController
         static Config config;
 
 
-        static bool isClosing = false;
+        public static bool isRunning = true;
         static void CreateLogicThread()             
         {
             Thread thread = new Thread(Logic);
@@ -112,7 +112,7 @@ namespace VRCToyController
         static bool wasVRChatInFocus = true;
         static void Logic()
         {
-            while (true)
+            while (isRunning)
             {
                 if (KeyManager.VerifyKey())
                 {
@@ -149,11 +149,7 @@ namespace VRCToyController
                 {
                     DebugToFile("[KEY] Key has not been verified recently. Closing Application.");
                     Mediator.ui.Invoke((Action)delegate () { Mediator.ui.Close(); });
-                    isClosing = true;
-                }
-                if (isClosing)
-                {
-                    return;
+                    isRunning = false;
                 }
                 int timeout = (int)(config.update_rate - (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastUpdate));
                 if(timeout>0)
@@ -167,7 +163,7 @@ namespace VRCToyController
         private static void SlowUpdate()
         {
             //GameWindowReader gameWindowReader = new GameWindowReader();
-            while (true)
+            while (isRunning)
             {
                 foreach (ToyAPI api in Mediator.toyAPIs)
                 {
@@ -191,7 +187,8 @@ namespace VRCToyController
                 {
                     TestPixels(gameWindowReader);
                 }*/
-                if (isClosing) return;
+                GameWindowReader.Singleton.SaveCurrentCapture("test");
+                Console.WriteLine("Saved");
                 Thread.Sleep(Config.SLOW_UPDATE_RATE);
             }
         }
@@ -200,7 +197,10 @@ namespace VRCToyController
         {
             if(gameWindowReader.Capture != null)
             {
-                Pixel pixel0 = gameWindowReader.GetPixel(gameWindowReader.Capture.Width - 1, 0);
+                Console.WriteLine(gameWindowReader.GetBounds());
+                //float f = gameWindowReader.GetFloat(1, 0 , true);
+                int i = gameWindowReader.GetInt(1, 0 , true);
+                /*Pixel pixel0 = gameWindowReader.GetPixel(gameWindowReader.Capture.Width - 1, 0);
                 Color pixel1 = gameWindowReader.Capture.GetPixel(gameWindowReader.Capture.Width - 1, 0);
                 Pixel pixel2 = new Pixel(pixel1.R, pixel1.G, pixel1.B);
                 Pixel pixel3 = gameWindowReader.GetPixel(0, 3);
@@ -209,7 +209,9 @@ namespace VRCToyController
                 Console.WriteLine("Pixel 1: "+pixel1);
                 Console.WriteLine("Pixel 2: "+pixel2);
                 Console.WriteLine("Pixel 3: "+pixel3);
-                Console.WriteLine("Pixel 4: "+ pixel4);
+                Console.WriteLine("Pixel 4: "+ pixel4);*/
+                //Console.WriteLine("Float: "+ f);
+                Console.WriteLine("Pixeint: "+ i);
                 Console.WriteLine();
                 gameWindowReader.SaveCurrentCapture("pixelTesting");
             }
@@ -264,16 +266,18 @@ namespace VRCToyController
         {
             int baseX = behaviourData.input_pos[0] * Config.SENSOR_WIDTH;
             int baseY = behaviourData.input_pos[1] * Config.SENSOR_HEIGHT;
-            Pixel exisits = GameWindowReader.Singleton.GetPixel(baseX + 0, baseY + 0);
-            Pixel depthWidth = GameWindowReader.Singleton.GetPixel(baseX + 1, baseY + 0);
-            Pixel avgXY = GameWindowReader.Singleton.GetPixel(baseX + 2, baseY + 0);
+            GameWindowReader.Singleton.CailbrateColors(baseX + Config.COORDS_REFERENCE_COLORS.x, baseY + Config.COORDS_REFERENCE_COLORS.y);
+            bool exisits = GameWindowReader.Singleton.GetShort(baseX + 0, baseY + 0) == Config.CHECK_VALUE_SHORT;
 
-            behaviourData.GetRuntimeData().depth = depthWidth.r;
-            behaviourData.GetRuntimeData().width = depthWidth.g;
-            behaviourData.GetRuntimeData().avgX = avgXY.r;
-            behaviourData.GetRuntimeData().avgY = avgXY.g;
+            if (exisits)
+            {
+                behaviourData.GetRuntimeData().depth = GameWindowReader.Singleton.GetFloat(baseX + Config.COORDS_SENSOR_DATA_DEPTH.x, baseY + Config.COORDS_SENSOR_DATA_DEPTH.y);
+                behaviourData.GetRuntimeData().width = GameWindowReader.Singleton.GetFloat(baseX + Config.COORDS_SENSOR_DATA_WIDTH.x, baseY + Config.COORDS_SENSOR_DATA_WIDTH.y);
+                behaviourData.GetRuntimeData().avgX = GameWindowReader.Singleton.GetFloat(baseX + Config.COORDS_SENSOR_DATA_X.x, baseY + Config.COORDS_SENSOR_DATA_X.y);
+                behaviourData.GetRuntimeData().avgY = GameWindowReader.Singleton.GetFloat(baseX + Config.COORDS_SENSOR_DATA_Y.x, baseY + Config.COORDS_SENSOR_DATA_Y.y);
+            }
 
-            return Pixel.ValueEquals(exisits, Config.GLOBAL_INDICATOR_PIXEL);
+            return exisits;
         }
 
         static bool audioLinkFound;
@@ -281,19 +285,17 @@ namespace VRCToyController
 
         static bool LoadGlobalData()
         {
-            Pixel indicatorPixel = GameWindowReader.Singleton.GetPixel(GameWindowReader.Singleton.Capture.Width - 1, 0);
-            //Console.WriteLine(indicatorPixel + " , " + Config.GLOBAL_INDICATOR_PIXEL);
-            if(Pixel.ValueEquals(indicatorPixel, Config.GLOBAL_INDICATOR_PIXEL))
+            int resolutionWriterOffset = (int)(Config.RESOLUTION_SCREEN_WIDTH / 100.0f * GameWindowReader.Singleton.Capture.Width + 1);
+            GameWindowReader.Singleton.CailbrateColors(resolutionWriterOffset + Config.COORDS_REFERENCE_COLORS.x, Config.COORDS_REFERENCE_COLORS.y, true);
+            if (GameWindowReader.Singleton.GetShort(resolutionWriterOffset + Config.COORDS_CHECK_VALUE.x, Config.COORDS_CHECK_VALUE.y, true) == Config.CHECK_VALUE_SHORT)
             {
                 SetUIMessage(Mediator.ui.messageLabel2, "", Color.Green);
-                
-                Pixel audioLinkColor0 = GameWindowReader.Singleton.GetPixel(GameWindowReader.Singleton.Capture.Width - 2, 0);
-                Pixel audioLinkColor1 = GameWindowReader.Singleton.GetPixel(GameWindowReader.Singleton.Capture.Width - 3, 0);
-                audioLinkData[0] = audioLinkColor0.r;
-                audioLinkData[1] = audioLinkColor0.g;
-                audioLinkData[2] = audioLinkColor1.r;
-                audioLinkData[3] = audioLinkColor1.g;
-                audioLinkFound = audioLinkColor0.b > 0;
+
+                audioLinkFound = GameWindowReader.Singleton.GetBool(Config.COORDS_AUDIOLINK_EXISITS.x, Config.COORDS_AUDIOLINK_EXISITS.y, fromRight: true);
+                audioLinkData[0] = GameWindowReader.Singleton.GetFloat(Config.COORDS_AUDIOLINK.x + 1, Config.COORDS_AUDIOLINK.y, true);
+                audioLinkData[1] = GameWindowReader.Singleton.GetFloat(Config.COORDS_AUDIOLINK.x + 2, Config.COORDS_AUDIOLINK.y, true);
+                audioLinkData[2] = GameWindowReader.Singleton.GetFloat(Config.COORDS_AUDIOLINK.x + 3, Config.COORDS_AUDIOLINK.y, true);
+                audioLinkData[3] = GameWindowReader.Singleton.GetFloat(Config.COORDS_AUDIOLINK.x + 4, Config.COORDS_AUDIOLINK.y, true);
                 return true;
             }
             else

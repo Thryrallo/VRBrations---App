@@ -85,6 +85,7 @@ namespace VRCToyController
         private async void MainUI_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
+            Program.isRunning = false;
             Config.Singleton.Save();
             await KeyManager.FreeKeyAsync();
             this.FormClosing -= MainUI_FormClosing;

@@ -129,7 +129,7 @@ namespace VRCToyController
         }
 
         bool isNewBounds;
-        WindowType windowType;
+        WindowType _windowType;
         Rectangle lastFullBounds;
         int vrcBlackBarsHorizontal = 0;
         int vrcBlackBarsVertical = 0;
@@ -137,7 +137,7 @@ namespace VRCToyController
         {
             Rectangle forgroundWindowBounds = GetForegroundWindowBounds();
             isNewBounds = forgroundWindowBounds != lastFullBounds;
-            if (isNewBounds)
+            if (isNewBounds && forgroundWindowBounds.Width > 0 && forgroundWindowBounds.Height > 0)
             {
                 Thread.Sleep(500);
                 Bitmap capture = Capture(forgroundWindowBounds);
@@ -147,13 +147,13 @@ namespace VRCToyController
                 if(newWindowType == WindowType.windowed)
                 {
                     if (windowType != WindowType.windowed) Program.DebugToFile("[Game Window] Swapped to windowed");
-                    windowType = WindowType.windowed;
+                    _windowType = WindowType.windowed;
                     currentBounds = CleanBoundsWindowed(forgroundWindowBounds, capture);
                     lastFullBounds = forgroundWindowBounds;
                 }else if(newWindowType == WindowType.maximized)
                 {
                     if (windowType != WindowType.maximized) Program.DebugToFile("[Game Window] Swapped to maximized");
-                    windowType = WindowType.maximized;
+                    _windowType = WindowType.maximized;
                     currentBounds = CleanBoundsMaximied(forgroundWindowBounds, capture);
                     lastFullBounds = forgroundWindowBounds;
                 }
@@ -167,12 +167,20 @@ namespace VRCToyController
                         //Bitmap capture = Capture(BoundsRemoveVRCBlackBars(fullBounds));
                         //capture.Save("./fullscreen.jpg", ImageFormat.Jpeg);
                         //capture.Dispose();
-                        windowType = WindowType.fullscreen;
+                        _windowType = WindowType.fullscreen;
                         currentBounds = BoundsRemoveVRCBlackBars(forgroundWindowBounds);
                         lastFullBounds = forgroundWindowBounds;
                     }
                 }
                 capture.Dispose();
+            }
+        }
+
+        public WindowType windowType
+        {
+            get
+            {
+                return _windowType;
             }
         }
 

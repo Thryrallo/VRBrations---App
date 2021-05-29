@@ -222,6 +222,7 @@ namespace VRCToyController
 
         public void UpdateStrengthIndicatorValue()
         {
+            if (strengthIndicator.IsHandleCreated == false) return;
             strengthIndicator.Invoke((Action)delegate
             {
                Size size = strengthIndicator.Parent.Size;
