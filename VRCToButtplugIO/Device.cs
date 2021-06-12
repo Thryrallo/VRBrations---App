@@ -11,30 +11,31 @@ namespace VRCToyController
 
         public DeviceData()
         {
-
         }
 
         public DeviceData(Toy toy)
         {
             behaviours = new List<BehaviourData>();
+            removedSensors = new HashSet<string>();
             id = toy.id;
             features = toy.totalFeatureCount;
-            for (int i = 0; i < toy.totalFeatureCount; i++)
+            /*for (int i = 0; i < toy.totalFeatureCount; i++)
             {
                 BehaviourData newBehaviour = new BehaviourData();
-                newBehaviour.input_pos = new int[] { i, 0 };
                 newBehaviour.feature = i;
                 behaviours.Add(newBehaviour);
-            }
+            }*/
         }
 
         public string id;
         public int features = 0;
         public List<BehaviourData> behaviours;
+        public HashSet<string> removedSensors;
 
-        public BehaviourData AddBehaviour(Toy t)
+        public BehaviourData AddBehaviour(Toy t, string sensorName)
         {
             BehaviourData newBehaviour = new BehaviourData();
+            newBehaviour.SetSensorName(sensorName, false);
             behaviours.Add(newBehaviour);
             Config.Singleton.Save();
             return newBehaviour;
@@ -49,15 +50,14 @@ namespace VRCToyController
 
     public class BehaviourData
     {
-        public CalulcationType type = CalulcationType.VOLUME;
+        public CalculationType type = CalculationType.VOLUME;
         public int feature = 0;
-        public int[] input_pos = new int[] { 0, 0 };
         public float volume_width = 0.5f;
         public float volume_depth = 0.5f;
 
         public float thrusting_acceleration = 0.1f;
         public float thrusting_speed_scale = 1;
-        public float thrusting_depth_scale = 1;
+        public float thrusting_depth_scale = 0;
 
         public float rubbing_acceleration = 0.1f;
         public float rubbing_scale = 1;
@@ -67,11 +67,52 @@ namespace VRCToyController
 
         public float max = 1;
 
+        public string name;
+
+        private bool _active;
+        /** <summary>Sets toy active and shows ui.</summary> **/
+        public void SetActive(Toy toy)
+        {
+            GetBehaviourUI(toy).ShowUI();
+            _active = true;
+        }
+
+        /** <summary>Sets toy inactive and hides ui.</summary> **/
+        public void SetInactive(Toy toy)
+        {
+            GetBehaviourUI(toy).HideUI();
+            _active = false;
+        }
+
+        public bool IsActive
+        {
+            get
+            {
+                return _active;
+            }
+        }
+
         private BehaviourUI ui;
+        /** <summary>Gets UI for behaviour. If doesnt exist creates one</summary> **/
         public BehaviourUI GetBehaviourUI(Toy toy)
         {
             if(ui == null) ui = toy.GetDeviceUI().GetBehaviourUI(this);
             return ui;
+        }
+
+        /** <summary>Sets sensor name. Changes type if nessesary. Saves if not otherwise specified.</summary> **/
+        public void SetSensorName(string name, bool save = true)
+        {
+            this.name = name;
+            ChangeCalculatioTypeIfSensorSpecifiesIt();
+            if(save) Config.Singleton.Save();
+        }
+
+        /** <summary>Changes calculation type if required by sensor.</summary> **/
+        private void ChangeCalculatioTypeIfSensorSpecifiesIt()
+        {
+            if (name == Config.SENSORNAME_AUDIOLINK) type = CalculationType.AUDIOLINK;
+            else if (type == CalculationType.AUDIOLINK) type = CalculationType.VOLUME;
         }
 
         public void SetFeature(int max)
@@ -80,17 +121,9 @@ namespace VRCToyController
             Config.Singleton.Save();
         }
 
-        public void SetInputPos(int[] pos)
+        public void SetCalculationType(CalculationType type)
         {
-            if (pos.Length < 2) return;
-            input_pos[0] = Math.Min(10, Math.Max(0, pos[0]));
-            input_pos[1] = Math.Min(10, Math.Max(0, pos[1]));
-            Config.Singleton.Save();
-        }
-
-        public void SetCalculationType(CalulcationType calulcationType)
-        {
-            this.type = calulcationType;
+            this.type = type;
             Config.Singleton.Save();
         }
 
@@ -139,18 +172,18 @@ namespace VRCToyController
         private float currentStrength;
         public float CalculateStrength(float[] audioLinkData)
         {
-            if (type == CalulcationType.VOLUME)
+            if (type == CalculationType.VOLUME)
             {
                 currentStrength = runtimeData.CalculateVolume(volume_width, volume_depth);
             }
-            else if (type == CalulcationType.THRUSTING)
+            else if (type == CalculationType.THRUSTING)
             {
                 currentStrength = runtimeData.CalculateThrusting(thrusting_acceleration, thrusting_speed_scale, thrusting_depth_scale);
             }
-            else if (type == CalulcationType.RUBBING)
+            else if (type == CalculationType.RUBBING)
             {
                 currentStrength = runtimeData.CalculateRubbing(thrusting_acceleration, thrusting_speed_scale);
-            }else if( type == CalulcationType.AudioLink)
+            }else if( type == CalculationType.AUDIOLINK)
             {
                 currentStrength = runtimeData.CalculateAudioLink(audioLink_scale, audioLink_channel, audioLinkData);
             }
@@ -221,8 +254,30 @@ namespace VRCToyController
         Low,LowMid,Mid,Trebble
     }
 
-    public enum CalulcationType
+    public enum CalculationType { VOLUME, THRUSTING, RUBBING, AUDIOLINK }
+
+    public struct CalculationTypeData
     {
-        VOLUME, THRUSTING, RUBBING, AudioLink
+        public readonly bool showInDropdown;
+        public readonly int drowDownIndex;
+        public readonly string displayName;
+
+        private readonly static CalculationTypeData VOLUME = new CalculationTypeData(true, 0, "Volume");
+        private readonly static CalculationTypeData THRUSTING = new CalculationTypeData(true, 1, "Thrusting");
+        private readonly static CalculationTypeData RUBBING = new CalculationTypeData(true, 2, "Rubbing");
+        private readonly static CalculationTypeData AUDIOLINK = new CalculationTypeData(false, -1, "Audio Link");
+
+        public readonly static CalculationTypeData[] COLLECTION = new CalculationTypeData[] { VOLUME, THRUSTING, RUBBING, AUDIOLINK };
+        private CalculationTypeData(bool s, int drowDownIndex, string displayName)
+        {
+            this.showInDropdown = s;
+            this.drowDownIndex = drowDownIndex;
+            this.displayName = displayName;
+        }
+
+        public static CalculationTypeData Get(CalculationType type)
+        {
+            return COLLECTION[(int)type];
+        }
     }
 }

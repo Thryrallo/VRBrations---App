@@ -18,6 +18,8 @@ namespace VRCToyController
 
         private BehaviourData behaviourData;
 
+        private bool isShown = false;
+
         public BehaviourUI(Toy toy, BehaviourData behaviourData, string[] featureNames)
         {
             InitializeComponent();
@@ -25,15 +27,13 @@ namespace VRCToyController
             this.toy = toy;
             this.behaviourData = behaviourData;
 
-            foreach (object o in Enum.GetValues(typeof(CalulcationType)))
-                this.typeSelector.Items.Add(o);
-
             foreach (object o in Enum.GetValues(typeof(AudioLinkChannel)))
                 this.audioLinkChannel.Items.Add(o);
 
             motor.Items.AddRange(featureNames);
 
             Populate(behaviourData);
+            ShowUI();
         }
 
         public BehaviourData GetBehaviourData()
@@ -41,9 +41,68 @@ namespace VRCToyController
             return behaviourData;
         }
 
+        public void ShowUI()
+        {
+            if (this.IsHandleCreated)
+            {
+                this.Invoke((Action)delegate ()
+                {
+                    CopySensorNamesFromMediator();
+                    Show();
+                    isShown = true;
+                });
+            }
+            else
+            {
+                CopySensorNamesFromMediator();
+                Show();
+                isShown = true;
+            }
+        }
+
+        private void CopySensorNamesFromMediator()
+        {
+            blockApply = true;
+            this.sensorSelection.Items.Clear();
+            this.sensorSelection.Items.AddRange(Mediator.activeSensorPositions.Keys.ToArray());
+            if (behaviourData.name == null) this.sensorSelection.SelectedIndex = -1;
+            else this.sensorSelection.SelectedIndex = this.sensorSelection.Items.IndexOf(behaviourData.name);
+            blockApply = false;
+        }
+
+        public void HideUI()
+        {
+            if (this.IsHandleCreated)
+            {
+                this.Invoke((Action)delegate () { 
+                    Hide();
+                    isShown = false;
+                });
+            }
+            else
+            {
+                Hide();
+                isShown = false;
+            }
+            
+        }
+
+        public void AddSensor(string sname)
+        {
+            if (this.IsHandleCreated) this.Invoke((Action)delegate () { this.sensorSelection.Items.Add(sname); });
+            else this.sensorSelection.Items.Add(sname);
+        }
+
+        public void RemoveSensor(string sname)
+        {
+            if (this.IsHandleCreated) this.Invoke((Action)delegate () { this.sensorSelection.Items.Remove(sname); });
+            else this.sensorSelection.Items.Remove(sname);
+        }
+
         private void Apply_All()
         {
-            Apply_InputPos(null, EventArgs.Empty);
+            if (!isShown) return;
+            Apply_SensorName(null, new KeyEventArgs(Keys.None));
             Apply_Max(null, new KeyEventArgs(Keys.None));
             Apply_Type(null, EventArgs.Empty);
             Apply_Feature(null, EventArgs.Empty);
@@ -53,56 +112,68 @@ namespace VRCToyController
             Apply_AudioLink(null, new KeyEventArgs(Keys.None));
         }
 
-        private void Apply_InputPos(object sender, EventArgs e)
+        private void Apply_SensorName(object sender, EventArgs e)
         {
+            if (!isShown) return;
             if (blockApply) return;
-            behaviourData.SetInputPos(new int[] { (int)this.x.Value, (int)this.y.Value });
+            behaviourData.SetSensorName(sensorSelection.SelectedItem as string);
+            UpdateTypeSelector();
         }
+
+        
 
         private void Apply_Max(object sender, KeyEventArgs e)
         {
+            if (!isShown) return;
             if (blockApply) return;
             behaviourData.SetMax(ParseFloat(this.max.Text));
         }
 
         private void Apply_Type(object sender, EventArgs e)
         {
+            if (!isShown) return;
             if (blockApply) return;
-            behaviourData.SetCalculationType((CalulcationType)this.typeSelector.SelectedIndex);
+            behaviourData.SetCalculationType((CalculationType)this.typeSelector.SelectedIndex);
         }
 
         private void Apply_Feature(object sender, EventArgs e)
         {
+            if (!isShown) return;
             if (blockApply) return;
             behaviourData.SetFeature(this.motor.SelectedIndex);
         }
 
         private void Apply_Volume(object sender, KeyEventArgs e)
         {
+            if (!isShown) return;
             if (blockApply) return;
             behaviourData.SetVolume(ParseFloat(this.volume_width), ParseFloat(this.volume_depth));
         }
 
         private void Apply_Thrusting(object sender, KeyEventArgs e)
         {
+            if (!isShown) return;
             if (blockApply) return;
             behaviourData.SetThrusting(Math.Min(1, ParseFloat(this.thrust_acceleration)), ParseFloat(this.thrust_speed_scale), ParseFloat(this.thrust_depth_scale));
         }
 
         private void Apply_Rubbing(object sender, KeyEventArgs e)
         {
+            if (!isShown) return;
             if (blockApply) return;
             behaviourData.SetRubbing(Math.Min(1, ParseFloat(this.rub_acceleration)), ParseFloat(this.rub_scale));
         }
 
         private void Apply_AudioLink(object sender, EventArgs e)
         {
+            if (!isShown) return;
             if (blockApply) return;
             behaviourData.SetAudioLink((AudioLinkChannel)audioLinkChannel.SelectedIndex, ParseFloat(this.audioLinkStrength));
         }
 
         private void Apply_AudioLink(object sender, KeyEventArgs e)
         {
+            if (!isShown) return;
             if (blockApply) return;
             behaviourData.SetAudioLink((AudioLinkChannel)audioLinkChannel.SelectedIndex, ParseFloat(this.audioLinkStrength));
         }
@@ -130,9 +201,6 @@ namespace VRCToyController
         {
             blockApply = true;
 
-            this.x.Value = param.input_pos[0];
-            this.y.Value = param.input_pos[1];
-
             this.motor.SelectedIndex = param.feature;
 
             this.max.Text = CleanConfigNumber(param.max);
@@ -150,9 +218,37 @@ namespace VRCToyController
             this.audioLinkStrength.Text = CleanConfigNumber(param.audioLink_scale);
             this.audioLinkChannel.SelectedIndex = (int)param.audioLink_channel;
 
-            typeSelector.SelectedIndex =  (int)param.type;
+            UpdateTypeSelector();
+            EnagleSelectedGroup();
 
             blockApply = false;
+        }
+
+        private void UpdateTypeSelector()
+        {
+            blockApply = true;
+            if (CalculationTypeData.Get(behaviourData.type).showInDropdown)
+            {
+                CopyTypesFromStruct();
+                typeSelector.Enabled = true;
+            }
+            else
+            {
+                typeSelector.Items.Clear();
+                typeSelector.Items.Add(CalculationTypeData.Get(behaviourData.type).displayName);
+                typeSelector.SelectedIndex = 0;
+                typeSelector.Enabled = false;
+            }
+            blockApply = false;
+        }
+
+        private void CopyTypesFromStruct()
+        {
+            typeSelector.Items.Clear();
+            foreach (CalculationTypeData t in CalculationTypeData.COLLECTION)
+                if (t.showInDropdown)
+                    this.typeSelector.Items.Add(t.displayName);
+            typeSelector.SelectedIndex = CalculationTypeData.Get(behaviourData.type).drowDownIndex;
         }
 
         private string CleanConfigNumber(float f)
@@ -207,17 +303,16 @@ namespace VRCToyController
 
         private void typeSelector_SelectedIndexChanged(object sender, EventArgs e)
         {
-            EnagleSelectedGroup();
             Apply_Type(null, EventArgs.Empty);
+            EnagleSelectedGroup();
         }
 
         private void EnagleSelectedGroup()
         {
-            CalulcationType selected = (CalulcationType)typeSelector.SelectedIndex;
-            groupVolume.Visible = selected == CalulcationType.VOLUME;
-            groupThrusting.Visible = selected == CalulcationType.THRUSTING;
-            groupRubbing.Visible = selected == CalulcationType.RUBBING;
-            audioLinkSettings.Visible = selected == CalulcationType.AudioLink;
+            groupVolume.Visible = behaviourData.type == CalculationType.VOLUME;
+            groupThrusting.Visible = behaviourData.type == CalculationType.THRUSTING;
+            groupRubbing.Visible = behaviourData.type == CalculationType.RUBBING;
+            audioLinkSettings.Visible = behaviourData.type == CalculationType.AUDIOLINK;
         }
 
         public void UpdateStrengthIndicatorValue()
@@ -230,6 +325,18 @@ namespace VRCToyController
                strengthIndicator.Size = size;
            });
             
+        }
+
+        public void UpdateStrengthIndicatorValue(float value)
+        {
+            if (strengthIndicator.IsHandleCreated == false) return;
+            strengthIndicator.Invoke((Action)delegate
+            {
+                Size size = strengthIndicator.Parent.Size;
+                size.Width = (int)(size.Width * value);
+                strengthIndicator.Size = size;
+            });
+
         }
 
         private void rem_button_Click(object sender, EventArgs e)

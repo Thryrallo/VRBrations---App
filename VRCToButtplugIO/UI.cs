@@ -163,5 +163,11 @@ namespace VRCToyController
             
             
         }
+
+        private void saveDebugCapture_Click(object sender, EventArgs e)
+        {
+            Program.DebugToFile("Save Capture for debugging");
+            GameWindowReader.Singleton.SaveCurrentCaptureDirectly("DebugScreenCapture");
+        }
     }
 }

@@ -18,27 +18,42 @@ namespace VRCToyController
         //Constant Values
         public static readonly string[] WINDOW_NAMES = new string[] { "VRChat" };
         public const int SLOW_UPDATE_RATE = 10000;
-        public const int SENSOR_WIDTH = 4;
-        public const int SENSOR_HEIGHT = 8;
+        public const int SENSOR_RECTANGLES_X = 12;
+        public const int SENSOR_RECTANGLES_Y = 7;
+
+        public const int SENSOR_MAX_X = 5;
+        public const int SENSOR_MAX_Y = 2;
+
+        public const float DATA_RECTANGLE_WIDTH_IN_PERCENT = 0.5f;
+        public const float DATA_RECTANGLE_HEIGHT_IN_PERCENT = 0.5f;
+
+        public const float DATA_RECTANGLE_WIDTH = DATA_RECTANGLE_WIDTH_IN_PERCENT / 100f;
+        public const float DATA_RECTANGLE_HEIGHT = DATA_RECTANGLE_HEIGHT_IN_PERCENT / 100f;
+
+        public const float SENSOR_RELATIVE_WIDTH = SENSOR_RECTANGLES_X * DATA_RECTANGLE_WIDTH;
+        public const float SENSOR_RELATIVE_HEIGHT = SENSOR_RECTANGLES_Y * DATA_RECTANGLE_HEIGHT;
+
         public const int CHECK_VALUE_SHORT = 175;
 
-        //Scale for resolution stuff
-        public const int RESOLUTION_SCREEN_WIDTH = 4;
-        public const int RESOLUTION_SCREEN_HEIGHT = 1;
+        public static readonly SensorCoordinates COORDS_MAIN_POSITION = new SensorCoordinates(0, 0);
 
         //Coords for exist check
-        public static readonly PixelCoords COORDS_REFERENCE_COLORS = new PixelCoords(0, 0);
-        public static readonly SensorCoords COORDS_CHECK_VALUE = new SensorCoords(3, 0);
+        public static readonly InSensorCoordiantes COORDS_REFERENCE_COLORS = new InSensorCoordiantes(0, 3);
+        public static readonly InSensorCoordiantes COORDS_CHECK_VALUE = new InSensorCoordiantes(9, 3);
 
         //Coords for audiolink
-        public static readonly SensorCoords COORDS_AUDIOLINK = new SensorCoords(0, 2);
-        public static readonly SensorCoords COORDS_AUDIOLINK_EXISITS = new SensorCoords(0, 3);
+        public static readonly InSensorCoordiantes COORDS_AUDIOLINK = new InSensorCoordiantes(0, 1);
+        public static readonly InSensorCoordiantes COORDS_AUDIOLINK_EXISITS = new InSensorCoordiantes(0, 2);
 
         //Coords for sensor data
-        public static readonly SensorCoords COORDS_SENSOR_DATA_DEPTH = new SensorCoords(0, 2);
-        public static readonly SensorCoords COORDS_SENSOR_DATA_WIDTH = new SensorCoords(1, 2);
-        public static readonly SensorCoords COORDS_SENSOR_DATA_X = new SensorCoords(2, 2);
-        public static readonly SensorCoords COORDS_SENSOR_DATA_Y = new SensorCoords(3, 2);
+        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_DEPTH = new InSensorCoordiantes(0, 2);
+        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_WIDTH = new InSensorCoordiantes(3, 2);
+        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_X = new InSensorCoordiantes(6, 2);
+        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_Y = new InSensorCoordiantes(9, 2);
+
+        public static readonly InSensorCoordiantes COORDS_SENSOR_NAME = new InSensorCoordiantes(0, 5);
+
+        public const string SENSORNAME_AUDIOLINK = "AudioLink";
 
         //Serialized Values
         public float update_rate = 100;
@@ -76,6 +91,18 @@ namespace VRCToyController
             foreach(DeviceData d in devices)
             {
                 deviceDataIdDictionary.Add(d.id, d);
+                List<BehaviourData> invalidBehaviours = new List<BehaviourData>();
+                foreach(BehaviourData b in d.behaviours)
+                {
+                    if (string.IsNullOrEmpty(b.name))
+                    {
+                        invalidBehaviours.Add(b);
+                    }
+                }
+                foreach(BehaviourData invalid in invalidBehaviours)
+                {
+                    d.behaviours.Remove(invalid);
+                }
             }
         }
 
@@ -193,29 +220,88 @@ namespace VRCToyController
         #endregion
     }
 
-    public struct PixelCoords
+    /**
+     * Coordinates a rectangle in the sensor
+     * */
+    public struct InSensorCoordiantes
     {
         public int x;
         public int y;
-        public PixelCoords(int x, int y)
+        public InSensorCoordiantes(int x, int y)
         {
             this.x = x;
             this.y = y;
         }
+
+        public InSensorCoordiantes Add(int x, int y)
+        {
+            InSensorCoordiantes sens = new InSensorCoordiantes();
+            sens.x = this.x + x;
+            sens.y = this.y + y;
+            return sens;
+        }
+
+        public int pixel_offset_x
+        {
+            get
+            {
+                return (int)(x * GameWindowReader.Singleton.RECTANGLE_ABSOLUTE_WIDTH);
+            }
+        }
+
+        public int pixel_offset_y
+        {
+            get
+            {
+                return (int)(y * GameWindowReader.Singleton.RECTANGLE_ABSOLUTE_HEIGHT);
+            }
+        }
+
+        public int GetXWithSensor(SensorCoordinates sensor)
+        {
+            return sensor.pixel_x + this.pixel_offset_x;
+        }
+
+        public int GetYWithSensor(SensorCoordinates sensor)
+        {
+            return sensor.pixel_y + this.pixel_offset_y;
+        }
     }
 
-    public struct SensorCoords
+    /**
+     * Coordinates for a sensor positoon. with respect to sensor size
+     * */
+    public struct SensorCoordinates
     {
         public int x;
         public int y;
-        public int sensorX;
-        public int sensorY;
-        public SensorCoords(int x, int y)
+        public SensorCoordinates(int x, int y)
         {
-            this.sensorX = x;
-            this.sensorY = y;
-            this.x = x * 3;
-            this.y = y * 3;
+            this.x = x;
+            this.y = y;
+        }
+
+        public SensorCoordinates((int,int) pos)
+        {
+            this.x = pos.Item1;
+            this.y = pos.Item2;
+        }
+
+        public int pixel_x
+        {
+            get
+            {
+                return (int)(x * GameWindowReader.Singleton.SENSOR_ABSOLUTE_WIDTH + GameWindowReader.Singleton.RECTANGLE_ABSOLUTE_TO_MID_OFFSET_X);
+                //return (int)((float)x * GameWindowReader.Singleton.Capture.Width / Config.SENSOR_WIDTH + Config.DATA_RECTANGLE_WIDTH / 100f * GameWindowReader.Singleton.Capture.Width);
+            }
+        }
+
+        public int pixel_y
+        {
+            get
+            {
+                return (int)(y * GameWindowReader.Singleton.SENSOR_ABSOLUTE_HEIGHT + GameWindowReader.Singleton.RECTANGLE_ABSOLUTE_TO_MID_OFFSET_Y);
+            }
         }
     }
 }

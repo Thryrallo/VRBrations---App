@@ -55,14 +55,19 @@ namespace VRCToyController
             return deviceData;
         }
 
-        public void AddBehaviour()
+        public BehaviourData AddBehaviour(string sensorName)
         {
-            deviceUI.AddBehaviourUI(deviceData.AddBehaviour(this));
+            BehaviourData behaviour = deviceData.AddBehaviour(this, sensorName);
+            deviceUI.AddBehaviourUI(behaviour);
+            if(Mediator.activeSensorPositions.ContainsKey(sensorName)) behaviour.SetActive(this); // set active if sensor is already active
+            return behaviour;
         }
+
+        
 
         public void RemoveBehaviour(BehaviourUI behaviourUI)
         {
-            deviceUI.RemoveBehaviourUI(behaviourUI);
+            deviceUI.RemoveBehaviourUI(deviceData, behaviourUI);
             deviceData.RemoveBehaviour(behaviourUI.GetBehaviourData());
         }
 
@@ -122,13 +127,23 @@ namespace VRCToyController
 
         public void TestBehaviours()
         {
+            int count = 0;
             foreach (BehaviourData behaviour in GetDeviceData().behaviours)
             {
+                if (behaviour.GetBehaviourUI(this) == null) continue;
+                count++;
                 double[] strengths = new double[totalFeatureCount];
                 for (int i = 0; i < strengths.Length; i++) strengths[i] = 0;
                 strengths[behaviour.feature] = behaviour.max;
                 //Console.WriteLine("Testing " + behaviour.feature + " at " + behaviour.max);
                 ExecuteFeatures(strengths);
+                GetDeviceUI().GetBehaviourUI(behaviour).UpdateStrengthIndicatorValue(behaviour.max);
+                System.Threading.Thread.Sleep(2000);
+                GetDeviceUI().GetBehaviourUI(behaviour).UpdateStrengthIndicatorValue(0);
+            }
+            if(count == 0)
+            {
+                ExecuteFeatures(new double[] { 1 });
                 System.Threading.Thread.Sleep(2000);
             }
             TurnOff();

@@ -22,6 +22,15 @@ namespace VRCToyController
             boundsCalculator = new BoundsCalculator();
         }
 
+        public float RECTANGLE_ABSOLUTE_WIDTH = 0;
+        public float RECTANGLE_ABSOLUTE_HEIGHT = 0;
+
+        public float SENSOR_ABSOLUTE_WIDTH = 0;
+        public float SENSOR_ABSOLUTE_HEIGHT = 0;
+
+        public float RECTANGLE_ABSOLUTE_TO_MID_OFFSET_X = 0;
+        public float RECTANGLE_ABSOLUTE_TO_MID_OFFSET_Y = 0;
+
         /**
          * <return>Returns true if successfull</return>
          * */
@@ -39,16 +48,18 @@ namespace VRCToyController
                     _capture.Dispose();
                 }
                 _capture = new Bitmap(boundsCalculator.bounds.Width, boundsCalculator.bounds.Height, PixelFormat.Format32bppRgb);
+                RECTANGLE_ABSOLUTE_WIDTH = Config.DATA_RECTANGLE_WIDTH * _capture.Width;
+                RECTANGLE_ABSOLUTE_HEIGHT = Config.DATA_RECTANGLE_HEIGHT * _capture.Height;
+                SENSOR_ABSOLUTE_WIDTH = RECTANGLE_ABSOLUTE_WIDTH * Config.SENSOR_RECTANGLES_X;
+                SENSOR_ABSOLUTE_HEIGHT = RECTANGLE_ABSOLUTE_HEIGHT * Config.SENSOR_RECTANGLES_Y;
+                RECTANGLE_ABSOLUTE_TO_MID_OFFSET_X = Config.DATA_RECTANGLE_WIDTH * 0.5f * _capture.Width;
+                RECTANGLE_ABSOLUTE_TO_MID_OFFSET_Y = Config.DATA_RECTANGLE_WIDTH * 0.5f * _capture.Width;
             }
             if (boundsCalculator.IsValidBounds())
             {
                 using (Graphics g = Graphics.FromImage(_capture))
                 {
                     g.CopyFromScreen(new Point(boundsCalculator.bounds.Left, boundsCalculator.bounds.Top), Point.Empty, boundsCalculator.bounds.Size);
-                }
-                if(boundsCalculator.windowType == BoundsCalculator.WindowType.fullscreen)
-                {
-                    GetRenderSize();
                 }
                 return true;
             }
@@ -63,11 +74,6 @@ namespace VRCToyController
             }
         }
 
-        private void GetRenderSize()
-        {
-            //TODO
-        }
-
         Color c_zero;
         Color c_one;
         Color c_two;
@@ -76,29 +82,33 @@ namespace VRCToyController
         Color c_five;
         Color c_six;
         Color c_seven;
-        public void CailbrateColors(int x, int y, bool fromRight = false)
+        public void CailbrateColors(SensorCoordinates sensorCoordinates, bool fromRight = false)
         {
+            int x = Config.COORDS_REFERENCE_COLORS.GetXWithSensor(sensorCoordinates);
+            int y = Config.COORDS_REFERENCE_COLORS.GetYWithSensor(sensorCoordinates);
+            float offset = Config.DATA_RECTANGLE_WIDTH * _capture.Width;
             if (fromRight)
             {
-                c_zero =  _capture.GetPixel(_capture.Width - x - 1, y);
-                c_one =   _capture.GetPixel(_capture.Width - x - 2, y);
-                c_two =   _capture.GetPixel(_capture.Width - x - 3, y);
-                c_three = _capture.GetPixel(_capture.Width - x - 4, y);
-                c_four =  _capture.GetPixel(_capture.Width - x - 5, y);
-                c_five =  _capture.GetPixel(_capture.Width - x - 6, y);
-                c_six =   _capture.GetPixel(_capture.Width - x - 7, y);
-                c_seven = _capture.GetPixel(_capture.Width - x - 8, y);
+                x = x + 1;
+                c_zero =  _capture.GetPixel((int)(_capture.Width - x - 0 * offset), y);
+                c_one =   _capture.GetPixel((int)(_capture.Width - x - 1 * offset), y);
+                c_two =   _capture.GetPixel((int)(_capture.Width - x - 2 * offset), y);
+                c_three = _capture.GetPixel((int)(_capture.Width - x - 3 * offset), y);
+                c_four =  _capture.GetPixel((int)(_capture.Width - x - 4 * offset), y);
+                c_five =  _capture.GetPixel((int)(_capture.Width - x - 5 * offset), y);
+                c_six =   _capture.GetPixel((int)(_capture.Width - x - 6 * offset), y);
+                c_seven = _capture.GetPixel((int)(_capture.Width - x - 7 * offset), y);
             }
             else
             {
-                c_zero =  _capture.GetPixel(x + 0, y);
-                c_one =   _capture.GetPixel(x + 1, y);
-                c_two =   _capture.GetPixel(x + 2, y);
-                c_three = _capture.GetPixel(x + 3, y);
-                c_four =  _capture.GetPixel(x + 4, y);
-                c_five =  _capture.GetPixel(x + 5, y);
-                c_six =   _capture.GetPixel(x + 6, y);
-                c_seven = _capture.GetPixel(x + 7, y);
+                c_zero =  _capture.GetPixel((int)(x + 0 * offset), y);
+                c_one =   _capture.GetPixel((int)(x + 1 * offset), y);
+                c_two =   _capture.GetPixel((int)(x + 2 * offset), y);
+                c_three = _capture.GetPixel((int)(x + 3 * offset), y);
+                c_four =  _capture.GetPixel((int)(x + 4 * offset), y);
+                c_five =  _capture.GetPixel((int)(x + 5 * offset), y);
+                c_six =   _capture.GetPixel((int)(x + 6 * offset), y);
+                c_seven = _capture.GetPixel((int)(x + 7 * offset), y);
             }
         }
 
@@ -132,21 +142,22 @@ namespace VRCToyController
             }
         }
 
-        private Color[] GetColors(int x, int y, int amount, bool fromRight = false)
+        private Color[] GetColors(SensorCoordinates sensorCoordinates, InSensorCoordiantes inSensorCoordiantes, int amount, bool fromRight = false)
         {
             Color[] ar = new Color[amount];
-            int baseX = x;
-            if (fromRight) baseX = _capture.Width - 1 - x;
+            int y = sensorCoordinates.pixel_y + inSensorCoordiantes.pixel_offset_y;
+            int baseX = sensorCoordinates.pixel_x + inSensorCoordiantes.pixel_offset_x;
+            if (fromRight) baseX = _capture.Width - 1 - sensorCoordinates.pixel_x - inSensorCoordiantes.pixel_offset_x;
+            float offset = Config.DATA_RECTANGLE_WIDTH * _capture.Width;
             for (int i = 0; i < amount; i++)
             {
                 if (fromRight)
                 {
-                    Console.WriteLine((baseX - i) + " , " + y);
-                    ar[i] = _capture.GetPixel(baseX - i, y);
+                    ar[i] = _capture.GetPixel((int)(baseX - i * offset), y);
                 }
                 else
                 {
-                    ar[i] = _capture.GetPixel(baseX + i, y);
+                    ar[i] = _capture.GetPixel((int)(baseX + i * offset), y);
                 }
             }
             return ar;
@@ -160,82 +171,79 @@ namespace VRCToyController
                 integer += GetColorAsBinary(colors[i]) << ((colors.Length - i - 1) * 3);
             }
             int firstColAsBinary = GetColorAsBinary(colors[0]); // extra handling cuase first color has negative indicator
-            integer += firstColAsBinary & ~4; //get rid of first bit, which indicators negative
+            integer += (firstColAsBinary & ~4) << ((colors.Length - 1) * 3); //get rid of first bit, which indicators negative
             if ((firstColAsBinary & 4) == 4) integer = -integer; //if first bit is 1, int is negative
             return integer;
         }
 
-        public int GetInt(int x, int y, bool fromRight = false)
+        public int GetInt(SensorCoordinates sensorCoordinates, InSensorCoordiantes inSensorCoordiantes, bool fromRight = false)
         {
             //Read colors from screen
-            Color[] colors = GetColors(x, y, 6, fromRight);
+            Color[] colors = GetColors(sensorCoordinates, inSensorCoordiantes, 6, fromRight);
             //Decode colors
             return DecodeColorsAsInt(colors);
         }
 
-        public int GetShort(int x, int y, bool fromRight = false)
+        public int GetShort(SensorCoordinates sensorCoordinates, InSensorCoordiantes inSensorCoordiantes, bool fromRight = false)
         {
             //Read colors from screen
-            Color[] colors = GetColors(x, y, 3, fromRight);
+            Color[] colors = GetColors(sensorCoordinates, inSensorCoordiantes, 3, fromRight);
             string s = "";
             foreach(Color c in colors)
             {
                 s += c;
             }
-            Console.WriteLine(s + " : " + DecodeColorsAsInt(colors));
             //Decode colors
             return DecodeColorsAsInt(colors);
         }
 
-        public float GetFloat(int x, int y, bool fromRight = false)
+        public float GetFloat(SensorCoordinates sensorCoordinates, InSensorCoordiantes inSensorCoordiantes, bool fromRight = false)
         {
-            return GetShort(x, y, fromRight) / 255.0f;
+            return GetShort(sensorCoordinates, inSensorCoordiantes, fromRight) / 255.0f;
         }
 
-        public bool GetBool(int x, int y, int subX = 0, bool fromRight = false)
+        public bool GetBool(SensorCoordinates sensorCoordinates, InSensorCoordiantes inSensorCoordiantes, bool fromRight = false)
         {
-            if(fromRight) return GetColorAsBinary(_capture.GetPixel(_capture.Width - x * 3 - subX - 1, y)) == 7;
-            return GetColorAsBinary(_capture.GetPixel(x * 3 + subX, y)) == 7;
+            if(fromRight) return GetColorAsBinary(_capture.GetPixel(_capture.Width - inSensorCoordiantes.GetXWithSensor(sensorCoordinates), inSensorCoordiantes.GetYWithSensor(sensorCoordinates))) == 7;
+            return GetColorAsBinary(_capture.GetPixel(inSensorCoordiantes.GetXWithSensor(sensorCoordinates), inSensorCoordiantes.GetYWithSensor(sensorCoordinates))) == 7;
         }
 
         /**
          * <param name="width">In pixel * 2 (char size)</param>
          * */
-        public string GetString(int startX, int startY, int width, int height, int subX = 0, bool fromRight = false)
+        public string GetString(SensorCoordinates sensorCoordinates, InSensorCoordiantes inSensorCoordiantes, int width, int height, bool fromRight = false)
         {
-            string s = "";
-            startX = startX * 3 + subX;
-            for (int y = startY; y < startY + height; y++)
+            StringBuilder sb = new StringBuilder();
+            for (int y = 0; y < height; y++)
             {
-                for (int x = startX; x < startX + width * 2; x = x + 2)
+                for (int x = 0; x < width; x = x + 2)
                 {
-                    s += GetChar(x, y, pixelCoordinates: true, fromRight: fromRight);
+                    sb.Append(GetChar(sensorCoordinates, inSensorCoordiantes.Add(x,y), fromRight));
                 }
             }
-            return s;
+            return sb.ToString();
         }
 
-        public char GetChar(int x, int y, int subX = 0, bool pixelCoordinates = false, bool fromRight = false)
+        public char GetChar(SensorCoordinates sensorCoordinates, InSensorCoordiantes inSensorCoordiantes, bool fromRight = false)
         {
-            Color c1;
-            Color c2;
-            int baseX = x;
-            if (pixelCoordinates == false)
-            {
-                baseX = x * 3 + subX;
-            }
+            Color c1 = GetPixel(sensorCoordinates, inSensorCoordiantes, 0, 0, fromRight);
+            Color c2 = GetPixel(sensorCoordinates, inSensorCoordiantes, 1, 0, fromRight);
+            int i = (GetColorAsBinary(c1) << 3) + GetColorAsBinary(c2);
+            return CompressedIntToChar(i);
+        }
+
+        private Color GetPixel(SensorCoordinates sensorCoordinates, InSensorCoordiantes inSensorCoordiantes, int offsetX = 0, int offsetY = 0, bool fromRight = false)
+        {
+            inSensorCoordiantes = inSensorCoordiantes.Add(offsetX, offsetY);
             if (fromRight)
             {
-                c1 = _capture.GetPixel(_capture.Width - baseX - 1, y);
-                c2 = _capture.GetPixel(_capture.Width - baseX - 2, y);
+                return _capture.GetPixel(_capture.Width - 1 -inSensorCoordiantes.GetXWithSensor(sensorCoordinates), inSensorCoordiantes.GetYWithSensor(sensorCoordinates));
             }
             else
             {
-                c1 = _capture.GetPixel(baseX + 0, y);
-                c2 = _capture.GetPixel(baseX + 1, y);
+                return _capture.GetPixel(inSensorCoordiantes.GetXWithSensor(sensorCoordinates), inSensorCoordiantes.GetYWithSensor(sensorCoordinates));
             }
-            int i = (GetColorAsBinary(c1) << 3) + GetColorAsBinary(c2);
-            return CompressedIntToChar(i);
+            
         }
 
         public static char CompressedIntToChar(int i)
@@ -263,6 +271,12 @@ namespace VRCToyController
         {
             this.saveName = filename;
             this.save = true;
+        }
+
+        public void SaveCurrentCaptureDirectly(string filename)
+        {
+            this.saveName = filename;
+            _capture.Save($"./{saveName}.png", ImageFormat.Png);
         }
     }
 

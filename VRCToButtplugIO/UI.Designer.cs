@@ -41,8 +41,8 @@
             this.b_Save = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label_vrc_focus = new System.Windows.Forms.Label();
-            this.footer = new System.Windows.Forms.LinkLabel();
             this.panel_bottom = new System.Windows.Forms.Panel();
+            this.saveDebugCapture = new MaterialSkin.Controls.MaterialFlatButton();
             this.label1 = new System.Windows.Forms.Label();
             this.configSelector = new System.Windows.Forms.ComboBox();
             this.materialFlatButton1 = new MaterialSkin.Controls.MaterialFlatButton();
@@ -125,32 +125,36 @@
             this.label_vrc_focus.TabIndex = 7;
             this.label_vrc_focus.Text = "Window Indicator";
             // 
-            // footer
-            // 
-            this.footer.AutoSize = true;
-            this.footer.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.footer.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
-            this.footer.LinkColor = System.Drawing.Color.Fuchsia;
-            this.footer.Location = new System.Drawing.Point(0, 810);
-            this.footer.Name = "footer";
-            this.footer.Size = new System.Drawing.Size(88, 20);
-            this.footer.TabIndex = 6;
-            this.footer.TabStop = true;
-            this.footer.Text = "by Thryrallo";
-            this.footer.VisitedLinkColor = System.Drawing.Color.Fuchsia;
-            this.footer.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.footer_LinkClicked);
-            // 
             // panel_bottom
             // 
             this.panel_bottom.BackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.panel_bottom.Controls.Add(this.saveDebugCapture);
             this.panel_bottom.Controls.Add(this.label1);
             this.panel_bottom.Controls.Add(this.configSelector);
             this.panel_bottom.Controls.Add(this.materialFlatButton1);
             this.panel_bottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel_bottom.Location = new System.Drawing.Point(0, 741);
+            this.panel_bottom.Location = new System.Drawing.Point(0, 761);
             this.panel_bottom.Name = "panel_bottom";
             this.panel_bottom.Size = new System.Drawing.Size(898, 69);
             this.panel_bottom.TabIndex = 9;
+            // 
+            // saveDebugCapture
+            // 
+            this.saveDebugCapture.AutoSize = true;
+            this.saveDebugCapture.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.saveDebugCapture.BackColor = System.Drawing.SystemColors.WindowText;
+            this.saveDebugCapture.Depth = 0;
+            this.saveDebugCapture.Icon = null;
+            this.saveDebugCapture.Location = new System.Drawing.Point(481, 6);
+            this.saveDebugCapture.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
+            this.saveDebugCapture.MouseState = MaterialSkin.MouseState.HOVER;
+            this.saveDebugCapture.Name = "saveDebugCapture";
+            this.saveDebugCapture.Primary = false;
+            this.saveDebugCapture.Size = new System.Drawing.Size(185, 36);
+            this.saveDebugCapture.TabIndex = 12;
+            this.saveDebugCapture.Text = "Debug Capture";
+            this.saveDebugCapture.UseVisualStyleBackColor = false;
+            this.saveDebugCapture.Click += new System.EventHandler(this.saveDebugCapture_Click);
             // 
             // label1
             // 
@@ -215,7 +219,6 @@
             this.Controls.Add(this.messageLabel2);
             this.Controls.Add(this.looseFocus);
             this.Controls.Add(this.panel_bottom);
-            this.Controls.Add(this.footer);
             this.Controls.Add(this.label_vrc_focus);
             this.Controls.Add(this.deviceList);
             this.Controls.Add(this.panel1);
@@ -237,7 +240,6 @@
         public System.Windows.Forms.FlowLayoutPanel deviceList;
         private System.Windows.Forms.Button b_Save;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.LinkLabel footer;
         public System.Windows.Forms.Label warning;
         public System.Windows.Forms.Label label_vrc_focus;
         private System.Windows.Forms.Panel panel_bottom;
@@ -246,6 +248,7 @@
         private System.Windows.Forms.ComboBox configSelector;
         private System.Windows.Forms.Label looseFocus;
         public System.Windows.Forms.Label messageLabel2;
+        private MaterialSkin.Controls.MaterialFlatButton saveDebugCapture;
     }
 }
 

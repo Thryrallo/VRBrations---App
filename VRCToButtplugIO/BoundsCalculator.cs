@@ -73,6 +73,9 @@ namespace VRCToyController
 
             // http://pinvoke.net/default.aspx/gdi32/GetDeviceCaps.html
         }
+
+        const long MIN_UPDATE_RATE = 20000; //recheck bounds every 20 seconds
+
         private Rectangle currentBounds;
 
         public BoundsCalculator()
@@ -85,13 +88,13 @@ namespace VRCToyController
         public bool Update()
         {
             GetWindowBounds();
-            UpdateUI();
+            if(isNewBounds) UpdateUI();
             return isNewBounds;
         }
 
         public bool IsValidBounds()
         {
-            return currentBounds.Height > 0 && currentBounds.Width > 0 && windowType != WindowType.fullscreen;
+            return currentBounds.Height > 0 && currentBounds.Width > 0;
         }
 
         public Rectangle bounds
@@ -107,10 +110,6 @@ namespace VRCToyController
             if (IsValidBounds())
             {
                 Program.SetUIMessage(Mediator.ui.label_vrc_focus, $"VRC is in focus ( {windowType} )", Color.Green);
-            }
-            else if (windowType == WindowType.fullscreen)
-            {
-                Program.SetUIMessage(Mediator.ui.label_vrc_focus, $"Fullscreen is not supported.", Color.Red);
             }
             else
             {
@@ -128,7 +127,11 @@ namespace VRCToyController
             return bitmap;
         }
 
-        bool isNewBounds;
+
+        bool isNewBounds; //new cleaned bounds
+        bool isNewFullBounds; //new full window bounds
+
+        long lastUpdate = 0;
         WindowType _windowType;
         Rectangle lastFullBounds;
         int vrcBlackBarsHorizontal = 0;
@@ -136,10 +139,17 @@ namespace VRCToyController
         private void GetWindowBounds()
         {
             Rectangle forgroundWindowBounds = GetForegroundWindowBounds();
-            isNewBounds = forgroundWindowBounds != lastFullBounds;
-            if (isNewBounds && forgroundWindowBounds.Width > 0 && forgroundWindowBounds.Height > 0)
+            //bounds have changed
+            isNewFullBounds = forgroundWindowBounds != lastFullBounds;
+            //periodic reload in case of wrongly calculated bounds
+            bool periodicReload = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastUpdate > MIN_UPDATE_RATE;
+            if ((isNewFullBounds || periodicReload) && forgroundWindowBounds.Width > 0 && forgroundWindowBounds.Height > 0)
             {
-                Thread.Sleep(500);
+                Rectangle prevBounds = currentBounds;
+                //Console.WriteLine(isNewFullBounds + " , " + periodicReload);
+
+                if(isNewFullBounds) Thread.Sleep(500);
+                
                 Bitmap capture = Capture(forgroundWindowBounds);
 
                 WindowType newWindowType = DetermineWindowType(forgroundWindowBounds);
@@ -172,6 +182,8 @@ namespace VRCToyController
                         lastFullBounds = forgroundWindowBounds;
                     }
                 }
+                if (prevBounds != currentBounds) isNewBounds = true;
+                lastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 capture.Dispose();
             }
         }

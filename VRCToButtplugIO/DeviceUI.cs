@@ -41,18 +41,41 @@ namespace VRCToyController
                 }
             }
 
-            foreach (BehaviourData behaviour in toy.GetDeviceData().behaviours)
-                AddBehaviourUI(behaviour);
+            //foreach (BehaviourData behaviour in toy.GetDeviceData().behaviours)
+            //    AddBehaviourUI(behaviour);
         }
 
-        public void AddBehaviourUI(BehaviourData behaviour)
+        public BehaviourUI AddBehaviourUI(BehaviourData behaviour)
         {
-            paramsList.Controls.Add(new BehaviourUI(toy, behaviour, featureNames));
+            BehaviourUI newui = new BehaviourUI(toy, behaviour, featureNames);
+            if (paramsList.IsHandleCreated)
+            {
+                paramsList.Invoke((Action)delegate ()
+                {
+                    paramsList.Controls.Add(newui);
+                });
+            }
+            else
+            {
+                paramsList.Controls.Add(newui);
+            }
+            return newui;
         }
 
-        public void RemoveBehaviourUI(BehaviourUI behaviourUI)
+        public void RemoveBehaviourUI(DeviceData deviceData, BehaviourUI behaviourUI)
         {
-            paramsList.Controls.Remove(behaviourUI);
+            if (paramsList.IsHandleCreated)
+            {
+                paramsList.Invoke((Action)delegate ()
+                {
+                    paramsList.Controls.Remove(behaviourUI);
+                });
+            }
+            else
+            {
+                paramsList.Controls.Remove(behaviourUI);
+            }
+            deviceData.removedSensors.Add(behaviourUI.GetBehaviourData().name);
         }
 
         public BehaviourUI GetBehaviourUI(BehaviourData behaviour)
@@ -64,7 +87,7 @@ namespace VRCToyController
                     return c as BehaviourUI;
                 }
             }
-            return null;
+            return AddBehaviourUI(behaviour);
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -74,7 +97,10 @@ namespace VRCToyController
 
         private void button_add_Click(object sender, EventArgs e)
         {
-            toy.AddBehaviour();
+            if(Mediator.activeSensorPositions.Count > 0)
+            {
+                toy.AddBehaviour(Mediator.activeSensorPositions.Keys.First());
+            }
         }
 
         private void b_test_Click(object sender, EventArgs e)

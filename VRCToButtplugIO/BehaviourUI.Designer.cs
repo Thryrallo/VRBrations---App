@@ -31,9 +31,6 @@
             this.components = new System.ComponentModel.Container();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.label1 = new System.Windows.Forms.Label();
-            this.x = new System.Windows.Forms.NumericUpDown();
-            this.y = new System.Windows.Forms.NumericUpDown();
             this.label11 = new System.Windows.Forms.Label();
             this.motor = new System.Windows.Forms.ComboBox();
             this.label_pixel_found = new System.Windows.Forms.Label();
@@ -60,31 +57,35 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.audioLinkSettings = new System.Windows.Forms.TableLayoutPanel();
+            this.label13 = new System.Windows.Forms.Label();
             this.audioLinkStrength = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
+            this.audioLinkChannel = new System.Windows.Forms.ComboBox();
             this.rem_button = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.audioLinkChannel = new System.Windows.Forms.ComboBox();
-            this.label13 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.battery_bar = new System.Windows.Forms.Label();
             this.strengthIndicator = new System.Windows.Forms.Label();
+            this.battery_bar = new System.Windows.Forms.Label();
+            this.sensorSelection = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.panel3 = new System.Windows.Forms.Panel();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.x)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.y)).BeginInit();
             this.flowLayoutPanel2.SuspendLayout();
             this.groupVolume.SuspendLayout();
             this.groupThrusting.SuspendLayout();
             this.groupRubbing.SuspendLayout();
             this.audioLinkSettings.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.flowLayoutPanel1.Controls.Add(this.flowLayoutPanel3);
+            this.flowLayoutPanel1.Controls.Add(this.panel3);
             this.flowLayoutPanel1.Controls.Add(this.flowLayoutPanel2);
             this.flowLayoutPanel1.Controls.Add(this.groupVolume);
             this.flowLayoutPanel1.Controls.Add(this.groupThrusting);
@@ -93,14 +94,13 @@
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(452, 231);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(452, 253);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // flowLayoutPanel3
             // 
             this.flowLayoutPanel3.Controls.Add(this.label1);
-            this.flowLayoutPanel3.Controls.Add(this.x);
-            this.flowLayoutPanel3.Controls.Add(this.y);
+            this.flowLayoutPanel3.Controls.Add(this.sensorSelection);
             this.flowLayoutPanel3.Controls.Add(this.label11);
             this.flowLayoutPanel3.Controls.Add(this.motor);
             this.flowLayoutPanel3.Controls.Add(this.label_pixel_found);
@@ -109,37 +109,11 @@
             this.flowLayoutPanel3.Size = new System.Drawing.Size(448, 37);
             this.flowLayoutPanel3.TabIndex = 8;
             // 
-            // label1
-            // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 7);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 20);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Position";
-            // 
-            // x
-            // 
-            this.x.Location = new System.Drawing.Point(74, 3);
-            this.x.Name = "x";
-            this.x.Size = new System.Drawing.Size(50, 26);
-            this.x.TabIndex = 1;
-            this.x.ValueChanged += new System.EventHandler(this.Apply_InputPos);
-            // 
-            // y
-            // 
-            this.y.Location = new System.Drawing.Point(130, 3);
-            this.y.Name = "y";
-            this.y.Size = new System.Drawing.Size(50, 26);
-            this.y.TabIndex = 0;
-            this.y.ValueChanged += new System.EventHandler(this.Apply_InputPos);
-            // 
             // label11
             // 
             this.label11.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(186, 7);
+            this.label11.Location = new System.Drawing.Point(259, 7);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(69, 20);
             this.label11.TabIndex = 3;
@@ -149,7 +123,7 @@
             // 
             this.motor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.motor.FormattingEnabled = true;
-            this.motor.Location = new System.Drawing.Point(261, 3);
+            this.motor.Location = new System.Drawing.Point(334, 3);
             this.motor.Name = "motor";
             this.motor.Size = new System.Drawing.Size(97, 28);
             this.motor.TabIndex = 4;
@@ -160,7 +134,7 @@
             // 
             this.label_pixel_found.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label_pixel_found.AutoSize = true;
-            this.label_pixel_found.Location = new System.Drawing.Point(364, 7);
+            this.label_pixel_found.Location = new System.Drawing.Point(437, 7);
             this.label_pixel_found.Name = "label_pixel_found";
             this.label_pixel_found.Size = new System.Drawing.Size(0, 20);
             this.label_pixel_found.TabIndex = 5;
@@ -172,7 +146,7 @@
             this.flowLayoutPanel2.Controls.Add(this.typeSelector);
             this.flowLayoutPanel2.Controls.Add(this.label4);
             this.flowLayoutPanel2.Controls.Add(this.max);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 46);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 82);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Size = new System.Drawing.Size(430, 38);
             this.flowLayoutPanel2.TabIndex = 2;
@@ -226,7 +200,7 @@
             this.groupVolume.Controls.Add(this.volume_width, 1, 0);
             this.groupVolume.Controls.Add(this.label3, 0, 0);
             this.groupVolume.Controls.Add(this.label2, 0, 1);
-            this.groupVolume.Location = new System.Drawing.Point(3, 90);
+            this.groupVolume.Location = new System.Drawing.Point(3, 126);
             this.groupVolume.Name = "groupVolume";
             this.groupVolume.RowCount = 2;
             this.groupVolume.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -446,6 +420,16 @@
             this.audioLinkSettings.TabIndex = 9;
             this.toolTip1.SetToolTip(this.audioLinkSettings, "(strength = (rubSpeed*scale)*(acceleration*time))");
             // 
+            // label13
+            // 
+            this.label13.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(48, 9);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(72, 20);
+            this.label13.TabIndex = 11;
+            this.label13.Text = "Channel:";
+            // 
             // audioLinkStrength
             // 
             this.audioLinkStrength.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -467,19 +451,6 @@
             this.label12.Text = "Strength:";
             this.toolTip1.SetToolTip(this.label12, "(strength = (rubSpeed*scale)*(acceleration*time))");
             // 
-            // rem_button
-            // 
-            this.rem_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.rem_button.AutoSize = true;
-            this.rem_button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.rem_button.Location = new System.Drawing.Point(374, 199);
-            this.rem_button.Name = "rem_button";
-            this.rem_button.Size = new System.Drawing.Size(78, 30);
-            this.rem_button.TabIndex = 5;
-            this.rem_button.Text = "Remove";
-            this.rem_button.UseVisualStyleBackColor = true;
-            this.rem_button.Click += new System.EventHandler(this.rem_button_Click);
-            // 
             // audioLinkChannel
             // 
             this.audioLinkChannel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -490,15 +461,18 @@
             this.audioLinkChannel.TabIndex = 10;
             this.audioLinkChannel.SelectedIndexChanged += new System.EventHandler(this.Apply_AudioLink);
             // 
-            // label13
+            // rem_button
             // 
-            this.label13.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(48, 9);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(72, 20);
-            this.label13.TabIndex = 11;
-            this.label13.Text = "Channel:";
+            this.rem_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.rem_button.AutoSize = true;
+            this.rem_button.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.rem_button.Location = new System.Drawing.Point(374, 221);
+            this.rem_button.Name = "rem_button";
+            this.rem_button.Size = new System.Drawing.Size(78, 30);
+            this.rem_button.TabIndex = 5;
+            this.rem_button.Text = "Remove";
+            this.rem_button.UseVisualStyleBackColor = true;
+            this.rem_button.Click += new System.EventHandler(this.rem_button_Click);
             // 
             // panel1
             // 
@@ -507,10 +481,18 @@
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.strengthIndicator);
             this.panel1.Controls.Add(this.battery_bar);
-            this.panel1.Location = new System.Drawing.Point(3, 225);
+            this.panel1.Location = new System.Drawing.Point(3, 247);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(452, 20);
+            this.panel1.Size = new System.Drawing.Size(452, 27);
             this.panel1.TabIndex = 5;
+            // 
+            // strengthIndicator
+            // 
+            this.strengthIndicator.BackColor = System.Drawing.Color.Cyan;
+            this.strengthIndicator.Location = new System.Drawing.Point(0, 0);
+            this.strengthIndicator.Name = "strengthIndicator";
+            this.strengthIndicator.Size = new System.Drawing.Size(0, 20);
+            this.strengthIndicator.TabIndex = 1;
             // 
             // battery_bar
             // 
@@ -521,13 +503,44 @@
             this.battery_bar.Size = new System.Drawing.Size(0, 31);
             this.battery_bar.TabIndex = 0;
             // 
-            // strengthIndicator
+            // sensorSelection
             // 
-            this.strengthIndicator.BackColor = System.Drawing.Color.Cyan;
-            this.strengthIndicator.Location = new System.Drawing.Point(0, 0);
-            this.strengthIndicator.Name = "strengthIndicator";
-            this.strengthIndicator.Size = new System.Drawing.Size(0, 20);
-            this.strengthIndicator.TabIndex = 1;
+            this.sensorSelection.FormattingEnabled = true;
+            this.sensorSelection.Location = new System.Drawing.Point(73, 3);
+            this.sensorSelection.Name = "sensorSelection";
+            this.sensorSelection.Size = new System.Drawing.Size(180, 28);
+            this.sensorSelection.TabIndex = 12;
+            this.sensorSelection.SelectedIndexChanged += new System.EventHandler(this.Apply_SensorName);
+            // 
+            // label1
+            // 
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 7);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(64, 20);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Sensor:";
+            // 
+            // panel2
+            // 
+            this.panel2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel2.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.panel2.Location = new System.Drawing.Point(3, 13);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(445, 5);
+            this.panel2.TabIndex = 10;
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.panel2);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel3.Location = new System.Drawing.Point(3, 46);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(448, 30);
+            this.panel3.TabIndex = 10;
             // 
             // BehaviourUI
             // 
@@ -538,12 +551,10 @@
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.panel1);
             this.Name = "BehaviourUI";
-            this.Size = new System.Drawing.Size(460, 255);
+            this.Size = new System.Drawing.Size(460, 277);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel3.ResumeLayout(false);
             this.flowLayoutPanel3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.x)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.y)).EndInit();
             this.flowLayoutPanel2.ResumeLayout(false);
             this.flowLayoutPanel2.PerformLayout();
             this.groupVolume.ResumeLayout(false);
@@ -555,6 +566,7 @@
             this.audioLinkSettings.ResumeLayout(false);
             this.audioLinkSettings.PerformLayout();
             this.panel1.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -563,10 +575,7 @@
         #endregion
 
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
-        public System.Windows.Forms.NumericUpDown x;
-        public System.Windows.Forms.NumericUpDown y;
         public System.Windows.Forms.ComboBox typeSelector;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
@@ -602,5 +611,9 @@
         private System.Windows.Forms.Panel panel1;
         public System.Windows.Forms.Label battery_bar;
         public System.Windows.Forms.Label strengthIndicator;
+        private System.Windows.Forms.Label label1;
+        public System.Windows.Forms.ComboBox sensorSelection;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Panel panel2;
     }
 }
