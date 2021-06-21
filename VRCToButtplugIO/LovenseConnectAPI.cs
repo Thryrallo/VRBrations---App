@@ -27,7 +27,16 @@ namespace VRCToyController
         {
         }
 
-        public void GetToys()
+        private void UpdateToysFromKnownSourcesAsync()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                GetToysViaLovensePlugin();
+                GetToysFromAddedUrls();
+            });
+        }
+
+        private void GetToysViaLovensePlugin()
         {
             Task.Factory.StartNew(() =>
             {
@@ -39,18 +48,23 @@ namespace VRCToyController
                 {
                     HandleDomainToys(d.Key, d.Value, previouslyExistingToys);
                 }
-                foreach (CustomLovenseConnectDomain cD_Url in customDomains)
-                {
-                    data = Get(cD_Url.toysUrl);
-                    LovenseConnectDomain domain = JsonConvert.DeserializeObject<LovenseConnectDomain>(data);
-                    domain.toys = domain.data;
-                    domain.domain = cD_Url.domain;
-                    domain.httpPort = cD_Url.httpPort;
-                    domain.isHttps = true;
-
-                    HandleDomainToys(cD_Url.domain, domain, previouslyExistingToys);
-                }
             });
+        }
+
+        private void GetToysFromAddedUrls()
+        {
+            IEnumerable<LovenseConnectToy> previouslyExistingToys = Mediator.activeToys.Values.Where(aT => aT is LovenseConnectToy).Select(t => t as LovenseConnectToy);
+            foreach (CustomLovenseConnectDomain cD_Url in customDomains)
+            {
+                string data = Get(cD_Url.toysUrl);
+                LovenseConnectDomain domain = JsonConvert.DeserializeObject<LovenseConnectDomain>(data);
+                domain.toys = domain.data;
+                domain.domain = cD_Url.domain;
+                domain.httpPort = cD_Url.httpPort;
+                domain.isHttps = true;
+
+                HandleDomainToys(cD_Url.domain, domain, previouslyExistingToys);
+            }
         }
 
         private void HandleDomainToys(string domainId, LovenseConnectDomain domain, IEnumerable<LovenseConnectToy> previouslyExistingToys)
@@ -192,7 +206,7 @@ namespace VRCToyController
                 pattern = @":\d+";
                 domain.httpPort = int.Parse(Regex.Match(url, pattern).Value.Trim(':'));
                 customDomains.Add(domain);
-                GetToys();
+                UpdateToysFromKnownSourcesAsync();
                 return true;
             }
             return false;
@@ -200,7 +214,7 @@ namespace VRCToyController
 
         public override void SlowUpdate()
         {
-            GetToys();
+            UpdateToysFromKnownSourcesAsync();
         }
 
         public override void UpdateBatteryIndicator(Toy iToy)

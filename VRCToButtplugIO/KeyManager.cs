@@ -100,7 +100,7 @@ namespace VRCToyController
 
             var content = new FormUrlEncodedContent(values);
 
-            var response = await client.PostAsync("https://www.vrctoycontroller.thryrallo.de/veryfyKey.php", content);
+            var response = await client.PostAsync("https://www.vrbrations.com/app/veryfyKey.php", content);
 
             var responseString = await response.Content.ReadAsStringAsync();
             //Console.WriteLine(responseString);
@@ -119,7 +119,7 @@ namespace VRCToyController
 
             var content = new FormUrlEncodedContent(values);
 
-            var response = await client.PostAsync("https://www.vrctoycontroller.thryrallo.de/free.php", content);
+            var response = await client.PostAsync("https://www.vrbrations.com/app/free.php", content);
 
             var responseString = await response.Content.ReadAsStringAsync();
             //Console.WriteLine(responseString);

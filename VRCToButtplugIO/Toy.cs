@@ -130,7 +130,7 @@ namespace VRCToyController
             int count = 0;
             foreach (BehaviourData behaviour in GetDeviceData().behaviours)
             {
-                if (behaviour.GetBehaviourUI(this) == null) continue;
+                if (behaviour.IsActive == false) continue;
                 count++;
                 double[] strengths = new double[totalFeatureCount];
                 for (int i = 0; i < strengths.Length; i++) strengths[i] = 0;

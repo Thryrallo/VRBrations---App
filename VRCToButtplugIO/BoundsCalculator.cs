@@ -127,6 +127,7 @@ namespace VRCToyController
             return bitmap;
         }
 
+        private bool TEST = false;
 
         bool isNewBounds; //new cleaned bounds
         bool isNewFullBounds; //new full window bounds
@@ -159,12 +160,14 @@ namespace VRCToyController
                     if (windowType != WindowType.windowed) Program.DebugToFile("[Game Window] Swapped to windowed");
                     _windowType = WindowType.windowed;
                     currentBounds = CleanBoundsWindowed(forgroundWindowBounds, capture);
+                    currentBounds = VRCBoundsToVRbrationsBounds(currentBounds);
                     lastFullBounds = forgroundWindowBounds;
                 }else if(newWindowType == WindowType.maximized)
                 {
                     if (windowType != WindowType.maximized) Program.DebugToFile("[Game Window] Swapped to maximized");
                     _windowType = WindowType.maximized;
                     currentBounds = CleanBoundsMaximied(forgroundWindowBounds, capture);
+                    currentBounds = VRCBoundsToVRbrationsBounds(currentBounds);
                     lastFullBounds = forgroundWindowBounds;
                 }
                 else if(newWindowType == WindowType.fullscreen)
@@ -174,13 +177,20 @@ namespace VRCToyController
                     //if whole screen black try again next time
                     if (OnVRCEnteredFullscreen(capture, forgroundWindowBounds))
                     {
-                        //Bitmap capture = Capture(BoundsRemoveVRCBlackBars(fullBounds));
-                        //capture.Save("./fullscreen.jpg", ImageFormat.Jpeg);
-                        //capture.Dispose();
                         _windowType = WindowType.fullscreen;
                         currentBounds = BoundsRemoveVRCBlackBars(forgroundWindowBounds);
+                        currentBounds = VRCBoundsToVRbrationsBounds(currentBounds);
                         lastFullBounds = forgroundWindowBounds;
                     }
+                }
+                if (TEST)
+                {
+                    Bitmap debugcapture = Capture(lastFullBounds);
+                    debugcapture.Save("./fullBounds.png", ImageFormat.Png);
+                    debugcapture.Dispose();
+                    debugcapture = Capture(currentBounds);
+                    debugcapture.Save("./currentBounds.png", ImageFormat.Png);
+                    debugcapture.Dispose();
                 }
                 if (prevBounds != currentBounds) isNewBounds = true;
                 lastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -247,6 +257,13 @@ namespace VRCToyController
             DwmGetWindowAttribute(hWnd, (int)DwmWindowAttribute.DWMWA_EXTENDED_FRAME_BOUNDS, out rect, size);
 
             return rect;
+        }
+
+        static Rectangle VRCBoundsToVRbrationsBounds(Rectangle bounds)
+        {
+            bounds.Width = (int)(bounds.Width * Config.VRBATIONS_WIDTH + 0.99f);
+            bounds.Height = (int)(bounds.Height * Config.VRBATIONS_HEIGHT + 0.99f);
+            return bounds;
         }
 
         static Rectangle CleanBoundsWindowed(Rectangle bounds, Bitmap capture)

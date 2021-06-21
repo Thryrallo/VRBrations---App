@@ -125,7 +125,6 @@ namespace VRCToyController
                         {
                             if (GameWindowReader.Singleton.UpdateCapture())
                             {
-                                SearchForSensors();
                                 CheckCaptureForInput();
                             }
                         }
@@ -137,6 +136,11 @@ namespace VRCToyController
                     }
                     else
                     {
+                        //if game screenshot was taken before, with vrbrations, use this to search for more sensors
+                        if (vrbrationsFound && GameWindowReader.Singleton.HasCapture())
+                        {
+                            SearchForSensors();
+                        }
                         if (wasVRChatInFocus)
                         {
                             TurnAllToysOff();
@@ -236,8 +240,7 @@ namespace VRCToyController
 
         static bool UpdateBehaviourPixelData(BehaviourData behaviourData, Toy toy)
         {
-            SensorCoordinates coords = new SensorCoordinates(Mediator.GetSensorPosition(behaviourData.name));
-            GameWindowReader.Singleton.CailbrateColors(coords);
+            (int,int) coords = Mediator.GetSensorPosition(behaviourData.name);
             bool exisits = GameWindowReader.Singleton.GetShort(coords, Config.COORDS_CHECK_VALUE) == Config.CHECK_VALUE_SHORT;
             if (exisits)
             {
@@ -250,26 +253,26 @@ namespace VRCToyController
             return exisits;
         }
 
+        static bool vrbrationsFound = false;
         static bool audioLinkFound;
         static float[] audioLinkData = new float[] { 0, 0, 0, 0 };
 
         static bool LoadGlobalData()
         {
-            GameWindowReader.Singleton.CailbrateColors(Config.COORDS_MAIN_POSITION, true);
             //Console.WriteLine(Config.COORDS_CHECK_VALUE.GetXWithSensor(Config.COORDS_MAIN_POSITION) + " , "+ Config.COORDS_CHECK_VALUE.GetYWithSensor(Config.COORDS_MAIN_POSITION)+ " : "+
             //    GameWindowReader.Singleton.GetShort(Config.COORDS_MAIN_POSITION, Config.COORDS_CHECK_VALUE, true));
-            bool vrbrationsFound = GameWindowReader.Singleton.GetShort(Config.COORDS_MAIN_POSITION, Config.COORDS_CHECK_VALUE, true) == Config.CHECK_VALUE_SHORT;
+            vrbrationsFound = GameWindowReader.Singleton.GetShort((0,0), Config.COORDS_CHECK_VALUE) == Config.CHECK_VALUE_SHORT;
             if (vrbrationsFound)
             {
                 SetUIMessage(Mediator.ui.messageLabel2, "VRbrations active", Color.Green);
 
-                audioLinkFound = GameWindowReader.Singleton.GetBool(Config.COORDS_MAIN_POSITION, Config.COORDS_AUDIOLINK_EXISITS, fromRight: true);
+                audioLinkFound = GameWindowReader.Singleton.GetBool((0, 0), Config.COORDS_AUDIOLINK_EXISITS);
                 if (audioLinkFound)
                 {
-                    audioLinkData[0] = GameWindowReader.Singleton.GetFloat(Config.COORDS_MAIN_POSITION, Config.COORDS_AUDIOLINK.Add(0, 0), true);
-                    audioLinkData[1] = GameWindowReader.Singleton.GetFloat(Config.COORDS_MAIN_POSITION, Config.COORDS_AUDIOLINK.Add(1, 0), true);
-                    audioLinkData[2] = GameWindowReader.Singleton.GetFloat(Config.COORDS_MAIN_POSITION, Config.COORDS_AUDIOLINK.Add(2, 0), true);
-                    audioLinkData[3] = GameWindowReader.Singleton.GetFloat(Config.COORDS_MAIN_POSITION, Config.COORDS_AUDIOLINK.Add(3, 0), true);
+                    audioLinkData[0] = GameWindowReader.Singleton.GetFloat((0, 0), Config.COORDS_AUDIOLINK.Add(0, 0));
+                    audioLinkData[1] = GameWindowReader.Singleton.GetFloat((0, 0), Config.COORDS_AUDIOLINK.Add(1, 0));
+                    audioLinkData[2] = GameWindowReader.Singleton.GetFloat((0, 0), Config.COORDS_AUDIOLINK.Add(2, 0));
+                    audioLinkData[3] = GameWindowReader.Singleton.GetFloat((0, 0), Config.COORDS_AUDIOLINK.Add(3, 0));
                     Mediator.SetSensorActive(Config.SENSORNAME_AUDIOLINK, -1, -1);
                 }
                 return true;
@@ -292,17 +295,16 @@ namespace VRCToyController
             return vrbrationsFound;
         }
 
-        static int searchX = 0;
+        static int searchX = 1;
         static int searchY = 0;
         static void SearchForSensors()
         {
-            SensorCoordinates sensorCoordinates = new SensorCoordinates(searchX, searchY);
-            GameWindowReader.Singleton.CailbrateColors(sensorCoordinates);
+            (int,int) sensorCoordinates = (searchX, searchY);
             bool found = GameWindowReader.Singleton.GetShort(sensorCoordinates, Config.COORDS_CHECK_VALUE) == Config.CHECK_VALUE_SHORT;
             //add if found
             if (found)
             {
-                string name = GameWindowReader.Singleton.GetString(sensorCoordinates, Config.COORDS_SENSOR_NAME, Config.SENSOR_RECTANGLES_X, 2);
+                string name = GameWindowReader.Singleton.GetString(sensorCoordinates, Config.COORDS_SENSOR_NAME, Config.SENSOR_PIXELS_X, 2);
                 Mediator.SetSensorActive(name, searchX, searchY);
             }
             else
@@ -311,11 +313,11 @@ namespace VRCToyController
             }
             //Increment search
             searchX++;
-            if(searchX > Config.SENSOR_MAX_X)
+            if(searchX >= Config.SENSOR_COUNT_X)
             {
-                searchX = 0;
+                searchX = 1;
                 searchY++;
-                if(searchY > Config.SENSOR_MAX_Y)
+                if(searchY >= Config.SENSOR_COUNT_Y)
                 {
                     searchY = 0;
                 }
@@ -326,26 +328,31 @@ namespace VRCToyController
         {
             LoadGlobalData();
 
-            foreach (Toy t in Mediator.activeToys.Values)
+            if (vrbrationsFound)
             {
-                for (int i = 0; i < t.featureStrengths.Length; i++) t.featureStrengths[i] = 0;
+                SearchForSensors();
 
-                foreach (BehaviourData behaviour in t.GetBehaviours())
+                foreach (Toy t in Mediator.activeToys.Values)
                 {
-                    if (behaviour.IsActive == false) continue;
+                    for (int i = 0; i < t.featureStrengths.Length; i++) t.featureStrengths[i] = 0;
 
-                    bool behaviourFound;
-                    if (behaviour.type == CalculationType.AUDIOLINK) behaviourFound = audioLinkFound;
-                    else behaviourFound = UpdateBehaviourPixelData(behaviour, t);
+                    foreach (BehaviourData behaviour in t.GetBehaviours())
+                    {
+                        if (behaviour.IsActive == false) continue;
 
-                    if (!behaviourFound) continue;
-                    t.featureStrengths[behaviour.feature] += behaviour.CalculateStrength(audioLinkData);
-                    behaviour.GetBehaviourUI(t).UpdateStrengthIndicatorValue();
-                }
+                        bool behaviourFound;
+                        if (behaviour.type == CalculationType.AUDIOLINK) behaviourFound = audioLinkFound;
+                        else behaviourFound = UpdateBehaviourPixelData(behaviour, t);
 
-                for(int i = 0; i < t.totalFeatureCount; i++)
-                {
-                    t.ExecuteFeatures(t.featureStrengths);
+                        if (!behaviourFound) continue;
+                        t.featureStrengths[behaviour.feature] += behaviour.CalculateStrength(audioLinkData);
+                        behaviour.GetBehaviourUI(t).UpdateStrengthIndicatorValue();
+                    }
+
+                    for (int i = 0; i < t.totalFeatureCount; i++)
+                    {
+                        t.ExecuteFeatures(t.featureStrengths);
+                    }
                 }
             }
         }

@@ -24,9 +24,6 @@ namespace VRCToyController
             InitializeComponent();
 
             this.Icon = new System.Drawing.Icon("./lib/icon.ico");
-            scan.Click += new EventHandler(Scan);
-
-            scan.Text = "Stop Scanning";
 
             MaterialSkinManager materialSkinManager = MaterialSkinManager.Instance;
             materialSkinManager.AddFormToManage(this);
@@ -42,34 +39,6 @@ namespace VRCToyController
             configSelector.Items.AddRange(Config.GetConfigNames());
             configSelector.Items.Add(NEW_CONFIG_NAME);
             configSelector.SelectedIndex = 0;
-        }
-
-        private void Scan(object sender, EventArgs e)
-        {
-            if(Mediator.ui.scan.Text== "Start scanning")
-            {
-                Mediator.ui.scan.Text = "Stop scanning";
-                foreach (ToyAPI api in Mediator.toyAPIs)
-                {
-                    if (api is ButtplugIOAPI)
-                        ((ButtplugIOAPI)api).StartScanning();
-                    else if (api is LovenseConnectAPI)
-                        ((LovenseConnectAPI)api).GetToys();
-                }
-            }
-            else
-            {
-                Mediator.ui.scan.Text = "Start scanning";
-                foreach (ToyAPI api in Mediator.toyAPIs)
-                {
-                    if (api is ButtplugIOAPI)
-                        ((ButtplugIOAPI)api).StartScanning();
-                    else
-                        ((LovenseConnectAPI)api).ClearToys();
-
-                }
-            }
-            //Console.WriteLine("connected devieces: "+Mediator.buttplugIOInterface.connectedDevices());
         }
 
         private void b_Save_Click(object sender, EventArgs e)

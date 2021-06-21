@@ -18,40 +18,45 @@ namespace VRCToyController
         //Constant Values
         public static readonly string[] WINDOW_NAMES = new string[] { "VRChat" };
         public const int SLOW_UPDATE_RATE = 10000;
-        public const int SENSOR_RECTANGLES_X = 12;
-        public const int SENSOR_RECTANGLES_Y = 7;
 
-        public const int SENSOR_MAX_X = 5;
-        public const int SENSOR_MAX_Y = 2;
+        //This is also in vrbrations.cginc
+        public const float PIXEL_WIDTH_SCREEN_RELATIVE = 0.005f;
+        public const float PIXEL_HEIGHT_SCREEN_RELATIVE = 0.005f;
 
-        public const float DATA_RECTANGLE_WIDTH_IN_PERCENT = 0.5f;
-        public const float DATA_RECTANGLE_HEIGHT_IN_PERCENT = 0.5f;
+        public const int SENSOR_PIXELS_X = 4;
+        public const int SENSOR_PIXELS_Y = 5;
 
-        public const float DATA_RECTANGLE_WIDTH = DATA_RECTANGLE_WIDTH_IN_PERCENT / 100f;
-        public const float DATA_RECTANGLE_HEIGHT = DATA_RECTANGLE_HEIGHT_IN_PERCENT / 100f;
+        //================================
 
-        public const float SENSOR_RELATIVE_WIDTH = SENSOR_RECTANGLES_X * DATA_RECTANGLE_WIDTH;
-        public const float SENSOR_RELATIVE_HEIGHT = SENSOR_RECTANGLES_Y * DATA_RECTANGLE_HEIGHT;
+        public const int SENSOR_COUNT_X = 40;
+        public const int SENSOR_COUNT_Y = 1;
+
+        public const float SENSOR_WIDTH = PIXEL_WIDTH_SCREEN_RELATIVE * SENSOR_PIXELS_X;
+        public const float SENSOR_HEIGHT = PIXEL_HEIGHT_SCREEN_RELATIVE * SENSOR_PIXELS_Y;
+
+        public const float VRBATIONS_WIDTH = SENSOR_COUNT_X * SENSOR_WIDTH;
+        public const float VRBATIONS_HEIGHT = SENSOR_COUNT_Y * SENSOR_HEIGHT;
+
+        public const float PIXEL_WIDTH = PIXEL_WIDTH_SCREEN_RELATIVE / VRBATIONS_WIDTH;
+        public const float PIXEL_HEIGHT = PIXEL_HEIGHT_SCREEN_RELATIVE / VRBATIONS_HEIGHT;
 
         public const int CHECK_VALUE_SHORT = 175;
 
-        public static readonly SensorCoordinates COORDS_MAIN_POSITION = new SensorCoordinates(0, 0);
-
         //Coords for exist check
-        public static readonly InSensorCoordiantes COORDS_REFERENCE_COLORS = new InSensorCoordiantes(0, 3);
-        public static readonly InSensorCoordiantes COORDS_CHECK_VALUE = new InSensorCoordiantes(9, 3);
+        public static readonly InSensorCoordiantes COORDS_CHECK_VALUE = new InSensorCoordiantes(0, 0);
+        public static readonly InSensorCoordiantes COORDS_CHECK_VALUE_2 = new InSensorCoordiantes(1, 0);
 
         //Coords for audiolink
         public static readonly InSensorCoordiantes COORDS_AUDIOLINK = new InSensorCoordiantes(0, 1);
-        public static readonly InSensorCoordiantes COORDS_AUDIOLINK_EXISITS = new InSensorCoordiantes(0, 2);
+        public static readonly InSensorCoordiantes COORDS_AUDIOLINK_EXISITS = new InSensorCoordiantes(2, 0);
 
         //Coords for sensor data
-        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_DEPTH = new InSensorCoordiantes(0, 2);
-        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_WIDTH = new InSensorCoordiantes(3, 2);
-        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_X = new InSensorCoordiantes(6, 2);
-        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_Y = new InSensorCoordiantes(9, 2);
+        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_DEPTH = new InSensorCoordiantes(0, 1);
+        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_WIDTH = new InSensorCoordiantes(1, 1);
+        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_X =     new InSensorCoordiantes(2, 1);
+        public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_Y =     new InSensorCoordiantes(3, 1);
 
-        public static readonly InSensorCoordiantes COORDS_SENSOR_NAME = new InSensorCoordiantes(0, 5);
+        public static readonly InSensorCoordiantes COORDS_SENSOR_NAME = new InSensorCoordiantes(0, 3);
 
         public const string SENSORNAME_AUDIOLINK = "AudioLink";
 
@@ -241,67 +246,14 @@ namespace VRCToyController
             return sens;
         }
 
-        public int pixel_offset_x
+        public float GetXWithSensor(int sensorX)
         {
-            get
-            {
-                return (int)(x * GameWindowReader.Singleton.RECTANGLE_ABSOLUTE_WIDTH);
-            }
+            return (sensorX + (x + 0.5f) / Config.SENSOR_PIXELS_X) / Config.SENSOR_COUNT_X;
         }
 
-        public int pixel_offset_y
+        public float GetYWithSensor(int sensorY)
         {
-            get
-            {
-                return (int)(y * GameWindowReader.Singleton.RECTANGLE_ABSOLUTE_HEIGHT);
-            }
-        }
-
-        public int GetXWithSensor(SensorCoordinates sensor)
-        {
-            return sensor.pixel_x + this.pixel_offset_x;
-        }
-
-        public int GetYWithSensor(SensorCoordinates sensor)
-        {
-            return sensor.pixel_y + this.pixel_offset_y;
-        }
-    }
-
-    /**
-     * Coordinates for a sensor positoon. with respect to sensor size
-     * */
-    public struct SensorCoordinates
-    {
-        public int x;
-        public int y;
-        public SensorCoordinates(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-
-        public SensorCoordinates((int,int) pos)
-        {
-            this.x = pos.Item1;
-            this.y = pos.Item2;
-        }
-
-        public int pixel_x
-        {
-            get
-            {
-                return (int)(x * GameWindowReader.Singleton.SENSOR_ABSOLUTE_WIDTH + GameWindowReader.Singleton.RECTANGLE_ABSOLUTE_TO_MID_OFFSET_X);
-                //return (int)((float)x * GameWindowReader.Singleton.Capture.Width / Config.SENSOR_WIDTH + Config.DATA_RECTANGLE_WIDTH / 100f * GameWindowReader.Singleton.Capture.Width);
-            }
-        }
-
-        public int pixel_y
-        {
-            get
-            {
-                return (int)(y * GameWindowReader.Singleton.SENSOR_ABSOLUTE_HEIGHT + GameWindowReader.Singleton.RECTANGLE_ABSOLUTE_TO_MID_OFFSET_Y);
-            }
+            return (sensorY + (y + 0.5f) / Config.SENSOR_PIXELS_Y) / Config.SENSOR_COUNT_Y;
         }
     }
 }
