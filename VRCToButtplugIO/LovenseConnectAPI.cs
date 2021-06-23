@@ -145,7 +145,7 @@ namespace VRCToyController
 
         protected enum LovenseConnectToyType
         {
-            none,nora, max,lush,hush,ambi,edge,domi,osci,diamo
+            none,nora,max,lush,hush,ambi,edge,domi,osci,diamo
         }
 
         public static string Get(string uri)

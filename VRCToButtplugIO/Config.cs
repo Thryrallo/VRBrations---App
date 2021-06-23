@@ -10,6 +10,8 @@ namespace VRCToyController
 {
     public class Config
     {
+        public const string VERSION = "3.0.3";
+
         //Constant private valies
         private const string DEFAULT_CONFIG_NAME = "default";
         private const string FILE_POSTFIX = @".config";

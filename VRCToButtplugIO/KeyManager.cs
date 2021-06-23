@@ -17,6 +17,7 @@ namespace VRCToyController
     {
         const string KEY_FILE_PATH = "./key.txt";
         private static string key;
+        private static string eventKey = "";
 
         private static KeyStatus p_status = KeyStatus.NONE;
         public static KeyStatus status{
@@ -87,6 +88,7 @@ namespace VRCToyController
             long time = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if(time-lastVerification > UPDATE_RATE && !closing)
             {
+                lastVerification = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 Task.Factory.StartNew(VerifyKeyAsync);
             }
         }
@@ -95,7 +97,9 @@ namespace VRCToyController
         {
             var values = new Dictionary<string, string>
             {
-                { "key", key }
+                { "key", key },
+                { "eventkey", eventKey },
+                { "version", Config.VERSION }
             };
 
             var content = new FormUrlEncodedContent(values);
@@ -106,7 +110,6 @@ namespace VRCToyController
             //Console.WriteLine(responseString);
             ValidationResult result = JsonConvert.DeserializeObject<ValidationResult>(responseString);
             p_status = result.status;
-            lastVerification = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             return status;
         }
 
@@ -114,7 +117,9 @@ namespace VRCToyController
         {
             var values = new Dictionary<string, string>
             {
-                { "key", key }
+                { "key", key },
+                { "eventkey", eventKey },
+                { "version", Config.VERSION }
             };
 
             var content = new FormUrlEncodedContent(values);

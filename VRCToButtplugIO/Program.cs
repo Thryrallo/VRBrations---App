@@ -94,6 +94,7 @@ namespace VRCToyController
 
 
         public static bool isRunning = true;
+        public static Thread trd_slowUpdate;
         static void CreateLogicThread()             
         {
             Thread thread = new Thread(Logic);
@@ -101,9 +102,9 @@ namespace VRCToyController
             thread.IsBackground = true;
             thread.Start();
 
-            Thread slowUpdate = new Thread(SlowUpdate);
-            slowUpdate.Name = "SlowUpdate";
-            slowUpdate.Start();
+            trd_slowUpdate = new Thread(SlowUpdate);
+            trd_slowUpdate.Name = "SlowUpdate";
+            trd_slowUpdate.Start();
         }
 
         static long lastUpdate = 0;
@@ -168,7 +169,6 @@ namespace VRCToyController
         static bool hasSentNotInFocusNotification = false;
         private static void SlowUpdate()
         {
-            //GameWindowReader gameWindowReader = new GameWindowReader();
             while (isRunning)
             {
                 foreach (ToyAPI api in Mediator.toyAPIs)
@@ -189,7 +189,11 @@ namespace VRCToyController
                 {
                     hasSentNotInFocusNotification = false;
                 }
-                Thread.Sleep(Config.SLOW_UPDATE_RATE);
+                for(int i=0;i<Config.SLOW_UPDATE_RATE;i += 500)
+                {
+                    if (isRunning == false) continue;
+                    Thread.Sleep(500);
+                }
             }
         }
 
