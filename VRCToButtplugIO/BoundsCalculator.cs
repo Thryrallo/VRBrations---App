@@ -77,6 +77,7 @@ namespace VRCToyController
         const long MIN_UPDATE_RATE = 20000; //recheck bounds every 20 seconds
 
         private Rectangle currentBounds;
+        private Rectangle fullVRChatBounds;
 
         public BoundsCalculator()
         {
@@ -107,10 +108,14 @@ namespace VRCToyController
 
         private void UpdateUI()
         {
-            if (IsValidBounds())
+            if (windowType == WindowType.windowed && IsOutsideBounds(fullVRChatBounds))
+            {
+                Program.SetUIMessage(Mediator.ui.label_vrc_focus, "VRChat is not fully on screen.", Color.Red);
+            }
+            else if (IsValidBounds())
             {
                 Program.SetUIMessage(Mediator.ui.label_vrc_focus, $"VRC is in focus ( {windowType} )", Color.Green);
-            }
+            } 
             else
             {
                 Program.SetUIMessage(Mediator.ui.label_vrc_focus, "VRC bounds wrong", Color.Red);
@@ -127,7 +132,36 @@ namespace VRCToyController
             return bitmap;
         }
 
-        private bool TEST = false;
+        struct BoundsCalculationData
+        {
+            public Rectangle bounds;
+            public int leftOffset;
+            public int topOffset;
+            public int rightOffset;
+            public int bottomOffset;
+            public BoundsCalculationData(Rectangle bounds)
+            {
+                this.bounds = bounds;
+                this.leftOffset = 0;
+                this.topOffset = 0;
+                this.rightOffset = 0;
+                this.bottomOffset = 0;
+            }
+
+            public void Offset(int left, int right, int top, int bottom)
+            {
+                bounds.X += left;
+                bounds.Width -= left + right;
+                bounds.Y += top;
+                bounds.Height -= top + bottom;
+                leftOffset += left;
+                rightOffset += right;
+                topOffset += top;
+                bottomOffset += bottom;
+            }
+        }
+
+        private bool TEST = true;
 
         bool isNewBounds; //new cleaned bounds
         bool isNewFullBounds; //new full window bounds
@@ -147,9 +181,10 @@ namespace VRCToyController
             if ((isNewFullBounds || periodicReload) && forgroundWindowBounds.Width > 0 && forgroundWindowBounds.Height > 0)
             {
                 Rectangle prevBounds = currentBounds;
+                fullVRChatBounds = forgroundWindowBounds;
                 //Console.WriteLine(isNewFullBounds + " , " + periodicReload);
 
-                if(isNewFullBounds) Thread.Sleep(500);
+                if (isNewFullBounds) Thread.Sleep(500);
                 
                 Bitmap capture = Capture(forgroundWindowBounds);
 
@@ -191,6 +226,9 @@ namespace VRCToyController
                     debugcapture = Capture(currentBounds);
                     debugcapture.Save("./currentBounds.png", ImageFormat.Png);
                     debugcapture.Dispose();
+                    debugcapture = Capture(forgroundWindowBounds);
+                    debugcapture.Save("./forgroundWindowBounds.png", ImageFormat.Png);
+                    debugcapture.Dispose();
                 }
                 if (prevBounds != currentBounds) isNewBounds = true;
                 lastUpdate = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -206,14 +244,14 @@ namespace VRCToyController
             }
         }
 
+        static float scaleForgroundRelativeToSelf = 1;
         public static WindowType DetermineWindowType(Rectangle bounds)
         {
             WINDOWPLACEMENT placement = new WINDOWPLACEMENT();
             GetWindowPlacement(GetForegroundWindow(), ref placement);
             if(placement.showCmd == 1)
             {
-                //Windowed or fullscreen
-                return IsBoundsFullScreen(bounds, null) ? WindowType.fullscreen : WindowType.windowed;
+                return IsBoundsFullScreen(bounds) ? WindowType.fullscreen : WindowType.windowed;
             }
             else
             {
@@ -222,14 +260,21 @@ namespace VRCToyController
             }
         }
 
-        public static bool IsBoundsFullScreen(Rectangle bounds, Screen screen)
+        public static bool IsBoundsFullScreen(Rectangle bounds)
         {
-            if (screen == null)
-            {
-                screen = Screen.PrimaryScreen;
-            }
-            //Console.WriteLine(screen.Bounds + " , " + bounds + " = " + bounds.Contains(screen.Bounds));
-            return bounds.Contains(screen.Bounds);
+            foreach (Screen s in Screen.AllScreens)
+                if (bounds.Contains(s.Bounds))
+                    return true;
+            return false;
+        }
+
+        public static bool IsOutsideBounds(Rectangle bounds)
+        {
+            bool isInside = false;
+            foreach (Screen s in Screen.AllScreens)
+                if (s.Bounds.Contains(bounds))
+                    isInside = true;
+            return !isInside;
         }
 
         private static Rectangle GetForegroundWindowBounds()
@@ -267,28 +312,47 @@ namespace VRCToyController
         }
 
         static Rectangle CleanBoundsWindowed(Rectangle bounds, Bitmap capture)
-        {   //remove border
-            bounds.Height -= 1;
-            bounds.Width -= 2;
-            bounds.X += 1;
-            bounds = RemoveTitlebar(bounds, capture);
-            return bounds;
+        {   
+            //Windows 11 has 2 full ass pixel border on all sides
+            BoundsCalculationData data = new BoundsCalculationData(bounds);
+            data = RemoveTransparency(data, capture);
+            //data.Offset(1, 1, 0, 1);
+            data.Offset(2, 2, 2, 2);
+            data = RemoveTitlebar(data, capture);
+            return data.bounds;
         }
 
         static Rectangle CleanBoundsMaximied(Rectangle bounds, Bitmap capture)
         {
-            return RemoveTitlebar(bounds, capture);
+            BoundsCalculationData data = new BoundsCalculationData(bounds);
+            data = RemoveTransparency(data, capture);
+            data = RemoveTitlebar(data, capture);
+            return data.bounds;
         }
 
-        static Rectangle RemoveTitlebar(Rectangle bounds, Bitmap capture)
+        static BoundsCalculationData RemoveTransparency(BoundsCalculationData data, Bitmap capture)
         {
-            Color titleBarColor = capture.GetPixel(1, 1);
-            int y = 1;
+            int top = 0;
+            int left = 0;
+            int bottom = 0;
+            int right = 0;
+            while (capture.GetPixel(data.bounds.Width / 2, top).A < 1) top++;
+            while (capture.GetPixel(data.bounds.Width / 2, data.bounds.Height - 1 - bottom).A < 1) bottom++;
+            while (capture.GetPixel(left, data.bounds.Height / 2).A < 1) left++;
+            while (capture.GetPixel(data.bounds.Width - 1 - right, data.bounds.Height / 2).A < 1) right++;
+            data.Offset(left, right, top, bottom);
+            return data;
+        }
+
+        static BoundsCalculationData RemoveTitlebar(BoundsCalculationData data, Bitmap capture)
+        {
+            Color titleBarColor = capture.GetPixel((int)(data.bounds.Width / 2), data.topOffset + 1 );
+            int y = data.topOffset + 1;
             int lastTitleBarRow = 0;
-            while(capture.GetPixel(1,y) == titleBarColor)
+            while(capture.GetPixel((int)(data.bounds.Width / 2), y) == titleBarColor)
             {
                 bool wasCompleteRow = true;
-                for (int x = 1; x < capture.Width - 1; x++)
+                for (int x = 2; x < capture.Width - 2; x++)
                 {
                     if(capture.GetPixel(x,y) != titleBarColor)
                     {
@@ -299,10 +363,8 @@ namespace VRCToyController
                 if (wasCompleteRow) lastTitleBarRow = y;
                 y++;
             }
-            lastTitleBarRow += 1;
-            bounds.Height -= lastTitleBarRow;
-            bounds.Y += lastTitleBarRow;
-            return bounds;
+            data.Offset(0, 0, 1 + lastTitleBarRow - data.topOffset, 0);
+            return data;
         }
 
         private bool OnVRCEnteredFullscreen(Bitmap capture, Rectangle fullBounds)

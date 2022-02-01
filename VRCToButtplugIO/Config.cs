@@ -52,6 +52,10 @@ namespace VRCToyController
         public static readonly InSensorCoordiantes COORDS_AUDIOLINK = new InSensorCoordiantes(0, 1);
         public static readonly InSensorCoordiantes COORDS_AUDIOLINK_EXISITS = new InSensorCoordiantes(2, 0);
 
+        //Cords for world overrides
+        public static readonly InSensorCoordiantes COORDS_WORLD_STRENGTH_1 = new InSensorCoordiantes(0, 2);
+        public static readonly InSensorCoordiantes COORDS_WORLD_STRENGTH_2 = new InSensorCoordiantes(1, 2);
+
         //Coords for sensor data
         public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_DEPTH = new InSensorCoordiantes(0, 1);
         public static readonly InSensorCoordiantes COORDS_SENSOR_DATA_WIDTH = new InSensorCoordiantes(1, 1);

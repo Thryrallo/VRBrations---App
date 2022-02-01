@@ -33,23 +33,35 @@ namespace VRCToyController
             Application.SetCompatibleTextRenderingDefault(false);
 
             //load key from args
-            if(args.Length > 0 && args[0] != null && args[0].Length == 64)
+            if (args.Length > 0 && args[0] != null && args[0].Length == 64)
             {
                 KeyManager.LoadKey(args[0]);
             }
 
-            while (KeyManager.LoadKey() == false || await KeyManager.VerifyKeyAsync() == KeyStatus.INVALID)
+            if (await KeyManager.VerifyWorld() != WorldStatus.ACTIVE)
             {
-                Rectangle rect = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
-                string input = Interaction.InputBox("Please input your 'VRC Toy Controller' Key", "Key", "", rect.Width / 2 - 200, rect.Height / 2 - 200);
-                input = input.Trim();
-                if (input != null && input.Length == 64)
-                    KeyManager.LoadKey(input);
-                if(input == null || input.Length == 0)
+
+                while (KeyManager.LoadKey() == false || await KeyManager.VerifyKeyAsync() == KeyStatus.INVALID)
                 {
-                    DebugToFile("[Key] no key was entered, or cancel was pressed.");
-                    return;
+                    Rectangle rect = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
+                    string input = Interaction.InputBox("Please input your 'VRbrations' Key", "Key", "", rect.Width / 2 - 200, rect.Height / 2 - 200);
+                    input = input.Trim();
+                    if (input != null && input.Length == 64)
+                        KeyManager.LoadKey(input);
+                    if (input == null || input.Length == 0)
+                    {
+                        if (await KeyManager.VerifyWorld() == WorldStatus.ACTIVE)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            DebugToFile("[Key] no key was entered, or cancel was pressed. => Status: "+ KeyManager.status);
+                            return;
+                        }
+                    }
                 }
+
             }
             DebugToFile("[Key] Key has been verified.");
 
@@ -92,7 +104,6 @@ namespace VRCToyController
 
         static Config config;
 
-
         public static bool isRunning = true;
         public static Thread trd_slowUpdate;
         static void CreateLogicThread()             
@@ -108,7 +119,7 @@ namespace VRCToyController
         }
 
         static long lastUpdate = 0;
-        static float lastVerifiedKey = 0;
+        static long lastVerifiedKey = 0;
 
         static long vrchatNotInFocusStart = 0;
         static bool wasVRChatInFocus = true;
@@ -260,15 +271,17 @@ namespace VRCToyController
         static bool vrbrationsFound = false;
         static bool audioLinkFound;
         static float[] audioLinkData = new float[] { 0, 0, 0, 0 };
+        static float[] overrideStrengthControls = new float[] { 0, 0 };
 
         static bool LoadGlobalData()
         {
-            //Console.WriteLine(Config.COORDS_CHECK_VALUE.GetXWithSensor(Config.COORDS_MAIN_POSITION) + " , "+ Config.COORDS_CHECK_VALUE.GetYWithSensor(Config.COORDS_MAIN_POSITION)+ " : "+
-            //    GameWindowReader.Singleton.GetShort(Config.COORDS_MAIN_POSITION, Config.COORDS_CHECK_VALUE, true));
             vrbrationsFound = GameWindowReader.Singleton.GetShort((0,0), Config.COORDS_CHECK_VALUE) == Config.CHECK_VALUE_SHORT;
             if (vrbrationsFound)
             {
                 SetUIMessage(Mediator.ui.messageLabel2, "VRbrations active", Color.Green);
+
+                overrideStrengthControls[0] = GameWindowReader.Singleton.GetFloat((0, 0), Config.COORDS_WORLD_STRENGTH_1);
+                overrideStrengthControls[1] = GameWindowReader.Singleton.GetFloat((0, 0), Config.COORDS_WORLD_STRENGTH_2);
 
                 audioLinkFound = GameWindowReader.Singleton.GetBool((0, 0), Config.COORDS_AUDIOLINK_EXISITS);
                 if (audioLinkFound)
@@ -283,7 +296,7 @@ namespace VRCToyController
             }
             else
             {
-                SetUIMessage(Mediator.ui.messageLabel2, "VRbrations indicator not found", Color.Orange);
+                SetUIMessage(Mediator.ui.messageLabel2, "You are not in a VRbrations enabled World or Avatar.", Color.Orange);
                 audioLinkFound = false;
             }
 
@@ -334,12 +347,18 @@ namespace VRCToyController
 
             if (vrbrationsFound)
             {
-                SearchForSensors();
-
                 foreach (Toy t in Mediator.activeToys.Values)
                 {
-                    for (int i = 0; i < t.featureStrengths.Length; i++) t.featureStrengths[i] = 0;
+                    //Reset feature strengths
+                    for (int i = 0; i < t.featureStrengths.Length; i++)
+                    {
+                        if (i < overrideStrengthControls.Length)
+                            t.featureStrengths[i] = overrideStrengthControls[i];
+                        else
+                            t.featureStrengths[i] = 0;
+                    }
 
+                    //add up behaviour values
                     foreach (BehaviourData behaviour in t.GetBehaviours())
                     {
                         if (behaviour.IsActive == false) continue;
@@ -353,11 +372,16 @@ namespace VRCToyController
                         behaviour.GetBehaviourUI(t).UpdateStrengthIndicatorValue();
                     }
 
+                    //Set the strengths on the device
                     for (int i = 0; i < t.totalFeatureCount; i++)
                     {
                         t.ExecuteFeatures(t.featureStrengths);
                     }
                 }
+            }
+            else
+            {
+                TurnAllToysOff();
             }
         }
         #endregion
@@ -379,7 +403,7 @@ namespace VRCToyController
 
         #endregion
 
-        public static void DebugToFile2(string s, int type = 0)
+        public static void DebugToFileOld(string s, int type = 0)
         {
             if (type == 1) s += "[Warning]";
             else if (type == 2) s += "[Error]";
@@ -393,6 +417,8 @@ namespace VRCToyController
         static ReaderWriterLock locker = new ReaderWriterLock();
         public static void DebugToFile(string s, int type = 0)
         {
+            if (type == 1) s += "[Warning]";
+            else if (type == 2) s += "[Error]";
             try
             {
                 locker.AcquireWriterLock(int.MaxValue); //You might wanna change timeout value 

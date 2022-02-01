@@ -19,14 +19,37 @@ namespace VRCToyController
         public static Dictionary<(int, int), string> activeSensorPositionNameMap = new Dictionary<(int, int), string>();
 
         private static MainUI p_ui;
+        private static uint _displayDPIX;
+        private static uint _displayDPIY;
         public static MainUI ui
         {
             get
             {
                 if (p_ui == null)
+                {
                     p_ui = new MainUI();
+                    System.Drawing.Graphics graphics = p_ui.CreateGraphics();
+                    _displayDPIX = (uint)graphics.DpiX;
+                    _displayDPIY = (uint)graphics.DpiY;
+                    graphics.Dispose();
+                }
                 return p_ui;
             }
+        }
+
+        public static bool IsUICreated()
+        {
+            return p_ui != null && p_ui.Created;
+        }
+
+        public static uint DisplayDpiX
+        {
+            get { return _displayDPIX;  }
+        }
+
+        public static uint DisplayDpiY
+        {
+            get { return _displayDPIY;  }
         }
 
         public static bool SetSensorActive(string name, int x, int y)

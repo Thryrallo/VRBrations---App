@@ -224,7 +224,13 @@ namespace VRCToyController
 
         private struct LovenseBattery
         {
-            public string data;
+            public int data;
+            public int code;
+        }
+
+        private struct LovenseBattery2
+        {
+            public Dictionary<string,int> data;
             public int code;
         }
 
@@ -240,10 +246,28 @@ namespace VRCToyController
             LovenseConnectToy t = (LovenseConnectToy)iToy;
             string fullurl = t.domain.url + "/Battery?t="+t.lovenseId;
             string data = Get(fullurl);
-            LovenseBattery battery = JsonConvert.DeserializeObject<LovenseBattery>(data);
-            if(battery.code == 200)
+            if (string.IsNullOrEmpty(data) == false)
             {
-                t.SetBatterLevel(int.Parse(battery.data));
+                //BatterData can be "data" : int
+                //or "data"  : { "<toyId>" : int }
+                //so i need to discern this
+                try
+                {
+                    if (data.Contains(t.lovenseId))
+                    {
+                        LovenseBattery2 battery = JsonConvert.DeserializeObject<LovenseBattery2>(data);
+                        if (battery.code == 200 && battery.data.Count > 0) t.SetBatterLevel(battery.data.First().Value);
+                    }
+                    else
+                    {
+                        LovenseBattery battery = JsonConvert.DeserializeObject<LovenseBattery>(data);
+                        if (battery.code == 200) t.SetBatterLevel(battery.data);
+                    }
+                }catch(Exception e)
+                {
+                    Program.DebugToFile($"Error When Updating Battery Indicator using Lovense Connect for toy: {t.id}", 2);
+                    Program.DebugToFile(e.ToString());
+                }
             }
         }
 
