@@ -161,7 +161,7 @@ namespace VRCToyController
             }
         }
 
-        private bool TEST = true;
+        private bool TEST = false;
 
         bool isNewBounds; //new cleaned bounds
         bool isNewFullBounds; //new full window bounds

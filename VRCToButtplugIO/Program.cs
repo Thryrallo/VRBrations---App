@@ -137,6 +137,7 @@ namespace VRCToyController
                         {
                             if (GameWindowReader.Singleton.UpdateCapture())
                             {
+                                SearchForSensors();
                                 CheckCaptureForInput();
                             }
                         }
