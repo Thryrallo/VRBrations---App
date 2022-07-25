@@ -31,40 +31,6 @@ namespace VRCToyController
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            //load key from args
-            if (args.Length > 0 && args[0] != null && args[0].Length == 64)
-            {
-                KeyManager.LoadKey(args[0]);
-            }
-
-            if (await KeyManager.VerifyWorld() != WorldStatus.ACTIVE)
-            {
-
-                while (KeyManager.LoadKey() == false || await KeyManager.VerifyKeyAsync() == KeyStatus.INVALID)
-                {
-                    Rectangle rect = System.Windows.Forms.Screen.PrimaryScreen.Bounds;
-                    string input = Interaction.InputBox("Please input your 'VRbrations' Key", "Key", "", rect.Width / 2 - 200, rect.Height / 2 - 200);
-                    input = input.Trim();
-                    if (input != null && input.Length == 64)
-                        KeyManager.LoadKey(input);
-                    if (input == null || input.Length == 0)
-                    {
-                        if (await KeyManager.VerifyWorld() == WorldStatus.ACTIVE)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            DebugToFile("[Key] no key was entered, or cancel was pressed. => Status: "+ KeyManager.status);
-                            return;
-                        }
-                    }
-                }
-
-            }
-            DebugToFile("[Key] Key has been verified.");
-
             DebugToFile("[API] Starting Inizilization.");
             Init();
             DebugToFile("[API] Starting Logic Thread.");
@@ -127,49 +93,40 @@ namespace VRCToyController
         {
             while (isRunning)
             {
-                if (KeyManager.VerifyKey())
+                string activeWindow = GetActiveWindow();
+                bool isAppInFocus = Config.WINDOW_NAMES.Contains(activeWindow);
+                if (isAppInFocus)
                 {
-                    string activeWindow = GetActiveWindow();
-                    bool isAppInFocus = Config.WINDOW_NAMES.Contains(activeWindow);
-                    if (isAppInFocus)
+                    try 
                     {
-                        try 
-                        {
-                            if (GameWindowReader.Singleton.UpdateCapture())
-                            {
-                                SearchForSensors();
-                                CheckCaptureForInput();
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            DebugToFile(e.ToString(),2);
-                            SetUIMessage(Mediator.ui.label_vrc_focus, "Error. Check log.", Color.Orange);
-                        }
-                    }
-                    else
-                    {
-                        //if game screenshot was taken before, with vrbrations, use this to search for more sensors
-                        if (vrbrationsFound && GameWindowReader.Singleton.HasCapture())
+                        if (GameWindowReader.Singleton.UpdateCapture())
                         {
                             SearchForSensors();
+                            CheckCaptureForInput();
                         }
-                        if (wasVRChatInFocus)
-                        {
-                            TurnAllToysOff();
-                            vrchatNotInFocusStart = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                        }
-                        SetUIMessage(Mediator.ui.label_vrc_focus, $"VRC not in focus\nCurrent window:\n{activeWindow}", Color.Red);
                     }
-                    wasVRChatInFocus = isAppInFocus;
-                    lastVerifiedKey = lastUpdate;
+                    catch (Exception e)
+                    {
+                        DebugToFile(e.ToString(),2);
+                        SetUIMessage(Mediator.ui.label_vrc_focus, "Error. Check log.", Color.Orange);
+                    }
                 }
-                else if (lastUpdate != 0 && (lastUpdate - lastVerifiedKey) > 30000)
+                else
                 {
-                    DebugToFile("[KEY] Key has not been verified recently. Closing Application.");
-                    Mediator.ui.Invoke((Action)delegate () { Mediator.ui.Close(); });
-                    isRunning = false;
+                    //if game screenshot was taken before, with vrbrations, use this to search for more sensors
+                    if (vrbrationsFound && GameWindowReader.Singleton.HasCapture())
+                    {
+                        SearchForSensors();
+                    }
+                    if (wasVRChatInFocus)
+                    {
+                        TurnAllToysOff();
+                        vrchatNotInFocusStart = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    }
+                    SetUIMessage(Mediator.ui.label_vrc_focus, $"VRC not in focus\nCurrent window:\n{activeWindow}", Color.Red);
                 }
+                wasVRChatInFocus = isAppInFocus;
+
                 int timeout = (int)(config.update_rate - (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastUpdate));
                 if(timeout>0)
                     Thread.Sleep(timeout);

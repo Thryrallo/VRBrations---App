@@ -179,7 +179,6 @@
       <DependentUpon>DeviceUI.cs</DependentUpon>
     </Compile>
     <Compile Include="GameWindowReader.cs" />
-    <Compile Include="KeyManager.cs" />
     <Compile Include="LovenseConnectAPI.cs" />
     <Compile Include="NoMousePanel.cs">
       <SubType>Component</SubType>

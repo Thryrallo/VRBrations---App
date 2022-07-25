@@ -56,7 +56,6 @@ namespace VRCToyController
             e.Cancel = true;
             Program.isRunning = false;
             Config.Singleton.Save();
-            await KeyManager.FreeKeyAsync();
             this.FormClosing -= MainUI_FormClosing;
             this.Invoke((Action)delegate ()
             {
