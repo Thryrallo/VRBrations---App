@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{6951E834-AD11-4995-BCA4-32D3EF4BA152}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>VRCToyController</RootNamespace>
+    <RootNamespace>VRbrations</RootNamespace>
     <AssemblyName>VRbrations</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -225,8 +225,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="VRCToButtplugIO_1_TemporaryKey.pfx" />
-    <None Include="VRCToButtplugIO_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
