@@ -52,8 +52,8 @@ namespace VRCToyController
     {
         public CalculationType type = CalculationType.VOLUME;
         public int feature = 0;
-        public float volume_width = 0.5f;
-        public float volume_depth = 0.5f;
+        public float volume_width = 0;
+        public float volume_depth = 1;
 
         public float thrusting_acceleration = 0.1f;
         public float thrusting_speed_scale = 1;

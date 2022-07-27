@@ -15,8 +15,10 @@ namespace VRCToyController
 
         public static Dictionary<string, Toy> activeToys = new Dictionary<string, Toy>();
 
-        public static Dictionary<string, (int, int)> activeSensorPositions = new Dictionary<string, (int, int)>();
-        public static Dictionary<(int, int), string> activeSensorPositionNameMap = new Dictionary<(int, int), string>();
+        public enum SensorType { None, Visual, OSC }
+
+        public static Dictionary<string, (int x, int y, SensorType type)> activeSensorPositions = new Dictionary<string, (int x, int y, SensorType type)>();
+        public static Dictionary<(int, int), (string name, SensorType type)> activeSensorPositionNameMap = new Dictionary<(int, int), (string name, SensorType type)>();
 
         private static MainUI p_ui;
         private static uint _displayDPIX;
@@ -52,12 +54,12 @@ namespace VRCToyController
             get { return _displayDPIY;  }
         }
 
-        public static bool SetSensorActive(string name, int x, int y)
+        public static bool SetSensorActive(string name, int x, int y, SensorType type)
         {
             if (activeSensorPositions.ContainsKey(name) == false && activeSensorPositionNameMap.ContainsKey((x,y)) == false)
             {
-                activeSensorPositions.Add(name, (x, y));
-                activeSensorPositionNameMap.Add((x, y), name);
+                activeSensorPositions.Add(name, (x, y, type));
+                activeSensorPositionNameMap.Add((x, y), (name, type));
 
                 foreach (Toy t in Mediator.activeToys.Values)
                 {
@@ -91,7 +93,7 @@ namespace VRCToyController
         {
             if (activeSensorPositions.ContainsKey(name))
             {
-                activeSensorPositionNameMap.Remove(activeSensorPositions[name]);
+                activeSensorPositionNameMap.Remove((activeSensorPositions[name].x, activeSensorPositions[name].y));
                 activeSensorPositions.Remove(name);
 
                 foreach (Toy t in Mediator.activeToys.Values)
@@ -118,7 +120,7 @@ namespace VRCToyController
         {
             if (activeSensorPositionNameMap.ContainsKey((x,y)))
             {
-                return SetSensorInactive(activeSensorPositionNameMap[(x,y)]);
+                return SetSensorInactive(activeSensorPositionNameMap[(x,y)].name);
             }
             return false;
         }
@@ -126,12 +128,18 @@ namespace VRCToyController
         public static (int,int) GetSensorPosition(string name)
         {
             if (activeSensorPositions.ContainsKey(name) == false) return (0, 0);
-            return activeSensorPositions[name];
+            return (activeSensorPositions[name].x , activeSensorPositions[name].y);
         }
 
         public static bool IsSensorActive(string name)
         {
             return activeSensorPositions.ContainsKey(name);
+        }
+
+        public static SensorType GetSensorType(string name)
+        {
+            if (activeSensorPositions.ContainsKey(name) == false) return SensorType.None;
+            return activeSensorPositions[name].type;
         }
 
         public static XSNotifier xSNotifier { get; private set; } = new XSNotifier();

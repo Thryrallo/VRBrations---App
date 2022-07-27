@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using VRbrations;
 
 namespace VRCToyController
 {
@@ -40,8 +41,9 @@ namespace VRCToyController
             DebugToFile("[API] Starting ButtplugIO.");
             InitButtplugIO();
             DebugToFile("[API] Starting LovenseConnect.");
-            //Mediator.toyAPIs.Add(await LovenseConnectAPI.GetClient());
             InitLovenseConnect();
+            DebugToFile("[API] Starting OSCInterface.");
+            InitOSC();
             DebugToFile("[API] All APIs have been started.");
 
             Application.Run(Mediator.ui);
@@ -50,6 +52,13 @@ namespace VRCToyController
         static  void InitButtplugIO()
         {
             var thread = new Thread(async delegate() { Mediator.toyAPIs.Add(await ButtplugIOAPI.GetClient()); });
+            thread.IsBackground = true;
+            thread.Start();
+        }
+
+        static void InitOSC()
+        {
+            var thread = new Thread( delegate () {  OSCInterface.ListenTask(); });
             thread.IsBackground = true;
             thread.Start();
         }
@@ -93,6 +102,8 @@ namespace VRCToyController
         {
             while (isRunning)
             {
+                ResetToyFeatureStrengths();
+
                 string activeWindow = GetActiveWindow();
                 bool isAppInFocus = Config.WINDOW_NAMES.Contains(activeWindow);
                 if (isAppInFocus)
@@ -126,6 +137,9 @@ namespace VRCToyController
                     SetUIMessage(Mediator.ui.label_vrc_focus, $"VRC not in focus\nCurrent window:\n{activeWindow}", Color.Red);
                 }
                 wasVRChatInFocus = isAppInFocus;
+
+                AddOSCDataToStrengths();
+                ApplyToyFeatureStrengths();
 
                 int timeout = (int)(config.update_rate - (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastUpdate));
                 if(timeout>0)
@@ -211,7 +225,7 @@ namespace VRCToyController
             }
         }
 
-        static bool UpdateBehaviourPixelData(BehaviourData behaviourData, Toy toy)
+        static bool UpdateBehaviourUsingPixelData(BehaviourData behaviourData, Toy toy)
         {
             (int,int) coords = Mediator.GetSensorPosition(behaviourData.name);
             bool exisits = GameWindowReader.Singleton.GetShort(coords, Config.COORDS_CHECK_VALUE) == Config.CHECK_VALUE_SHORT;
@@ -224,6 +238,46 @@ namespace VRCToyController
             }
 
             return exisits;
+        }
+
+        static bool UpdateBehaviourUsingOSCData(BehaviourData behaviourData, Toy toy) 
+        {
+            if (OSCInterface.PenetratorValues.ContainsKey(behaviourData.name))
+            {
+                (float rootRoot, float rootFwd, float backRoot) data = OSCInterface.PenetratorValues[behaviourData.name];
+                //Console.WriteLine($"{behaviourData.name} {data.rootRoot} {data.rootFwd} {data.backRoot}");
+                if (data.rootRoot > 0 && data.rootRoot < data.rootFwd && data.backRoot < data.rootRoot)
+                {
+                    behaviourData.GetRuntimeData().depth = data.rootRoot;
+                    return true;
+                }
+            }
+            if (OSCInterface.OrificeValues.ContainsKey(behaviourData.name))
+            {
+                (float depth, float width1, float width2) data = OSCInterface.OrificeValues[behaviourData.name];
+                behaviourData.GetRuntimeData().depth = data.depth;
+                behaviourData.GetRuntimeData().width = data.width1 - data.width2;
+                return true;
+            }
+            return false;
+        }
+
+        static void AddOSCDataToStrengths()
+        {
+            foreach (Toy t in Mediator.activeToys.Values)
+            {
+                //add up behaviour values
+                foreach (BehaviourData behaviour in t.GetBehaviours())
+                {
+                    bool behaviourFound = false;
+                    if (Mediator.GetSensorType(behaviour.name) == Mediator.SensorType.OSC)
+                        behaviourFound = UpdateBehaviourUsingOSCData(behaviour, t);
+
+                    if (!behaviourFound) continue;
+                    t.featureStrengths[behaviour.feature] += behaviour.CalculateStrength(audioLinkData);
+                    behaviour.GetBehaviourUI(t).UpdateStrengthIndicatorValue();
+                }
+            }
         }
 
         static bool vrbrationsFound = false;
@@ -248,7 +302,7 @@ namespace VRCToyController
                     audioLinkData[1] = GameWindowReader.Singleton.GetFloat((0, 0), Config.COORDS_AUDIOLINK.Add(1, 0));
                     audioLinkData[2] = GameWindowReader.Singleton.GetFloat((0, 0), Config.COORDS_AUDIOLINK.Add(2, 0));
                     audioLinkData[3] = GameWindowReader.Singleton.GetFloat((0, 0), Config.COORDS_AUDIOLINK.Add(3, 0));
-                    Mediator.SetSensorActive(Config.SENSORNAME_AUDIOLINK, -1, -1);
+                    Mediator.SetSensorActive(Config.SENSORNAME_AUDIOLINK, -1, -1, Mediator.SensorType.Visual);
                 }
                 return true;
             }
@@ -280,7 +334,7 @@ namespace VRCToyController
             if (found)
             {
                 string name = GameWindowReader.Singleton.GetString(sensorCoordinates, Config.COORDS_SENSOR_NAME, Config.SENSOR_PIXELS_X, 2);
-                Mediator.SetSensorActive(name, searchX, searchY);
+                Mediator.SetSensorActive(name, searchX, searchY, Mediator.SensorType.Visual);
             }
             else
             {
@@ -299,6 +353,33 @@ namespace VRCToyController
             }
         }
 
+        static void ResetToyFeatureStrengths()
+        {
+            foreach (Toy t in Mediator.activeToys.Values)
+            {
+                //Reset feature strengths
+                for (int i = 0; i < t.featureStrengths.Length; i++)
+                {
+                    if (i < overrideStrengthControls.Length)
+                        t.featureStrengths[i] = overrideStrengthControls[i];
+                    else
+                        t.featureStrengths[i] = 0;
+                }
+            }
+        }
+
+        static void ApplyToyFeatureStrengths()
+        {
+            foreach (Toy t in Mediator.activeToys.Values)
+            {
+                //Set the strengths on the device
+                for (int i = 0; i < t.totalFeatureCount; i++)
+                {
+                    t.ExecuteFeatures(t.featureStrengths);
+                }
+            }
+        }
+
         static void CheckCaptureForInput()
         {
             LoadGlobalData();
@@ -307,33 +388,20 @@ namespace VRCToyController
             {
                 foreach (Toy t in Mediator.activeToys.Values)
                 {
-                    //Reset feature strengths
-                    for (int i = 0; i < t.featureStrengths.Length; i++)
-                    {
-                        if (i < overrideStrengthControls.Length)
-                            t.featureStrengths[i] = overrideStrengthControls[i];
-                        else
-                            t.featureStrengths[i] = 0;
-                    }
-
                     //add up behaviour values
                     foreach (BehaviourData behaviour in t.GetBehaviours())
                     {
                         if (behaviour.IsActive == false) continue;
 
-                        bool behaviourFound;
-                        if (behaviour.type == CalculationType.AUDIOLINK) behaviourFound = audioLinkFound;
-                        else behaviourFound = UpdateBehaviourPixelData(behaviour, t);
+                        bool behaviourFound = false;
+                        if (behaviour.type == CalculationType.AUDIOLINK) 
+                            behaviourFound = audioLinkFound;
+                        else if (Mediator.GetSensorType(behaviour.name) == Mediator.SensorType.Visual) 
+                            behaviourFound = UpdateBehaviourUsingPixelData(behaviour, t);
 
                         if (!behaviourFound) continue;
                         t.featureStrengths[behaviour.feature] += behaviour.CalculateStrength(audioLinkData);
                         behaviour.GetBehaviourUI(t).UpdateStrengthIndicatorValue();
-                    }
-
-                    //Set the strengths on the device
-                    for (int i = 0; i < t.totalFeatureCount; i++)
-                    {
-                        t.ExecuteFeatures(t.featureStrengths);
                     }
                 }
             }

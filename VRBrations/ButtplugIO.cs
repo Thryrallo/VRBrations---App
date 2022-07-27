@@ -140,6 +140,8 @@ namespace VRCToyController
             this.lovenseType = GetLovenseType(device);
             this.id = ButtplugIOAPI.GetId(device);
             this.name = device.Name;
+            if (this.name.Contains("("))
+                this.name = this.name.Substring(0, this.name.IndexOf('('));
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.VibrateCmd))
                 this.featureCount[ToyFeatureType.Vibrate] = (int)device.AllowedMessages[ServerMessage.Types.MessageAttributeType.VibrateCmd].FeatureCount;
             if (device.AllowedMessages.ContainsKey(ServerMessage.Types.MessageAttributeType.RotateCmd))
