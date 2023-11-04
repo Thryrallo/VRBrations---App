@@ -1,11 +1,8 @@
 ﻿using SharpOSC;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 using VRCToyController;
 
 namespace VRbrations
@@ -33,7 +30,15 @@ namespace VRbrations
                 
             };
 
-            var listener = new UDPListener(9001, cb);
+            try
+            {
+                var listener = new UDPListener(Config.Singleton.osc_listen_port, cb);
+            } catch (SocketException)
+            {
+                MessageBox.Show(
+                    "Couldn't bind to OSC input port; please close any other OSC programs and retry.", "Socket Bind Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw;
+            }
         }
 
         static void HandleOSCMessage(OscMessage message)
