@@ -1,10 +1,7 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace VRCToyController
 {
@@ -69,6 +66,7 @@ namespace VRCToyController
         //Serialized Values
         public float update_rate = 100;
         public float threshold = 0.05f;
+        public ushort osc_listen_port = 9001;
         public List<DeviceData> devices;
 
         //Private Non Serialized values
